@@ -1,0 +1,474 @@
+import fs from 'fs';
+import path from 'path';
+import type { Plugin } from 'vite';
+
+const DATA_DIR = path.resolve(process.cwd(), 'data');
+const CARDS_FILE = path.join(DATA_DIR, 'cards.json');
+const CLIENTS_FILE = path.join(DATA_DIR, 'clients.json');
+const SCANS_FILE = path.join(DATA_DIR, 'scans.json');
+
+const INITIAL_SERVER_CARDS = [
+  {
+    "id": "qr_demo_01",
+    "cardNumber": "CARD-2026-0001",
+    "publicId": "AGB2026X",
+    "clientId": "client_001",
+    "title": "Gilles Brice ATSÉ — Concepteur d'applications",
+    "type": "vcard",
+    "mode": "dynamic",
+    "status": "active",
+    "modelId": "model_luxury",
+    "cardFormat": "85x55",
+    "createdAt": "2026-08-10T08:00:00.000Z",
+    "updatedAt": "2026-08-21T08:00:00.000Z",
+    "scanCount": 184,
+    "lastScannedAt": "2026-08-21T05:30:00.000Z",
+    "tags": ["Carte Pro", "Développeur", "AGB", "VIP"],
+    "content": {
+      "firstName": "Gilles Brice",
+      "lastName": "ATSÉ",
+      "fullName": "Gilles Brice ATSÉ",
+      "jobTitle": "Concepteur d'applications mobiles & solutions Web sur mesure",
+      "company": "AGB",
+      "commercialName": "AGB Digital Engineering",
+      "department": "Ingénierie Logicielle & Conseil",
+      "industry": "Technologies de l'Information & Digital",
+      "slogan": "L'innovation technologique et le développement sur mesure au service de vos projets",
+      "bio": "Conception et ingénierie d'applications mobiles iOS & Android, architectures Web performantes, logiciels de gestion d'entreprise et solutions SaaS scalables.",
+      "photoUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
+      "logoUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80",
+      "primaryPhone": "+225 01 04 00 00 00",
+      "secondaryPhone": "+225 07 97 00 00 00",
+      "whatsappNumber": "+225 01 04 00 00 00",
+      "workPhone": "+225 27 22 00 00 00",
+      "email": "atsegillesbrice@gmail.com",
+      "workEmail": "contact@agb-solutions.ci",
+      "websiteUrl": "https://agb-solutions.ci",
+      "address": "Cocody Riviera 3",
+      "commune": "Cocody",
+      "neighborhood": "Riviera Bonoumin",
+      "city": "Abidjan",
+      "country": "Côte d'Ivoire",
+      "operatingZone": "Abidjan, Côte d'Ivoire & International (Afrique de l'Ouest, Remote)",
+      "latitude": 5.3599,
+      "longitude": -3.9870,
+      "locationLink": "https://maps.google.com/?q=5.3599,-3.9870",
+      "googleMapsUrl": "https://maps.google.com/?q=5.3599,-3.9870",
+      "businessRegisterNumber": "CI-ABJ-2024-B-12849",
+      "businessTaxId": "CC-2409817-A",
+      "servicesList": [
+        "Applications mobiles (iOS & Android)",
+        "Applications Web sur mesure",
+        "Logiciels de gestion & ERP/CRM",
+        "Cartes de visite connectées vCard",
+        "Solutions SaaS & Cloud"
+      ],
+      "productsList": [
+        "Pack Carte Connectée Pro AGB"
+      ],
+      "socialLinks": [
+        { "id": "s1", "platform": "whatsapp", "url": "https://wa.me/2250104000000", "displayOrder": 1 },
+        { "id": "s2", "platform": "linkedin", "url": "https://linkedin.com/in/gilles-brice-atse", "displayOrder": 2 },
+        { "id": "s3", "platform": "github", "url": "https://github.com/atsegillesbrice", "displayOrder": 3 },
+        { "id": "s4", "platform": "website", "url": "https://agb-solutions.ci", "displayOrder": 4 },
+        { "id": "s5", "platform": "facebook", "url": "https://facebook.com", "displayOrder": 5 }
+      ],
+      "customFields": [
+        { "id": "c1", "label": "Stack Technique", "value": "Flutter, React Native, React/Next.js, Node.js, PostgreSQL, Cloud" },
+        { "id": "c2", "label": "Disponibilité", "value": "Conseil, missions & projets sur mesure" }
+      ],
+      "otherInformation": "Rendez-vous et consultations sur confirmation préalable.",
+      "emergencyContactNote": "+225 01 04 00 00 00",
+      "internalNotes": "Client VIP. Carte imprimée en finition Noir Carbone Mat.",
+      "privacy": {
+        "hideAddress": false,
+        "hideSecondaryPhone": false,
+        "hideTaxInfo": false
+      }
+    },
+    "styling": {
+      "fgColor": "#0f172a",
+      "bgColor": "#ffffff",
+      "transparentBg": false,
+      "moduleStyle": "rounded",
+      "eyeStyle": "rounded",
+      "eyeColor": "#2563eb",
+      "errorCorrectionLevel": "H",
+      "margin": 3,
+      "size": 320,
+      "cardBackgroundTheme": "matte_dark",
+      "logoUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80",
+      "logoSizeRatio": 0.22,
+      "logoBackground": true,
+      "logoBgColor": "#ffffff",
+      "logoBorderRadius": 8,
+      "bottomText": "SCANNEZ POUR MA FICHE COMPLÈTE",
+      "bottomTextColor": "#0f172a",
+      "bottomTextBg": "#f1f5f9",
+      "cardFormat": "85x55"
+    }
+  },
+  {
+    "id": "qr_demo_02",
+    "cardNumber": "CARD-2026-0002",
+    "publicId": "ICG9982S",
+    "clientId": "client_002",
+    "title": "Sarah KOUASSI — Ivoire Consulting Group",
+    "type": "vcard",
+    "mode": "dynamic",
+    "status": "active",
+    "modelId": "model_corporate",
+    "cardFormat": "85x55",
+    "createdAt": "2026-08-15T10:00:00.000Z",
+    "updatedAt": "2026-08-20T14:30:00.000Z",
+    "scanCount": 92,
+    "lastScannedAt": "2026-08-21T02:15:00.000Z",
+    "tags": ["Conseil", "Finance", "Corporate"],
+    "content": {
+      "firstName": "Sarah",
+      "lastName": "KOUASSI",
+      "fullName": "Sarah KOUASSI",
+      "jobTitle": "Directrice Générale & Stratégie",
+      "company": "Ivoire Consulting Group",
+      "commercialName": "ICG Africa",
+      "industry": "Conseil en Stratégie & Finance",
+      "slogan": "L'excellence stratégique pour transformer vos investissements en réussites durables",
+      "bio": "Cabinet d'accompagnement en gouvernance, restructuration financière, levée de fonds et transformation des organisations en Afrique.",
+      "photoUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
+      "logoUrl": "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&auto=format&fit=crop&q=80",
+      "primaryPhone": "+225 07 45 12 34 56",
+      "secondaryPhone": "+225 01 02 03 04 05",
+      "whatsappNumber": "+225 07 45 12 34 56",
+      "email": "sarah.kouassi@ivoire-consulting.ci",
+      "websiteUrl": "https://ivoire-consulting.ci",
+      "address": "Boulevard de la République, Immeuble Horizon",
+      "commune": "Plateau",
+      "city": "Abidjan",
+      "country": "Côte d'Ivoire",
+      "locationLink": "https://maps.google.com/?q=5.3261,-4.0200",
+      "businessRegisterNumber": "CI-ABJ-2021-M-08941",
+      "businessTaxId": "CC-1904532-B",
+      "servicesList": [
+        "Gouvernance d'entreprise",
+        "Conseil financier & Levée de fonds",
+        "Audit & Transformation"
+      ],
+      "socialLinks": [
+        { "id": "s21", "platform": "whatsapp", "url": "https://wa.me/2250745123456", "displayOrder": 1 },
+        { "id": "s22", "platform": "linkedin", "url": "https://linkedin.com", "displayOrder": 2 },
+        { "id": "s23", "platform": "website", "url": "https://ivoire-consulting.ci", "displayOrder": 3 }
+      ],
+      "customFields": [],
+      "otherInformation": "Permanence du cabinet du lundi au vendredi de 8h30 à 18h00.",
+      "privacy": { "hideAddress": false }
+    },
+    "styling": {
+      "fgColor": "#0f172a",
+      "bgColor": "#ffffff",
+      "transparentBg": false,
+      "moduleStyle": "classy",
+      "eyeStyle": "leaf",
+      "eyeColor": "#0a192f",
+      "errorCorrectionLevel": "H",
+      "margin": 3,
+      "size": 320,
+      "cardBackgroundTheme": "navy_prestige",
+      "logoUrl": "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&auto=format&fit=crop&q=80",
+      "logoSizeRatio": 0.2,
+      "logoBackground": true,
+      "cardFormat": "85x55"
+    }
+  },
+  {
+    "id": "qr_demo_03",
+    "cardNumber": "CARD-2026-0003",
+    "publicId": "MED4411B",
+    "clientId": "client_003",
+    "title": "Dr. Marc BAMBA — Polyclinique Sainte-Victoire",
+    "type": "vcard",
+    "mode": "dynamic",
+    "status": "active",
+    "modelId": "model_center_qr",
+    "cardFormat": "85x55",
+    "createdAt": "2026-08-18T09:15:00.000Z",
+    "updatedAt": "2026-08-21T11:00:00.000Z",
+    "scanCount": 61,
+    "lastScannedAt": "2026-08-21T04:45:00.000Z",
+    "tags": ["Médical", "Cardiologie", "Clinique"],
+    "content": {
+      "firstName": "Dr. Marc",
+      "lastName": "BAMBA",
+      "fullName": "Dr. Marc BAMBA",
+      "jobTitle": "Médecin Cardiologue & Fondateur",
+      "company": "Polyclinique Sainte-Victoire",
+      "industry": "Santé & Cardiologie",
+      "slogan": "L'expertise médicale et l'écoute bienveillante au cœur de votre santé",
+      "bio": "Consultations de cardiologie, bilans cardiovasculaires avancés, urgences médicales et hospitalisation de jour.",
+      "photoUrl": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&auto=format&fit=crop&q=80",
+      "logoUrl": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=200&auto=format&fit=crop&q=80",
+      "primaryPhone": "+225 05 88 99 00 11",
+      "secondaryPhone": "+225 27 21 00 11 22",
+      "whatsappNumber": "+225 05 88 99 00 11",
+      "email": "secretariat@saintevictoire-sante.ci",
+      "websiteUrl": "https://saintevictoire-sante.ci",
+      "address": "Rue des Jardins, Deux Plateaux Vallon",
+      "commune": "Cocody",
+      "city": "Abidjan",
+      "country": "Côte d'Ivoire",
+      "locationLink": "https://maps.google.com/?q=5.3700,-3.9900",
+      "servicesList": [
+        "Cardiologie & Échographie",
+        "Bilan cardiovasculaire préventif",
+        "Urgences & Soins continus"
+      ],
+      "socialLinks": [
+        { "id": "s31", "platform": "whatsapp", "url": "https://wa.me/2250588990011", "displayOrder": 1 },
+        { "id": "s32", "platform": "website", "url": "https://saintevictoire-sante.ci", "displayOrder": 2 }
+      ],
+      "customFields": [],
+      "otherInformation": "Consultations sur rendez-vous du lundi au samedi.",
+      "privacy": { "hideAddress": false }
+    },
+    "styling": {
+      "fgColor": "#0f172a",
+      "bgColor": "#ffffff",
+      "transparentBg": false,
+      "moduleStyle": "rounded",
+      "eyeStyle": "rounded",
+      "eyeColor": "#064e3b",
+      "errorCorrectionLevel": "H",
+      "margin": 3,
+      "size": 320,
+      "cardBackgroundTheme": "white_classic",
+      "logoUrl": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=200&auto=format&fit=crop&q=80",
+      "logoSizeRatio": 0.22,
+      "logoBackground": true,
+      "cardFormat": "85x55"
+    }
+  }
+];
+
+function ensureDataFiles() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  if (!fs.existsSync(CARDS_FILE) || fs.readFileSync(CARDS_FILE, 'utf-8').trim() === '' || fs.readFileSync(CARDS_FILE, 'utf-8').trim() === '[]') {
+    fs.writeFileSync(CARDS_FILE, JSON.stringify(INITIAL_SERVER_CARDS, null, 2), 'utf-8');
+  }
+  if (!fs.existsSync(CLIENTS_FILE)) {
+    fs.writeFileSync(CLIENTS_FILE, JSON.stringify([], null, 2), 'utf-8');
+  }
+  if (!fs.existsSync(SCANS_FILE)) {
+    fs.writeFileSync(SCANS_FILE, JSON.stringify([], null, 2), 'utf-8');
+  }
+}
+
+function readCards(): any[] {
+  ensureDataFiles();
+  try {
+    const raw = fs.readFileSync(CARDS_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.length === 0) {
+      fs.writeFileSync(CARDS_FILE, JSON.stringify(INITIAL_SERVER_CARDS, null, 2), 'utf-8');
+      return INITIAL_SERVER_CARDS;
+    }
+    return parsed;
+  } catch (err) {
+    console.error('Error reading cards file:', err);
+    return INITIAL_SERVER_CARDS;
+  }
+}
+
+function writeCards(cards: any[]): void {
+  ensureDataFiles();
+  try {
+    fs.writeFileSync(CARDS_FILE, JSON.stringify(cards, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Error writing cards file:', err);
+  }
+}
+
+function readScans(): any[] {
+  ensureDataFiles();
+  try {
+    const raw = fs.readFileSync(SCANS_FILE, 'utf-8');
+    return JSON.parse(raw);
+  } catch (err) {
+    return [];
+  }
+}
+
+function writeScans(scans: any[]): void {
+  ensureDataFiles();
+  try {
+    fs.writeFileSync(SCANS_FILE, JSON.stringify(scans.slice(0, 1000), null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Error writing scans file:', err);
+  }
+}
+
+export function apiServerPlugin(): Plugin {
+  return {
+    name: 'smart-card-api-server',
+    configureServer(server) {
+      ensureDataFiles();
+
+      server.middlewares.use(async (req, res, next) => {
+        const url = req.url || '';
+
+        // Mobile short URL redirects: if mobile phone opens /c/XYZ or /q/XYZ, redirect to /#q/XYZ so Vite serves the SPA smoothly
+        const directShortMatch = url.match(/^\/(?:c|q|card)\/([a-zA-Z0-9_-]+)/i);
+        if (directShortMatch && directShortMatch[1] && !url.startsWith('/api/')) {
+          res.statusCode = 302;
+          res.setHeader('Location', `/#q/${directShortMatch[1]}`);
+          res.end();
+          return;
+        }
+
+        // CORS headers for all /api requests
+        if (url.startsWith('/api/')) {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+          if (req.method === 'OPTIONS') {
+            res.statusCode = 204;
+            res.end();
+            return;
+          }
+        }
+
+        // 1. GET /api/cards - List all cards
+        if (url === '/api/cards' && req.method === 'GET') {
+          const cards = readCards();
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(cards));
+          return;
+        }
+
+        // 2. GET /api/cards/:publicIdOrId - Get specific card by publicId or id
+        if (url.startsWith('/api/cards/') && req.method === 'GET') {
+          const idOrPublicId = decodeURIComponent(url.replace('/api/cards/', '').split('?')[0]);
+          const cards = readCards();
+          const cleanSearch = idOrPublicId.trim().toLowerCase();
+          const found = cards.find(
+            c => (c.publicId && c.publicId.toLowerCase() === cleanSearch) || 
+                 (c.id && c.id.toLowerCase() === cleanSearch) ||
+                 (c.cardNumber && c.cardNumber.toLowerCase() === cleanSearch)
+          );
+
+          if (found) {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(found));
+          } else {
+            res.statusCode = 404;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Carte introuvable' }));
+          }
+          return;
+        }
+
+        // 3. POST /api/cards - Save or update card
+        if (url === '/api/cards' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk;
+          });
+          req.on('end', () => {
+            try {
+              const cardData = JSON.parse(body);
+              const cards = readCards();
+              const existingIndex = cards.findIndex(
+                c => c.id === cardData.id || 
+                     (cardData.publicId && c.publicId && c.publicId.toLowerCase() === cardData.publicId.toLowerCase())
+              );
+
+              const now = new Date().toISOString();
+              const updatedCard = {
+                ...cardData,
+                updatedAt: now
+              };
+
+              if (existingIndex >= 0) {
+                cards[existingIndex] = { ...cards[existingIndex], ...updatedCard };
+              } else {
+                cards.unshift(updatedCard);
+              }
+
+              writeCards(cards);
+
+              res.setHeader('Content-Type', 'application/json');
+              res.statusCode = 200;
+              res.end(JSON.stringify(updatedCard));
+            } catch (err: any) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: err.message || 'Invalid JSON body' }));
+            }
+          });
+          return;
+        }
+
+        // 4. POST /api/scans - Record a scan from any mobile device
+        if (url === '/api/scans' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk;
+          });
+          req.on('end', () => {
+            try {
+              const scanEvent = JSON.parse(body);
+              const scans = readScans();
+              scans.unshift(scanEvent);
+              writeScans(scans);
+
+              // Update card scan count
+              if (scanEvent.publicId || scanEvent.qrCodeId) {
+                const cards = readCards();
+                const card = cards.find(
+                  c => (scanEvent.publicId && c.publicId && c.publicId.toLowerCase() === scanEvent.publicId.toLowerCase()) || 
+                       (scanEvent.qrCodeId && c.id === scanEvent.qrCodeId)
+                );
+                if (card) {
+                  card.scanCount = (card.scanCount || 0) + 1;
+                  card.lastScannedAt = scanEvent.timestamp || new Date().toISOString();
+                  writeCards(cards);
+                }
+              }
+
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: true }));
+            } catch (err: any) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: 'Invalid scan event' }));
+            }
+          });
+          return;
+        }
+
+        // 5. GET /api/scans
+        if (url === '/api/scans' && req.method === 'GET') {
+          const scans = readScans();
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(scans));
+          return;
+        }
+
+        // 6. DELETE /api/cards/:id
+        if (url.startsWith('/api/cards/') && req.method === 'DELETE') {
+          const id = decodeURIComponent(url.replace('/api/cards/', '').split('?')[0]);
+          let cards = readCards();
+          cards = cards.filter(c => c.id !== id && c.publicId !== id);
+          writeCards(cards);
+
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ success: true }));
+          return;
+        }
+
+        next();
+      });
+    }
+  };
+}

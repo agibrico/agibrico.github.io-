@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@layer utilities {
+  @keyframes scannerMove {
+    0% {
+      top: 10%;
+      opacity: 0.6;
+    }
+    50% {
+      top: 88%;
+      opacity: 1;
+    }
+    100% {
+      top: 10%;
+      opacity: 0.6;
+    }
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  header, nav, button, .no-print {
+    display: none !important;
+  }
+}

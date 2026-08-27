@@ -40,14 +40,25 @@ jobs:
       - name: Capacitor Sync
         run: npx cap sync android
 
-      - name: Build Android APK
+      - name: Build Android APK (Release)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
-      - name: Upload APK
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        if: env.SIGNING_KEY != null
+
+      - name: Upload APK (Signed)
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: app-release
+          path: ${{ steps.sign_app.outputs.signedReleaseFile || 'android/app/build/outputs/apk/release/app-release-unsigned.apk' }}

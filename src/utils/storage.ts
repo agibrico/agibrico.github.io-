@@ -14,6 +14,19 @@ import {
   SAINTE_VICTOIRE_LOGO, 
   getCompanyDefaultLogo 
 } from './defaultLogos';
+import { db } from '../firebase';
+import {
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  updateDoc,
+  serverTimestamp
+} from 'firebase/firestore';
 
 const CARDS_STORAGE_KEY = 'smart_qr_items_v2';
 const CLIENTS_STORAGE_KEY = 'smart_qr_clients_v2';
@@ -1109,42 +1122,31 @@ export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeIte
 
   // 3. Query server API
   if (!resolvedItem) {
+  // 3. Query Firestore
+  if (!resolvedItem) {
     try {
-      const res = await fetch(`/api/cards/${encodeURIComponent(cleanId)}`);
-      if (res.ok) {
-        const serverItem: QRCodeItem = await res.json();
-        if (serverItem && serverItem.content) {
+      const cardRef = doc(db, 'cards', cleanId);
+      const cardSnap = await getDoc(cardRef);
+      if (cardSnap.exists()) {
+        const serverItem = cardSnap.data() as QRCodeItem;
+        saveOrUpdateQRCode(serverItem, false);
+        resolvedItem = serverItem;
+      } else {
+        // Loose search in Firestore collection
+        const q = query(collection(db, 'cards'), where('publicId', '==', cleanId));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const serverItem = querySnapshot.docs[0].data() as QRCodeItem;
           saveOrUpdateQRCode(serverItem, false);
           resolvedItem = serverItem;
         }
       }
     } catch (err) {
-      console.warn('Could not fetch card from server by ID:', err);
+      console.warn('Could not fetch card from Firestore:', err);
     }
   }
 
-  // 4. Query all cards from server and search loosely
-  if (!resolvedItem) {
-    try {
-      const resAll = await fetch('/api/cards');
-      if (resAll.ok) {
-        const allCards: QRCodeItem[] = await resAll.json();
-        const match = allCards.find(c => 
-          (c.publicId && c.publicId.toLowerCase() === cleanId.toLowerCase()) ||
-          (c.id && c.id.toLowerCase() === cleanId.toLowerCase()) ||
-          (c.cardNumber && c.cardNumber.toLowerCase() === cleanId.toLowerCase())
-        );
-        if (match) {
-          saveOrUpdateQRCode(match, false);
-          resolvedItem = match;
-        }
-      }
-    } catch (err) {
-      console.warn('Could not fetch all cards from server:', err);
-    }
-  }
-
-  // 5. Fallback: match initial items in memory
+  // 4. Fallback: match initial items in memory
   if (!resolvedItem) {
     const initialFound = INITIAL_QR_ITEMS.find(
       q => q.publicId.toLowerCase() === cleanId.toLowerCase() || q.id.toLowerCase() === cleanId.toLowerCase()
@@ -1221,11 +1223,12 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): QRCod
   saveQRCodes(items);
 
   if (syncToServer) {
-    fetch('/api/cards', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedItem)
-    }).catch(err => console.warn('Server sync error:', err));
+    // Cloud Sync with Firestore
+    const cardRef = doc(db, 'cards', updatedItem.publicId);
+    setDoc(cardRef, {
+      ...updatedItem,
+      updatedAt: serverTimestamp()
+    }, { merge: true }).catch(err => console.warn('Firestore sync error:', err));
   }
 
   return updatedItem;
@@ -1245,9 +1248,10 @@ export function deleteQRCode(id: string): void {
       cardId: target.id,
       clientId: target.clientId
     });
-  }
 
-  fetch(`/api/cards/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
+    // Delete from Firestore
+    deleteDoc(doc(db, 'cards', target.publicId)).catch(() => {});
+  }
 }
 
 export function duplicateQRCode(id: string): QRCodeItem | null {
@@ -1275,45 +1279,41 @@ export function duplicateQRCode(id: string): QRCodeItem | null {
 async function syncAllCardsToServer(items: QRCodeItem[]) {
   try {
     for (const item of items) {
-      await fetch('/api/cards', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item)
-      });
+      const cardRef = doc(db, 'cards', item.publicId);
+      await setDoc(cardRef, { ...item, updatedAt: serverTimestamp() }, { merge: true });
     }
   } catch (err) {
-    // silent
+    console.warn('Firestore mass sync error:', err);
   }
 }
 
 export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
   try {
-    const res = await fetch('/api/cards');
-    if (res.ok) {
-      const serverCards: QRCodeItem[] = await res.json();
-      if (serverCards && serverCards.length > 0) {
-        const localCards = getStoredQRCodes();
-        const map = new Map<string, QRCodeItem>();
+    const querySnapshot = await getDocs(collection(db, 'cards'));
+    const serverCards: QRCodeItem[] = [];
+    querySnapshot.forEach((doc) => {
+      serverCards.push(doc.data() as QRCodeItem);
+    });
 
-        serverCards.forEach(c => map.set(c.id, c));
-        localCards.forEach(c => {
-          if (!map.has(c.id)) {
-            map.set(c.id, c);
-            fetch('/api/cards', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(c)
-            }).catch(() => {});
-          }
-        });
+    if (serverCards.length > 0) {
+      const localCards = getStoredQRCodes();
+      const map = new Map<string, QRCodeItem>();
 
-        const merged = Array.from(map.values());
-        saveQRCodes(merged);
-        return merged;
-      }
+      serverCards.forEach(c => map.set(c.id, c));
+      localCards.forEach(c => {
+        if (!map.has(c.id)) {
+          map.set(c.id, c);
+          const cardRef = doc(db, 'cards', c.publicId);
+          setDoc(cardRef, { ...c, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+        }
+      });
+
+      const merged = Array.from(map.values());
+      saveQRCodes(merged);
+      return merged;
     }
   } catch (err) {
-    console.warn('API sync unavailable:', err);
+    console.warn('Firestore sync unavailable:', err);
   }
   return getStoredQRCodes();
 }
@@ -1505,17 +1505,19 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
 
     if (qrCodesUpdated) {
       saveQRCodes(updatedQRCodes);
-      // Sync associated cards to server API in background
+      // Sync associated cards to Firestore
       updatedQRCodes.filter(q => q.clientId === id).forEach(q => {
-        fetch('/api/cards', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(q)
-        }).catch(() => {});
+        const cardRef = doc(db, 'cards', q.publicId);
+        setDoc(cardRef, { ...q, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
       });
     }
+
+    // Sync client to Firestore
+    const clientRef = doc(db, 'clients', fullClient.id);
+    setDoc(clientRef, { ...fullClient, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+
   } catch (err) {
-    console.error('Error synchronizing QR codes with updated client:', err);
+    console.error('Error synchronizing with Firestore:', err);
   }
 
   return fullClient;

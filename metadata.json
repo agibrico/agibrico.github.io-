@@ -1,0 +1,6 @@
+{
+  "name": "AGB vCard Studio — Production de Cartes de Visite",
+  "description": "Application professionnelle réservée au concepteur pour l'enregistrement des clients, la création de fiches de contact vCard 3.0, la génération de QR codes dynamiques et l'impression de cartes physiques.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

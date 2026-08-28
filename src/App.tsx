@@ -15,6 +15,7 @@ import { ArchitectureModal } from './components/architecture/ArchitectureModal';
 import { PrintStudioModal } from './components/print/PrintStudioModal';
 import { PhoneSimulatorModal } from './components/preview/PhoneSimulatorModal';
 import { AndroidStudioViewer } from './components/android/AndroidStudioViewer';
+import { useAuth } from './context/AuthContext';
 
 import { QRCodeItem, ScanEvent, ClientProfile, HistoryLogItem, CardModelId } from './types/qr';
 import { 
@@ -31,6 +32,7 @@ import {
 import { CARD_TEMPLATES } from './components/templates/TemplateGalleryView';
 
 export default function App() {
+  const { user, loading: authLoading } = useAuth();
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
   const [qrItems, setQrItems] = useState<QRCodeItem[]>([]);
   const [clients, setClients] = useState<ClientProfile[]>([]);
@@ -66,13 +68,17 @@ export default function App() {
     checkHashRoute();
     window.addEventListener('hashchange', checkHashRoute);
     
-    // Sync with server API in background on startup
-    syncCardsWithServer().then(() => {
-      setQrItems(getStoredQRCodes());
-    }).catch(() => {});
-
     return () => window.removeEventListener('hashchange', checkHashRoute);
   }, []);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    // Sync with server API in background when user changes
+    syncCardsWithServer().then(() => {
+      refreshData();
+    }).catch(() => {});
+  }, [user, authLoading]);
 
   const refreshData = () => {
     setQrItems(getStoredQRCodes());

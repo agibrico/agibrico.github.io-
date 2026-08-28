@@ -253,6 +253,7 @@ export interface QRContent {
 
 export interface ClientProfile {
   id: string;
+  userId?: string; // UID of the creator
   clientNumber: string; // e.g. CLT-2026-001
   firstName: string;
   lastName: string;
@@ -316,6 +317,7 @@ export interface HistoryLogItem {
 
 export interface QRCodeItem {
   id: string;
+  userId?: string; // UID of the creator
   cardNumber?: string; // e.g. CARD-2026-0001
   publicId: string; // e.g. "AGB2026X"
   clientId?: string;

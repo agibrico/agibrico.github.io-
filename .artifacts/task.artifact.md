@@ -1,0 +1,15 @@
+- `[x]` Configuration de Capacitor pour Android et iOS
+    - `[x]` Ajouter les dépendances Capacitor au `package.json`
+    - `[x]` Créer le fichier `capacitor.config.ts`
+    - `[x]` Installer les nouvelles dépendances
+- `[x]` Compilation et synchronisation
+    - `[x]` Compiler l'application React (`npm run build`)
+    - `[x]` Initialiser Capacitor dans le projet
+    - `[x]` Ajouter la plateforme Android
+    - `[x]` Ajouter la plateforme iOS
+    - `[x]` Synchroniser les fichiers (`npx cap sync`)
+- `[/]` Génération de l'APK
+    - `[ ]` Lancer la compilation de l'APK via Gradle
+- `[ ]` Vérification finale
+    - `[ ]` Vérifier la présence de l'APK généré
+    - `[ ]` Résumer les étapes pour iOS

@@ -14,7 +14,7 @@ import {
   SAINTE_VICTOIRE_LOGO, 
   getCompanyDefaultLogo 
 } from './defaultLogos';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import {
   doc,
   setDoc,
@@ -1193,6 +1193,7 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): QRCod
   
   const updatedItem: QRCodeItem = {
     ...item,
+    userId: auth.currentUser?.uid || item.userId,
     cardNumber: item.cardNumber || generateCardNumber(items.length + 1),
     publicId: item.publicId || generateSecurePublicId(),
     updatedAt: new Date().toISOString()
@@ -1287,7 +1288,11 @@ async function syncAllCardsToServer(items: QRCodeItem[]) {
 
 export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
   try {
-    const querySnapshot = await getDocs(collection(db, 'cards'));
+    const user = auth.currentUser;
+    if (!user) return getStoredQRCodes();
+
+    const q = query(collection(db, 'cards'), where('userId', '==', user.uid));
+    const querySnapshot = await getDocs(q);
     const serverCards: QRCodeItem[] = [];
     querySnapshot.forEach((doc) => {
       serverCards.push(doc.data() as QRCodeItem);
@@ -1387,6 +1392,7 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
 
   const fullClient: ClientProfile = {
     id,
+    userId: auth.currentUser?.uid || (client as any).userId,
     clientNumber,
     firstName: client.firstName || '',
     lastName: client.lastName || '',

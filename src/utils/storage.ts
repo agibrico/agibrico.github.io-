@@ -1120,8 +1120,6 @@ export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeIte
     if (localFound) resolvedItem = localFound;
   }
 
-  // 3. Query server API
-  if (!resolvedItem) {
   // 3. Query Firestore
   if (!resolvedItem) {
     try {

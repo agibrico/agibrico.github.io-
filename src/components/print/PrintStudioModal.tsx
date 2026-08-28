@@ -284,49 +284,24 @@ export const PrintStudioModal: React.FC<PrintStudioModalProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 print:hidden">
                     <span>1. RECTO (Face Avant Physique)</span>
-                    <span className="text-blue-600">Logo • Nom • Numéro en cas de perte</span>
+                    <span className="text-blue-600">Nom • Prénom • Numéro Principal</span>
                   </div>
                   <div
                     ref={rectoCardRef}
                     style={{ ...getCardBgStyle(), height: '55mm' }}
-                    className="w-full max-w-[85mm] mx-auto rounded-3xl border border-emerald-800/80 p-5 shadow-md flex flex-col justify-between relative overflow-hidden"
+                    className="w-full max-w-[85mm] mx-auto rounded-3xl border border-slate-300/80 p-8 shadow-md flex flex-col items-center justify-center relative overflow-hidden text-center"
                   >
-                    {/* Header: Logo */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        {companyLogo ? (
-                          <div className="w-10 h-10 rounded-xl bg-white p-0.5 border border-slate-200 shadow-xs flex items-center justify-center overflow-hidden">
-                            <img src={companyLogo} alt="Logo" className="w-full h-full object-contain" />
-                          </div>
-                        ) : (
-                          <div className="w-10 h-10 rounded-xl bg-white text-slate-900 font-black text-xs flex items-center justify-center border border-slate-200 shadow-xs">
-                            LOGO
-                          </div>
-                        )}
-                        <span className="text-xs font-black tracking-wider uppercase opacity-95">{displayCompany}</span>
-                      </div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-xs" />
-                    </div>
-
-                    {/* Center: Identity */}
-                    <div className="my-auto space-y-0.5">
-                      <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight">
+                    {/* Minimalist Identity centered */}
+                    <div className="space-y-4">
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight uppercase">
                         {displayName}
                       </h2>
-                      {displayTitle && (
-                        <p className="text-[11px] font-medium opacity-90">
-                          {displayTitle}
-                        </p>
-                      )}
-                    </div>
 
-                    {/* Bottom: Emergency phone in case of loss */}
-                    <div className="pt-2 border-t border-emerald-700/50 flex items-center justify-between text-[9px] font-semibold opacity-95">
-                      <span className="flex items-center gap-1">
-                        <span className="text-red-400">📞</span>
-                        <span>{phoneLossText}</span>
-                      </span>
-                      <span className="text-[9px] uppercase tracking-wider font-black opacity-90">AGB</span>
+                      <div className="w-20 h-0.5 bg-current opacity-20 mx-auto rounded-full" />
+
+                      <p className="text-lg sm:text-xl font-bold tracking-widest opacity-90">
+                        {emergencyPhone}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -335,24 +310,17 @@ export const PrintStudioModal: React.FC<PrintStudioModalProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 print:hidden">
                     <span>2. VERSO (Face Arrière Physique)</span>
-                    <span className="text-emerald-600">100% QR Code (Fiche Complète & Services)</span>
+                    <span className="text-emerald-600">QR Code Uniquement</span>
                   </div>
                   <div
                     ref={versoCardRef}
-                    className="w-full max-w-[85mm] mx-auto rounded-3xl border border-emerald-800/80 p-4 shadow-md flex flex-col items-center justify-between relative overflow-hidden"
+                    className="w-full max-w-[85mm] mx-auto rounded-3xl border border-slate-300/80 p-6 shadow-md flex flex-col items-center justify-center relative overflow-hidden"
                     style={{ ...getCardBgStyle(), height: '55mm' }}
                   >
-                    {/* Centered High-Resolution QR Code with yellow banner */}
-                    <div className="p-2.5 bg-white rounded-2xl border border-slate-200 flex flex-col items-center justify-center shadow-xs my-auto max-w-[70%]">
-                      {qrDataUrl && <img src={qrDataUrl} alt="QR Code Verso" className="w-22 h-22 sm:w-24 sm:h-24 object-contain" />}
-                      <div className="mt-1 px-1.5 py-0.5 bg-amber-100 text-amber-950 font-black text-[7px] uppercase tracking-wide rounded-2xs text-center border border-amber-200/80 w-full">
-                        SCANNEZ POUR CONTACTER {displayCompany || 'CANAAN SERVICES'}
-                      </div>
+                    {/* Only the QR Code centered in its white box */}
+                    <div className="p-3 bg-white rounded-[32px] border border-slate-200/50 flex items-center justify-center shadow-2xl">
+                      {qrDataUrl && <img src={qrDataUrl} alt="QR Code Verso" className="w-28 h-28 sm:w-32 sm:h-32 object-contain" />}
                     </div>
-
-                    <span className="text-[8px] font-black uppercase tracking-wider opacity-90 text-center pb-0.5">
-                      SCANNEZ POUR LA FICHE COMPLÈTE & COORDONNÉES
-                    </span>
                   </div>
                 </div>
 
@@ -365,33 +333,17 @@ export const PrintStudioModal: React.FC<PrintStudioModalProps> = ({
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
-                    className="border-2 border-dashed border-slate-300 rounded-xl p-4 flex items-center justify-between gap-3 bg-white"
+                    className="border border-slate-300 rounded-xl p-6 flex flex-col items-center justify-center gap-3 bg-white text-center shadow-sm"
                     style={{ height: '55mm' }}
                   >
-                    <div className="space-y-2 max-w-[58%] text-[9px] flex flex-col justify-between h-full">
-                      <div className="flex items-center gap-1.5">
-                        {companyLogo ? (
-                          <img src={companyLogo} alt="Logo" className="w-6 h-6 rounded-md object-contain bg-white border border-slate-200 p-0.5 shadow-2xs" />
-                        ) : (
-                          <div className="w-6 h-6 rounded-md bg-slate-900 text-amber-400 font-black text-[9px] flex items-center justify-center border border-amber-400/30">
-                            {displayCompany ? displayCompany.substring(0, 3).toUpperCase() : 'AGB'}
-                          </div>
-                        )}
-                        <span className="text-[9px] font-black uppercase text-slate-800">{displayCompany}</span>
-                      </div>
-
-                      <div>
-                        <h3 className="font-black text-xs text-slate-900 leading-tight">{displayName}</h3>
-                      </div>
-
-                      <div className="pt-1 border-t border-slate-100 text-[8px] text-slate-600 space-y-0.5">
-                        <p className="font-semibold text-slate-700">📞 En cas de perte : {item.content.primaryPhone || '+225 01 04 00 00 00'}</p>
-                      </div>
+                    <div className="space-y-2">
+                      <h3 className="font-black text-sm text-slate-900 uppercase tracking-wide">{displayName}</h3>
+                      <div className="w-12 h-0.5 bg-slate-200 mx-auto" />
+                      <p className="font-bold text-[10px] text-slate-600 tracking-widest">{item.content.primaryPhone || '+225 01 04 00 00 00'}</p>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center shrink-0 p-1 bg-white rounded-lg border border-slate-200">
-                      {qrDataUrl && <img src={qrDataUrl} alt="QR" className="w-22 h-22 object-contain" />}
-                      <span className="text-[6.5px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">Scannez-moi</span>
+                    <div className="p-2 bg-white rounded-xl border border-slate-100 shadow-xs mt-1">
+                      {qrDataUrl && <img src={qrDataUrl} alt="QR" className="w-20 h-22 object-contain" />}
                     </div>
                   </div>
                 ))}

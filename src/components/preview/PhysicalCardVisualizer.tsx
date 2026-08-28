@@ -235,89 +235,27 @@ export const PhysicalCardVisualizer: React.FC<PhysicalCardVisualizerProps> = ({
           <div className="w-full flex flex-col items-center space-y-1.5">
             <div className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
               <span>Face Recto (Avant)</span>
-              <span className="text-[10px] text-blue-600 font-semibold">85 × 55 mm • Rendu Réel</span>
+              <span className="text-[10px] text-blue-600 font-semibold">Design Minimaliste</span>
             </div>
 
             <div
               style={getCardStyle(false)}
-              className="w-full max-w-[340px] sm:max-w-[360px] aspect-[85/55] rounded-2xl border border-slate-300/80 p-6 flex flex-col justify-between relative select-none transition-all duration-300 shadow-xl overflow-hidden"
+              className="w-full max-w-[340px] sm:max-w-[360px] aspect-[85/55] rounded-2xl border border-slate-300/80 p-8 flex flex-col items-center justify-center relative select-none transition-all duration-300 shadow-xl overflow-hidden text-center"
             >
               {/* Subtle card sheen effect */}
-              <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-white/10 to-transparent pointer-events-none rounded-tr-2xl" />
+              <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-white/5 to-transparent pointer-events-none rounded-tr-2xl" />
 
-              {/* 1. TOP: Logo de l'entreprise / marque */}
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div 
-                    onClick={() => onUpdateStyling && fileInputRef.current?.click()}
-                    className={`relative group ${onUpdateStyling ? 'cursor-pointer' : ''}`}
-                    title={onUpdateStyling ? 'Cliquer pour importer / changer le logo d\'entreprise' : undefined}
-                  >
-                    {companyLogo ? (
-                      <div className="w-12 h-12 rounded-2xl bg-white p-1 border border-slate-200/80 shadow-md flex items-center justify-center overflow-hidden">
-                        <img
-                          src={companyLogo}
-                          alt="Logo Entreprise"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-12 h-12 rounded-2xl bg-white text-slate-900 font-black text-xs flex items-center justify-center border border-slate-200 shadow-md">
-                        LOGO
-                      </div>
-                    )}
-
-                    {onUpdateStyling && (
-                      <div className="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
-                        <Upload className="w-4 h-4" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="text-sm font-black tracking-wider uppercase opacity-95">
-                      {companyName}
-                    </span>
-                    {onUpdateStyling && (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="text-[9px] text-emerald-200 hover:text-white underline cursor-pointer text-left print:hidden opacity-80"
-                      >
-                        Modifier le logo
-                      </button>
-                    )}
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                  />
-                </div>
-
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-xs" />
-              </div>
-
-              {/* 2. CENTER: Nom & Prénom + Titre */}
-              <div className="my-auto py-1.5">
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight text-white">
+              {/* Name & Phone Number centered */}
+              <div className="space-y-4">
+                <h3 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight uppercase">
                   {displayName}
                 </h3>
-                <p className="text-xs sm:text-sm font-medium text-emerald-100/90 mt-0.5">
-                  {jobTitle}
-                </p>
-              </div>
 
-              {/* 3. BOTTOM: Numéro en cas de perte */}
-              <div className="pt-2.5 border-t border-emerald-700/60 flex items-center justify-between text-[9.5px] sm:text-[10.5px] font-semibold tracking-wide opacity-95 text-white">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-red-400">📞</span>
-                  <span>{phoneLossText}</span>
-                </span>
-                <span className="text-[10px] uppercase tracking-wider font-black opacity-90">AGB</span>
+                <div className="w-24 h-1 bg-white/20 mx-auto rounded-full" />
+
+                <p className="text-lg sm:text-xl font-bold tracking-widest opacity-90">
+                  {emergencyPhone}
+                </p>
               </div>
             </div>
           </div>
@@ -328,37 +266,24 @@ export const PhysicalCardVisualizer: React.FC<PhysicalCardVisualizerProps> = ({
           <div className="w-full flex flex-col items-center space-y-1.5">
             <div className="w-full flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
               <span>Face Verso (Arrière)</span>
-              <span className="text-[10px] text-emerald-600 font-semibold">100% QR Code Dynamique</span>
+              <span className="text-[10px] text-emerald-600 font-semibold">100% QR Code</span>
             </div>
 
             <div
               style={getCardStyle(true)}
-              className="w-full max-w-[340px] sm:max-w-[360px] aspect-[85/55] rounded-3xl border border-slate-300/80 p-4 sm:p-5 flex flex-col items-center justify-between relative select-none transition-all duration-300 shadow-xl overflow-hidden"
+              className="w-full max-w-[340px] sm:max-w-[360px] aspect-[85/55] rounded-3xl border border-slate-300/80 p-6 flex flex-col items-center justify-center relative select-none transition-all duration-300 shadow-xl overflow-hidden"
             >
-              {/* Centered High-Definition QR Code in White Rounded Box with Banner */}
-              <div className="p-3 bg-white rounded-3xl shadow-md border border-slate-200/80 flex flex-col items-center justify-center max-w-[75%] my-auto">
+              <div className="p-4 bg-white rounded-[32px] shadow-2xl border border-slate-200/50 flex items-center justify-center">
                 {qrDataUrl ? (
                   <img
                     src={qrDataUrl}
                     alt="QR Code Verso"
-                    className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
+                    className="w-32 h-32 sm:w-36 sm:h-32 object-contain"
                   />
                 ) : (
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 animate-pulse rounded-xl flex items-center justify-center text-xs text-slate-400">
-                    Chargement QR...
-                  </div>
+                  <div className="w-32 h-32 bg-slate-100 animate-pulse rounded-2xl" />
                 )}
-                
-                {/* Yellow / Beige instruction banner under QR code */}
-                <div className="mt-1.5 px-2 py-0.5 bg-amber-100 text-amber-950 font-black text-[7.5px] sm:text-[8px] uppercase tracking-wide rounded-sm text-center border border-amber-200/80 w-full">
-                  SCANNEZ POUR CONTACTER {companyName || 'CANAAN SERVICES'}
-                </div>
               </div>
-
-              {/* Bottom centered bold white subtitle */}
-              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-emerald-100 text-center pb-1">
-                SCANNEZ POUR LA FICHE COMPLÈTE & COORDONNÉES
-              </span>
             </div>
           </div>
         )}

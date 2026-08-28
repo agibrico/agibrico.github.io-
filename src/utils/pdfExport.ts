@@ -238,34 +238,23 @@ export async function exportDirectCardPDF(item: QRCodeItem): Promise<boolean> {
     rectoEl.style.height = '220px';
     rectoEl.style.backgroundColor = bgColor;
     rectoEl.style.color = textColor;
-    rectoEl.style.padding = '20px';
+    rectoEl.style.padding = '24px';
     rectoEl.style.boxSizing = 'border-box';
     rectoEl.style.display = 'flex';
     rectoEl.style.flexDirection = 'column';
-    rectoEl.style.justifyContent = 'space-between';
+    rectoEl.style.alignItems = 'center';
+    rectoEl.style.justifyContent = 'center';
     rectoEl.style.borderRadius = '16px';
     rectoEl.style.border = '2px solid rgba(0,0,0,0.15)';
     rectoEl.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-
-    const logoHtml = item.styling.logoUrl
-      ? `<img src="${item.styling.logoUrl}" style="width:36px;height:36px;object-fit:contain;background:white;padding:2px;border-radius:8px;" />`
-      : `<div style="width:36px;height:36px;background:#2563eb;color:white;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;border-radius:8px;">${displayCompany.substring(0,3).toUpperCase()}</div>`;
+    rectoEl.style.textAlign = 'center';
 
     rectoEl.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          ${logoHtml}
-          <span style="font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;">${displayCompany}</span>
-        </div>
-        <div style="width:8px;height:8px;border-radius:50%;background:#2563eb;"></div>
+      <div style="margin-bottom: 12px;">
+        <h2 style="font-size:22px;font-weight:900;margin:0;line-height:1.1;text-transform:uppercase;letter-spacing:1px;">${displayName}</h2>
       </div>
-      <div style="margin:auto 0;padding:8px 0;">
-        <h2 style="font-size:18px;font-weight:900;margin:0;line-height:1.2;">${displayName}</h2>
-        ${displayTitle ? `<p style="font-size:11px;font-weight:600;margin:4px 0 0 0;opacity:0.85;">${displayTitle}</p>` : ''}
-      </div>
-      <div style="padding-top:8px;border-top:1px solid rgba(128,128,128,0.25);display:flex;justify-content:space-between;font-size:9.5px;font-weight:600;opacity:0.85;">
-        <span>📞 ${phoneText}</span>
-        <span style="font-size:8px;font-weight:800;letter-spacing:1px;">AGB</span>
+      <div style="padding-top:12px;border-top:2px solid rgba(128,128,128,0.2);width:80%;">
+        <span style="font-size:16px;font-weight:800;letter-spacing:1px;">${emergencyPhone}</span>
       </div>
     `;
 
@@ -286,12 +275,9 @@ export async function exportDirectCardPDF(item: QRCodeItem): Promise<boolean> {
     versoEl.style.fontFamily = 'system-ui, -apple-system, sans-serif';
 
     versoEl.innerHTML = `
-      <div style="background:white;padding:8px;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-        <img src="${qrDataUrl}" style="width:115px;height:115px;object-fit:contain;" />
+      <div style="background:white;padding:12px;border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        <img src="${qrDataUrl}" style="width:130px;height:130px;object-fit:contain;" />
       </div>
-      <span style="font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:8px;opacity:0.75;">
-        Scannez pour la fiche complète & coordonnées
-      </span>
     `;
 
     offscreen.appendChild(rectoEl);

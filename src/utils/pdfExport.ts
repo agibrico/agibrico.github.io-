@@ -1,5 +1,7 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas-pro';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 import { QRCodeItem, QRStyling, CardBackgroundTheme } from '../types/qr';
 import { renderQRToCanvas } from './qrEngine';
 import { getPublicQRUrl, addHistoryLog } from './storage';
@@ -7,8 +9,26 @@ import { getPublicQRUrl, addHistoryLog } from './storage';
 /**
  * Universal safe downloader that works across iOS Safari, Android Chrome, and Desktop browsers.
  */
-export function downloadBlob(blob: Blob, filename: string) {
+export async function downloadBlob(blob: Blob, filename: string) {
   try {
+    // Check if running on Android/iOS via Capacitor
+    if (Capacitor.isNativePlatform()) {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        // Save file to the device's Documents directory
+        await Filesystem.writeFile({
+          path: filename,
+          data: base64data,
+          directory: Directory.Documents,
+        });
+        alert(`Fichier enregistré dans vos Documents : ${filename}`);
+      };
+      return;
+    }
+
+    // Standard Web Download
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.style.display = 'none';

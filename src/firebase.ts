@@ -14,12 +14,26 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+// Initialize Firebase safely
+let app;
+let db: any;
+let auth: any;
+let analytics: any = null;
 
-// Optional: Analytics only in browser
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+try {
+  if (firebaseConfig.apiKey) {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    if (typeof window !== 'undefined') {
+      analytics = getAnalytics(app);
+    }
+  } else {
+    console.warn("Firebase configuration is missing. Cloud features will be disabled.");
+  }
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+}
 
+export { db, auth, analytics };
 export default app;

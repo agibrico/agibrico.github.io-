@@ -1121,7 +1121,7 @@ export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeIte
   }
 
   // 3. Query Firestore
-  if (!resolvedItem) {
+  if (!resolvedItem && db) {
     try {
       const cardRef = doc(db, 'cards', cleanId);
       const cardSnap = await getDoc(cardRef);
@@ -1221,7 +1221,7 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): QRCod
 
   saveQRCodes(items);
 
-  if (syncToServer) {
+  if (syncToServer && db) {
     // Cloud Sync with Firestore
     const cardRef = doc(db, 'cards', updatedItem.publicId);
     setDoc(cardRef, {
@@ -1249,7 +1249,9 @@ export function deleteQRCode(id: string): void {
     });
 
     // Delete from Firestore
-    deleteDoc(doc(db, 'cards', target.publicId)).catch(() => {});
+    if (db) {
+      deleteDoc(doc(db, 'cards', target.publicId)).catch(() => {});
+    }
   }
 }
 
@@ -1276,6 +1278,7 @@ export function duplicateQRCode(id: string): QRCodeItem | null {
 }
 
 async function syncAllCardsToServer(items: QRCodeItem[]) {
+  if (!db) return;
   try {
     for (const item of items) {
       const cardRef = doc(db, 'cards', item.publicId);
@@ -1287,6 +1290,7 @@ async function syncAllCardsToServer(items: QRCodeItem[]) {
 }
 
 export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
+  if (!db || !auth) return getStoredQRCodes();
   try {
     const user = auth.currentUser;
     if (!user) return getStoredQRCodes();
@@ -1510,15 +1514,19 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
     if (qrCodesUpdated) {
       saveQRCodes(updatedQRCodes);
       // Sync associated cards to Firestore
-      updatedQRCodes.filter(q => q.clientId === id).forEach(q => {
-        const cardRef = doc(db, 'cards', q.publicId);
-        setDoc(cardRef, { ...q, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
-      });
+      if (db) {
+        updatedQRCodes.filter(q => q.clientId === id).forEach(q => {
+          const cardRef = doc(db, 'cards', q.publicId);
+          setDoc(cardRef, { ...q, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+        });
+      }
     }
 
     // Sync client to Firestore
-    const clientRef = doc(db, 'clients', fullClient.id);
-    setDoc(clientRef, { ...fullClient, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+    if (db) {
+      const clientRef = doc(db, 'clients', fullClient.id);
+      setDoc(clientRef, { ...fullClient, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+    }
 
   } catch (err) {
     console.error('Error synchronizing with Firestore:', err);

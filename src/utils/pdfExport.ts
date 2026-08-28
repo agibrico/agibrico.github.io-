@@ -16,7 +16,10 @@ export async function downloadBlob(blob: Blob, filename: string) {
       const reader = new FileReader();
       reader.readAsDataURL(blob);
       reader.onloadend = async () => {
-        const base64data = reader.result as string;
+        const dataUri = reader.result as string;
+        // Strip the "data:application/pdf;base64," prefix
+        const base64data = dataUri.split(',')[1];
+
         // Save file to the device's Documents directory
         await Filesystem.writeFile({
           path: filename,

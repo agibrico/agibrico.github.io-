@@ -1193,7 +1193,7 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): QRCod
   
   const updatedItem: QRCodeItem = {
     ...item,
-    userId: auth.currentUser?.uid || item.userId,
+    userId: auth?.currentUser?.uid || item.userId,
     cardNumber: item.cardNumber || generateCardNumber(items.length + 1),
     publicId: item.publicId || generateSecurePublicId(),
     updatedAt: new Date().toISOString()
@@ -1222,12 +1222,16 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): QRCod
   saveQRCodes(items);
 
   if (syncToServer && db) {
-    // Cloud Sync with Firestore
-    const cardRef = doc(db, 'cards', updatedItem.publicId);
-    setDoc(cardRef, {
-      ...updatedItem,
-      updatedAt: serverTimestamp()
-    }, { merge: true }).catch(err => console.warn('Firestore sync error:', err));
+    try {
+      // Cloud Sync with Firestore
+      const cardRef = doc(db, 'cards', updatedItem.publicId);
+      setDoc(cardRef, {
+        ...updatedItem,
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(err => console.warn('Firestore sync error:', err));
+    } catch (e) {
+      console.warn('Firestore doc creation failed:', e);
+    }
   }
 
   return updatedItem;
@@ -1292,7 +1296,7 @@ async function syncAllCardsToServer(items: QRCodeItem[]) {
 export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
   if (!db || !auth) return getStoredQRCodes();
   try {
-    const user = auth.currentUser;
+    const user = auth?.currentUser;
     if (!user) return getStoredQRCodes();
 
     const q = query(collection(db, 'cards'), where('userId', '==', user.uid));
@@ -1396,7 +1400,7 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
 
   const fullClient: ClientProfile = {
     id,
-    userId: auth.currentUser?.uid || (client as any).userId,
+    userId: auth?.currentUser?.uid || (client as any).userId,
     clientNumber,
     firstName: client.firstName || '',
     lastName: client.lastName || '',

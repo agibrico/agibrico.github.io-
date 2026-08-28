@@ -1095,7 +1095,7 @@ export function decodeCardPayload(payload: string): QRCodeItem | null {
  * Robust async fetch for any external smartphone scan:
  * 1. Checks URL for compressed payload
  * 2. Checks local memory/cache
- * 3. Queries server /api/cards/:publicId
+ * 3. Queries Firestore Cloud Database
  * 4. Fallback search across all stored cards and defaults
  */
 export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeItem | null> {

@@ -1548,6 +1548,11 @@ export function deleteClient(id: string): void {
       details: `Numéro client : ${target.clientNumber}`,
       clientId: id
     });
+
+    // Delete from Firestore
+    if (db) {
+      deleteDoc(doc(db, 'clients', id)).catch(() => {});
+    }
   }
 }
 

@@ -1796,35 +1796,22 @@ export const CANONICAL_GITHUB_PAGES_URL = 'https://agibrico.github.io/agibrico.g
 
 /**
  * Builds standard public URL for the card:
- * Supports GitHub Pages hosting (https://agibrico.github.io/agibrico.github.io-/)
- * and works across smartphones when scanning the QR code.
  *
- * NOTE: For truly dynamic QR codes (same QR after update), we prioritize the stable URL
- * without the payload if a backend is available.
+ * IMPORTANT: We ALWAYS use the canonical web URL for the QR Code links,
+ * even when generating from the mobile app (localhost), so that clients
+ * scanning the physical QR code are redirected to the public website.
  */
 export function getPublicQRUrl(publicId: string, card?: QRCodeItem): string {
-  let baseUrl = `${CANONICAL_GITHUB_PAGES_URL}#q/${publicId}`;
-
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    // When running on GitHub Pages or custom domain
-    if (hostname.includes('github.io')) {
-      const basePath = window.location.pathname.replace(/\/$/, '');
-      baseUrl = `${window.location.origin}${basePath}/#q/${publicId}`;
-    } else {
-      // In dev / preview environments
-      baseUrl = `${window.location.origin}/#q/${publicId}`;
-    }
-  }
+  // Always use the public web address for the link encoded in the QR code
+  const baseUrl = `${CANONICAL_GITHUB_PAGES_URL}#q/${publicId}`;
 
   // To ensure the QR code stays identical even when data changes,
   // we avoid appending the '?d=...' payload in dynamic mode
-  // if we expect the data to be fetched from a server/API.
   if (card?.mode === 'dynamic') {
     return baseUrl;
   }
 
-  // Fallback for static/offline compatibility if needed
+  // Fallback for static/offline compatibility (encodes data in URL)
   if (card && card.content && (card.content.firstName || card.content.fullName || card.content.company)) {
     const payload = encodeCardPayload(card);
     if (payload && payload.length < 1600) {

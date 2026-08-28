@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appName: 'AGB vCard Studio',
   webDir: 'dist',
   server: {
-    url: 'https://agibrico.github.io/agibrico.github.io-/',
-    cleartext: true
+    // We remove the hardcoded URL to allow Capacitor to load local files from the APK
+    androidScheme: 'https'
   }
 };
 

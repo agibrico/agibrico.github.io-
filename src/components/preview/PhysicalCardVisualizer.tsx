@@ -253,7 +253,7 @@ export const PhysicalCardVisualizer: React.FC<PhysicalCardVisualizerProps> = ({
 
                 <div className="w-24 h-1 bg-white/20 mx-auto rounded-full" />
 
-                <p className="text-lg sm:text-xl font-bold tracking-widest opacity-90">
+                <p className="text-base sm:text-lg font-bold tracking-widest opacity-90">
                   {emergencyPhone}
                 </p>
               </div>

@@ -299,7 +299,7 @@ export const PrintStudioModal: React.FC<PrintStudioModalProps> = ({
 
                       <div className="w-20 h-0.5 bg-current opacity-20 mx-auto rounded-full" />
 
-                      <p className="text-lg sm:text-xl font-bold tracking-widest opacity-90">
+                      <p className="text-base sm:text-lg font-bold tracking-widest opacity-90">
                         {emergencyPhone}
                       </p>
                     </div>

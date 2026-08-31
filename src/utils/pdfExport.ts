@@ -254,7 +254,7 @@ export async function exportDirectCardPDF(item: QRCodeItem): Promise<boolean> {
         <h2 style="font-size:16px;font-weight:900;margin:0;line-height:1.1;text-transform:uppercase;letter-spacing:1px;">${displayName}</h2>
       </div>
       <div style="padding-top:12px;border-top:2px solid rgba(128,128,128,0.2);width:80%;">
-        <span style="font-size:16px;font-weight:800;letter-spacing:1px;">${emergencyPhone}</span>
+        <span style="font-size:14px;font-weight:800;letter-spacing:1px;">${emergencyPhone}</span>
       </div>
     `;
 

@@ -247,7 +247,7 @@ export const PhysicalCardVisualizer: React.FC<PhysicalCardVisualizerProps> = ({
 
               {/* Name & Phone Number centered */}
               <div className="space-y-4">
-                <h3 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight uppercase">
+                <h3 className="text-lg sm:text-xl font-black tracking-tight leading-tight uppercase">
                   {displayName}
                 </h3>
 

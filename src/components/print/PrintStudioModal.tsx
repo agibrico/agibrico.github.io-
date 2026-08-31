@@ -293,7 +293,7 @@ export const PrintStudioModal: React.FC<PrintStudioModalProps> = ({
                   >
                     {/* Minimalist Identity centered */}
                     <div className="space-y-4">
-                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight uppercase">
+                      <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight uppercase">
                         {displayName}
                       </h2>
 

@@ -236,6 +236,13 @@ export const QREditor: React.FC<QREditorProps> = ({
     }));
   };
 
+  const updateOpeningHour = (index: number, field: keyof OpeningHourDay, value: any) => {
+    const currentHours = content.openingHours || DEFAULT_DAYS;
+    const newHours = [...currentHours];
+    newHours[index] = { ...newHours[index], [field]: value };
+    updateContentField('openingHours', newHours);
+  };
+
   // Image Upload helper (compress & scale to Base64)
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>, 
@@ -1280,6 +1287,59 @@ export const QREditor: React.FC<QREditorProps> = ({
                       placeholder="CC-2409817-A"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-blue-600 focus:outline-none transition-colors"
                     />
+                  </div>
+                </div>
+
+                {/* Opening Hours Section */}
+                <div className="space-y-4 pt-3 border-t border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-emerald-600" />
+                      <span>Horaires d'Ouverture</span>
+                    </h5>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2.5">
+                    {(content.openingHours || DEFAULT_DAYS).map((oh, idx) => (
+                      <div key={oh.day} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div className="w-20">
+                          <span className="text-[11px] font-bold text-slate-700">{oh.day}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-1">
+                          <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={oh.isOpen}
+                              onChange={e => updateOpeningHour(idx, 'isOpen', e.target.checked)}
+                              className="w-4 h-4 accent-blue-600"
+                            />
+                            <span className="text-[10px] font-bold uppercase text-slate-500">Ouvert</span>
+                          </label>
+
+                          {oh.isOpen && (
+                            <div className="flex items-center gap-2 ml-auto">
+                              <input
+                                type="time"
+                                value={oh.openTime}
+                                onChange={e => updateOpeningHour(idx, 'openTime', e.target.value)}
+                                className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-mono"
+                              />
+                              <span className="text-slate-400">à</span>
+                              <input
+                                type="time"
+                                value={oh.closeTime}
+                                onChange={e => updateOpeningHour(idx, 'closeTime', e.target.value)}
+                                className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-mono"
+                              />
+                            </div>
+                          )}
+                          {!oh.isOpen && (
+                            <span className="ml-auto text-[10px] font-bold text-slate-400 italic">Fermé</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

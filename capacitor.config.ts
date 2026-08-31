@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.agb.smartqr',
+  appId: 'QR.ODE01',
   appName: 'AGB vCard Studio',
   webDir: 'dist',
   server: {

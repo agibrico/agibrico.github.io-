@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">AGB vCard Studio</string>
     <string name="title_activity_main">AGB vCard Studio</string>
-    <string name="package_name">com.agb.smartqr</string>
-    <string name="custom_url_scheme">com.agb.smartqr</string>
+    <string name="package_name">QR.ODE01</string>
+    <string name="custom_url_scheme">QR.ODE01</string>
 </resources>

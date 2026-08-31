@@ -1117,13 +1117,10 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
           <span>Conçu par <span className="font-semibold text-slate-400">AGB Studio</span></span>
           <span>•</span>
           <a
-            href="https://agibrico.github.io/agibrico.github.io-/"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="tel:+2250777709693"
             className="text-blue-400/80 hover:text-blue-400 hover:underline inline-flex items-center gap-0.5"
           >
-            <span>agibrico.github.io</span>
-            <ExternalLink className="w-2.5 h-2.5" />
+            <span>+225 07 7 70 96 93</span>
           </a>
         </p>
       </footer>

@@ -1165,13 +1165,9 @@ export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeIte
     resolvedItem.styling.logoUrl = '';
   }
 
-  // Synchronize with the client's latest registered logo if available
+  // Synchronize with the client's latest registered logo if available (STRICT ID MATCH ONLY)
   const clients = getStoredClients();
-  const matchedClient = (resolvedItem.clientId && clients.find(c => c.id === resolvedItem.clientId)) ||
-    clients.find(c => 
-      (c.company && resolvedItem?.content?.company && c.company.toLowerCase().trim() === resolvedItem.content.company.toLowerCase().trim()) ||
-      (c.fullName && resolvedItem?.content?.fullName && c.fullName.toLowerCase().trim() === resolvedItem.content.fullName.toLowerCase().trim())
-    );
+  const matchedClient = resolvedItem.clientId ? clients.find(c => c.id === resolvedItem.clientId) : null;
 
   if (matchedClient) {
     if (matchedClient.logoUrl && !matchedClient.logoUrl.includes('unsplash.com')) {

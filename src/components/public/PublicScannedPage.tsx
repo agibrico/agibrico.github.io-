@@ -186,14 +186,8 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     );
   }
 
-  // Live Client Dynamic Resolution: If linked to a client profile, merge the latest live client data
-  const allClients = getStoredClients();
-  const linkedClient = item.clientId 
-    ? getClientById(item.clientId) 
-    : allClients.find(c => 
-        (c.company && item.content.company && c.company.toLowerCase().trim() === item.content.company.toLowerCase().trim()) ||
-        (c.fullName && item.content.fullName && c.fullName.toLowerCase().trim() === item.content.fullName.toLowerCase().trim())
-      );
+  // Live Client Dynamic Resolution: If linked to a client profile, merge the latest live client data (STRICT ID MATCH ONLY)
+  const linkedClient = item.clientId ? getClientById(item.clientId) : null;
 
   const content: QRContent = linkedClient ? {
     ...item.content,

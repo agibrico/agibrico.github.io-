@@ -111,15 +111,13 @@ export const QREditor: React.FC<QREditorProps> = ({
       businessTaxId: '',
       businessRegisterNumber: '',
       openingHours: DEFAULT_DAYS,
-      servicesList: ['Conseil & Stratégie', 'Support client 24/7'],
+      servicesList: [],
       socialLinks: [
         { id: '1', platform: 'linkedin', url: '', displayOrder: 1 },
         { id: '2', platform: 'whatsapp', url: '', displayOrder: 2 },
         { id: '3', platform: 'instagram', url: '', displayOrder: 3 }
       ],
-      customFields: [
-        { id: 'cf_1', label: 'Spécialité', value: 'Développement Web & Mobile' }
-      ],
+      customFields: [],
       privacy: {
         hideAddress: false,
         hideSecondaryPhone: false,

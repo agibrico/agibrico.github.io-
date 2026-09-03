@@ -841,175 +841,177 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
         </div>
 
         {/* Section: Coordonnées Complètes */}
-        <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 space-y-3 shadow-xl">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-            <Phone className="w-3.5 h-3.5 text-blue-400" />
-            <span>Coordonnées Directes</span>
-          </h2>
+        {(content.primaryPhone || content.secondaryPhone || content.whatsappNumber || content.email || content.websiteUrl || content.address || content.city) && (
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 space-y-3 shadow-xl">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <Phone className="w-3.5 h-3.5 text-blue-400" />
+              <span>Coordonnées Directes</span>
+            </h2>
 
-          <div className="space-y-2">
-            
-            {/* Téléphone Principal */}
-            {content.primaryPhone && (
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                    <Phone className="w-4 h-4" />
+            <div className="space-y-2">
+
+              {/* Téléphone Principal */}
+              {content.primaryPhone && (
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-medium text-slate-400 block">Téléphone Principal</span>
+                      <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="text-xs sm:text-sm font-semibold text-white hover:text-blue-400">
+                        {content.primaryPhone}
+                      </a>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-medium text-slate-400 block">Téléphone Principal</span>
-                    <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="text-xs sm:text-sm font-semibold text-white hover:text-blue-400">
-                      {content.primaryPhone}
-                    </a>
-                  </div>
+                  <button
+                    onClick={() => handleCopy(content.primaryPhone!, 'phone')}
+                    className="p-2 text-slate-400 hover:text-white"
+                    title="Copier"
+                  >
+                    {copiedPhone === content.primaryPhone ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleCopy(content.primaryPhone!, 'phone')}
-                  className="p-2 text-slate-400 hover:text-white"
-                  title="Copier"
-                >
-                  {copiedPhone === content.primaryPhone ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            )}
+              )}
 
-            {/* Téléphone Secondaire */}
-            {content.secondaryPhone && !content.privacy?.hideSecondaryPhone && (
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-slate-700 text-slate-300 flex items-center justify-center">
-                    <Phone className="w-4 h-4" />
+              {/* Téléphone Secondaire */}
+              {content.secondaryPhone && !content.privacy?.hideSecondaryPhone && (
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-slate-700 text-slate-300 flex items-center justify-center">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-medium text-slate-400 block">Ligne Secondaire</span>
+                      <a href={`tel:${content.secondaryPhone.replace(/\s+/g, '')}`} className="text-xs sm:text-sm font-semibold text-white hover:text-blue-400">
+                        {content.secondaryPhone}
+                      </a>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-medium text-slate-400 block">Ligne Secondaire</span>
-                    <a href={`tel:${content.secondaryPhone.replace(/\s+/g, '')}`} className="text-xs sm:text-sm font-semibold text-white hover:text-blue-400">
-                      {content.secondaryPhone}
-                    </a>
-                  </div>
+                  <button
+                    onClick={() => handleCopy(content.secondaryPhone!, 'phone')}
+                    className="p-2 text-slate-400 hover:text-white"
+                  >
+                    {copiedPhone === content.secondaryPhone ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleCopy(content.secondaryPhone!, 'phone')}
-                  className="p-2 text-slate-400 hover:text-white"
-                >
-                  {copiedPhone === content.secondaryPhone ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            )}
+              )}
 
-            {/* WhatsApp */}
-            {content.whatsappNumber && (
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                    <MessageSquare className="w-4 h-4" />
+              {/* WhatsApp */}
+              {content.whatsappNumber && (
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                      <MessageSquare className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-medium text-slate-400 block">WhatsApp Direct</span>
+                      <a
+                        href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs sm:text-sm font-semibold text-emerald-400 hover:underline"
+                      >
+                        {content.whatsappNumber}
+                      </a>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-medium text-slate-400 block">WhatsApp Direct</span>
-                    <a 
-                      href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer" 
-                      className="text-xs sm:text-sm font-semibold text-emerald-400 hover:underline"
-                    >
-                      {content.whatsappNumber}
-                    </a>
-                  </div>
-                </div>
-                <a
-                  href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1 bg-emerald-600/20 text-emerald-400 text-xs font-semibold rounded-lg hover:bg-emerald-600/30"
-                >
-                  Ouvrir
-                </a>
-              </div>
-            )}
-
-            {/* Email */}
-            {content.email && (
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-medium text-slate-400 block">E-mail</span>
-                    <a href={`mailto:${content.email}`} className="text-xs sm:text-sm font-semibold text-white hover:text-blue-400 truncate block">
-                      {content.email}
-                    </a>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleCopy(content.email!, 'email')}
-                  className="p-2 text-slate-400 hover:text-white shrink-0"
-                >
-                  {copiedEmail ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            )}
-
-            {/* Site Web */}
-            {content.websiteUrl && (
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
-                    <Globe className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-medium text-slate-400 block">Site Internet</span>
-                    <a 
-                      href={content.websiteUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-xs sm:text-sm font-semibold text-blue-400 hover:underline truncate block"
-                    >
-                      {content.websiteUrl.replace(/^https?:\/\//, '')}
-                    </a>
-                  </div>
-                </div>
-                <a
-                  href={content.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 text-slate-400 hover:text-white shrink-0"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-            )}
-
-            {/* Adresse & Localisation */}
-            {(content.address || content.city) && !content.privacy?.hideAddress && (
-              <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40 space-y-2">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[10px] font-medium text-slate-400 block">Localisation & Siège</span>
-                    <p className="text-xs sm:text-sm font-semibold text-white">
-                      {[content.address, content.commune, content.city, content.country].filter(Boolean).join(', ')}
-                    </p>
-                  </div>
-                </div>
-
-                {content.locationLink && (
                   <a
-                    href={content.locationLink}
+                    href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-2 px-3 bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-colors"
+                    className="px-3 py-1 bg-emerald-600/20 text-emerald-400 text-xs font-semibold rounded-lg hover:bg-emerald-600/30"
                   >
-                    <Navigation className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Lancer le GPS / Itinéraire</span>
+                    Ouvrir
                   </a>
-                )}
-              </div>
-            )}
+                </div>
+              )}
 
+              {/* Email */}
+              {content.email && (
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-medium text-slate-400 block">E-mail</span>
+                      <a href={`mailto:${content.email}`} className="text-xs sm:text-sm font-semibold text-white hover:text-blue-400 truncate block">
+                        {content.email}
+                      </a>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleCopy(content.email!, 'email')}
+                    className="p-2 text-slate-400 hover:text-white shrink-0"
+                  >
+                    {copiedEmail ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+              )}
+
+              {/* Site Web */}
+              {content.websiteUrl && (
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+                      <Globe className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-medium text-slate-400 block">Site Internet</span>
+                      <a
+                        href={content.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs sm:text-sm font-semibold text-blue-400 hover:underline truncate block"
+                      >
+                        {content.websiteUrl.replace(/^https?:\/\//, '')}
+                      </a>
+                    </div>
+                  </div>
+                  <a
+                    href={content.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-slate-400 hover:text-white shrink-0"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              )}
+
+              {/* Adresse & Localisation */}
+              {(content.address || content.city) && !content.privacy?.hideAddress && (
+                <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700/40 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] font-medium text-slate-400 block">Localisation & Siège</span>
+                      <p className="text-xs sm:text-sm font-semibold text-white">
+                        {[content.address, content.commune, content.city, content.country].filter(Boolean).join(', ')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {content.locationLink && (
+                    <a
+                      href={content.locationLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-2 px-3 bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-colors"
+                    >
+                      <Navigation className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Lancer le GPS / Itinéraire</span>
+                    </a>
+                  )}
+                </div>
+              )}
+
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Section: Services & Expertises */}
         {content.servicesList && content.servicesList.length > 0 && (

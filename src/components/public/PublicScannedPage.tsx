@@ -288,15 +288,32 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 <p className="text-xs font-medium text-indigo-300">{content.bookSubtitle}</p>
               )}
               <p className="text-sm font-semibold text-slate-300 pt-1">Par <span className="text-white font-bold">{bookAuthor}</span></p>
+              {content.bookCoAuthor && (
+                <p className="text-xs text-slate-400 italic">Co-auteur(s) : {content.bookCoAuthor}</p>
+              )}
               {content.bookPublisher && (
-                <p className="text-xs text-slate-400">Éditeur : {content.bookPublisher} {content.bookYear ? `(${content.bookYear})` : ''}</p>
+                <p className="text-xs text-slate-400 pt-1">Éditeur : {content.bookPublisher} {content.bookYear ? `(${content.bookYear})` : ''}</p>
               )}
             </div>
 
-            {/* Price Badge */}
-            {content.bookPrice && (
-              <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold">
-                Prix : {content.bookPrice}
+            {/* Price & Availability Badge */}
+            {(content.bookPrice || content.bookAvailability) && (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {content.bookPrice && (
+                  <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold">
+                    Prix : {content.bookPrice} {content.bookCurrency || 'FCFA'}
+                  </div>
+                )}
+                {content.bookAvailability && (
+                  <div className={`inline-block px-4 py-1.5 rounded-full text-xs font-bold border ${
+                    content.bookAvailability === 'available' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                    content.bookAvailability === 'preorder' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                    'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                  }`}>
+                    {content.bookAvailability === 'available' ? 'Disponible' :
+                     content.bookAvailability === 'preorder' ? 'En précommande' : 'Épuisé'}
+                  </div>
+                )}
               </div>
             )}
 
@@ -317,20 +334,20 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
             {/* Quick Actions */}
             <div className="grid grid-cols-3 gap-2 w-full pt-1">
-              {content.primaryPhone && (
-                <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200">
+              {(content.bookOrderPhone || content.primaryPhone) && (
+                <a href={`tel:${(content.bookOrderPhone || content.primaryPhone!).replace(/\s+/g, '')}`} className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200">
                   <Phone className="w-4 h-4 text-emerald-400" />
-                  <span className="text-[10px] font-semibold">Appeler</span>
+                  <span className="text-[10px] font-semibold">Commander</span>
                 </a>
               )}
-              {content.whatsappNumber && (
-                <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200">
+              {(content.bookWhatsapp || content.whatsappNumber) && (
+                <a href={`https://wa.me/${(content.bookWhatsapp || content.whatsappNumber!).replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200">
                   <MessageSquare className="w-4 h-4 text-emerald-400" />
                   <span className="text-[10px] font-semibold">WhatsApp</span>
                 </a>
               )}
-              {content.bookWebsite && (
-                <a href={content.bookWebsite} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200">
+              {(content.bookWebsite || content.websiteUrl) && (
+                <a href={content.bookWebsite || content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200">
                   <Globe className="w-4 h-4 text-blue-400" />
                   <span className="text-[10px] font-semibold">Site Web</span>
                 </a>

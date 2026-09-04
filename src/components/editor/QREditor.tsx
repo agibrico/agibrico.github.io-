@@ -30,7 +30,12 @@ import {
   Navigation,
   CheckCircle2,
   Smartphone,
-  Printer
+  Printer,
+  CalendarDays,
+  Hash,
+  Languages,
+  DollarSign,
+  ShoppingCart
 } from 'lucide-react';
 import { 
   QRCodeItem, 
@@ -307,7 +312,12 @@ export const QREditor: React.FC<QREditorProps> = ({
 
   // Explicit Save and Return
   const handleSave = () => {
-    if (!title.trim() && !content.firstName && !content.company) {
+    if (type === 'book' && (!content.bookTitle?.trim() || !content.bookAuthor?.trim())) {
+      alert("Veuillez renseigner au moins le titre du livre et l'auteur.");
+      return;
+    }
+
+    if (type !== 'book' && !title.trim() && !content.firstName && !content.company) {
       alert("Veuillez renseigner au moins un prénom, un nom ou une entreprise pour votre carte.");
       return;
     }
@@ -315,6 +325,56 @@ export const QREditor: React.FC<QREditorProps> = ({
     const itemToSave = getCurrentItem();
     saveOrUpdateQRCode(itemToSave, true);
     setShowSavedToast(true);
+
+    // Auto-clear if creating new (no initialItem)
+    if (!initialItem) {
+      setTitle('');
+      setType('vcard');
+      setMode('dynamic');
+      setContent({
+        firstName: '',
+        lastName: '',
+        fullName: '',
+        jobTitle: '',
+        company: '',
+        department: '',
+        industry: '',
+        bio: '',
+        photoUrl: '',
+        logoUrl: '',
+        bannerUrl: '',
+        primaryPhone: '',
+        secondaryPhone: '',
+        whatsappNumber: '',
+        email: '',
+        websiteUrl: '',
+        address: '',
+        city: '',
+        postalCode: '',
+        country: '',
+        latitude: undefined,
+        longitude: undefined,
+        googleMapsUrl: '',
+        businessTaxId: '',
+        businessRegisterNumber: '',
+        openingHours: DEFAULT_DAYS,
+        servicesList: [],
+        socialLinks: [
+          { id: '1', platform: 'linkedin', url: '', displayOrder: 1 },
+          { id: '2', platform: 'whatsapp', url: '', displayOrder: 2 },
+          { id: '3', platform: 'instagram', url: '', displayOrder: 3 }
+        ],
+        customFields: [],
+        privacy: {
+          hideAddress: false,
+          hideSecondaryPhone: false,
+          hideTaxInfo: false,
+          requirePassword: false,
+          accessPassword: ''
+        }
+      });
+    }
+
     setTimeout(() => {
       onSave(itemToSave);
     }, 600);
@@ -499,120 +559,280 @@ export const QREditor: React.FC<QREditorProps> = ({
 
                 {/* SPECIALIZED FORM SECTION FOR BOOK */}
                 {type === 'book' && (
-                  <div className="space-y-4 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-5 rounded-2xl">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-indigo-600" />
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Informations du Livre</h4>
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-5 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <BookOpen className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Fiche de Livre Officielle</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Édition AGB</span>
+                    </div>
+
+                    {/* Couverture */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-2xl bg-white/60 space-y-3">
+                      {content.bookCoverUrl ? (
+                        <div className="relative group">
+                          <img src={content.bookCoverUrl} className="w-32 h-44 object-cover rounded-lg shadow-md" />
+                          <button
+                            onClick={() => updateContentField('bookCoverUrl', '')}
+                            className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <div className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Couverture du livre (Facultatif)</p>
+                          <label className="px-4 py-1.5 bg-indigo-600 text-white text-[10px] font-bold rounded-full cursor-pointer hover:bg-indigo-700 transition-colors">
+                            Choisir une image
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => updateContentField('bookCoverUrl', ev.target?.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Titre de l'ouvrage</label>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Titre du livre *</label>
                         <input
                           type="text"
+                          required
                           value={content.bookTitle || ''}
                           onChange={e => updateContentField('bookTitle', e.target.value)}
-                          placeholder="L'Ingénierie Mobile & Cloud Moderne"
-                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          placeholder="L'ingénierie du Succès"
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none shadow-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Sous-titre (optionnel)</label>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Sous-titre</label>
                         <input
                           type="text"
                           value={content.bookSubtitle || ''}
                           onChange={e => updateContentField('bookSubtitle', e.target.value)}
-                          placeholder="Architectures pérennes & Systèmes distribués"
-                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          placeholder="Guide complet du QR Code"
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Auteur</label>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Auteur Principal *</label>
                         <input
                           type="text"
+                          required
                           value={content.bookAuthor || ''}
                           onChange={e => updateContentField('bookAuthor', e.target.value)}
-                          placeholder="Gilles Brice ATSÉ"
-                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          placeholder="Nom de l'auteur"
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none shadow-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Maison d'édition</label>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Co-auteur(s)</label>
                         <input
                           type="text"
-                          value={content.bookPublisher || ''}
-                          onChange={e => updateContentField('bookPublisher', e.target.value)}
-                          placeholder="Éditions AGB Ingénierie"
-                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Numéro ISBN</label>
-                        <input
-                          type="text"
-                          value={content.bookIsbn || ''}
-                          onChange={e => updateContentField('bookIsbn', e.target.value)}
-                          placeholder="978-2-901234-56-7"
-                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-mono text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          value={content.bookCoAuthor || ''}
+                          onChange={e => updateContentField('bookCoAuthor', e.target.value)}
+                          placeholder="Noms des co-auteurs"
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Prix Public</label>
-                        <input
-                          type="text"
-                          value={content.bookPrice || ''}
-                          onChange={e => updateContentField('bookPrice', e.target.value)}
-                          placeholder="15 000 FCFA / 25 €"
-                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:border-indigo-600 focus:outline-none"
-                        />
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Éditeur</label>
+                        <div className="relative">
+                          <Building2 className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
+                          <input
+                            type="text"
+                            value={content.bookPublisher || ''}
+                            onChange={e => updateContentField('bookPublisher', e.target.value)}
+                            placeholder="Maison d'édition"
+                            className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          />
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre de pages</label>
-                        <input
-                          type="text"
-                          value={content.bookPages || ''}
-                          onChange={e => updateContentField('bookPages', e.target.value)}
-                          placeholder="348 pages"
-                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
-                        />
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">ISBN</label>
+                        <div className="relative">
+                          <Hash className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
+                          <input
+                            type="text"
+                            value={content.bookIsbn || ''}
+                            onChange={e => updateContentField('bookIsbn', e.target.value)}
+                            placeholder="978-..."
+                            className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-mono text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          />
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Genre / Thème</label>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Publication</label>
+                        <div className="relative">
+                          <CalendarDays className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
+                          <input
+                            type="text"
+                            value={content.bookYear || ''}
+                            onChange={e => updateContentField('bookYear', e.target.value)}
+                            placeholder="Ex: 2026"
+                            className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Genre</label>
                         <input
                           type="text"
                           value={content.bookGenre || ''}
                           onChange={e => updateContentField('bookGenre', e.target.value)}
-                          placeholder="Génie Logiciel & Architecture"
-                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          placeholder="Ex: Roman, Essai..."
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Langue</label>
+                        <div className="relative">
+                          <Languages className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
+                          <input
+                            type="text"
+                            value={content.bookLanguage || ''}
+                            onChange={e => updateContentField('bookLanguage', e.target.value)}
+                            placeholder="Ex: Français"
+                            className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Pages</label>
+                        <input
+                          type="number"
+                          value={content.bookPages || ''}
+                          onChange={e => updateContentField('bookPages', e.target.value)}
+                          placeholder="320"
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Prix</label>
+                          <div className="relative">
+                            <DollarSign className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
+                            <input
+                              type="text"
+                              value={content.bookPrice || ''}
+                              onChange={e => updateContentField('bookPrice', e.target.value)}
+                              placeholder="15000"
+                              className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Devise</label>
+                          <input
+                            type="text"
+                            value={content.bookCurrency || 'FCFA'}
+                            onChange={e => updateContentField('bookCurrency', e.target.value)}
+                            placeholder="FCFA"
+                            className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Disponibilité</label>
+                        <select
+                          value={content.bookAvailability || 'available'}
+                          onChange={e => updateContentField('bookAvailability', e.target.value)}
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none appearance-none"
+                        >
+                          <option value="available">Disponible</option>
+                          <option value="out_of_stock">Épuisé</option>
+                          <option value="preorder">En précommande</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Tél. Commande</label>
+                        <input
+                          type="tel"
+                          value={content.bookOrderPhone || ''}
+                          onChange={e => updateContentField('bookOrderPhone', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">WhatsApp</label>
+                        <input
+                          type="tel"
+                          value={content.bookWhatsapp || ''}
+                          onChange={e => updateContentField('bookWhatsapp', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Lien d'achat / Commande en ligne</label>
-                      <input
-                        type="url"
-                        value={content.bookBuyUrl || ''}
-                        onChange={e => updateContentField('bookBuyUrl', e.target.value)}
-                        placeholder="https://agb-solutions.ci/librairie"
-                        className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
-                      />
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Lien d'achat (URL)</label>
+                      <div className="relative">
+                        <ShoppingCart className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
+                        <input
+                          type="url"
+                          value={content.bookBuyUrl || ''}
+                          onChange={e => updateContentField('bookBuyUrl', e.target.value)}
+                          placeholder="https://..."
+                          className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                        />
+                      </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Résumé / Quatrième de couverture</label>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Site Auteur / Éditeur</label>
+                      <div className="relative">
+                        <Globe className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
+                        <input
+                          type="url"
+                          value={content.bookWebsite || ''}
+                          onChange={e => updateContentField('bookWebsite', e.target.value)}
+                          placeholder="https://..."
+                          className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Résumé du livre</label>
                       <textarea
-                        rows={3}
+                        rows={4}
                         value={content.bookSummary || ''}
                         onChange={e => updateContentField('bookSummary', e.target.value)}
-                        placeholder="Présentez l'intrigue, les enseignements clés ou le sujet du livre..."
-                        className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-indigo-600 focus:outline-none"
+                        placeholder="Quatrième de couverture, résumé, thèmes abordés..."
+                        className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none resize-none leading-relaxed"
                       />
                     </div>
                   </div>

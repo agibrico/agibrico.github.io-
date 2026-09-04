@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "QR.ODE01"
+    namespace = "qr.ode01"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,10 +16,11 @@ android {
 
     defaultConfig {
         applicationId = "QR.ODE01"
-        minSdk = 21
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 23
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     buildTypes {

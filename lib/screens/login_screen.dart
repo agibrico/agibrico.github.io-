@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
               border: Border.all(color: const Color(0xFFE2E8F0)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -76,13 +76,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.3),
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.3),
                           blurRadius: 15,
                           offset: const Offset(0, 8),
                         ),
                       ],
                     ),
-                    child: const Icon(LucideIcons.qrCode, color: Colors.white, size: 40),
+                    child: Icon(LucideIcons.qr_code, color: Colors.white, size: 40),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.alertCircle, color: Color(0xFFB91C1C), size: 16),
+                        Icon(LucideIcons.circle_alert, color: Color(0xFFB91C1C), size: 16),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: 'Email Administrateur',
                     labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
                     hintText: 'admin@example.com',
-                    prefixIcon: const Icon(LucideIcons.mail, size: 18),
+                    prefixIcon: Icon(LucideIcons.mail, size: 18),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Mot de passe',
                     labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
-                    prefixIcon: const Icon(LucideIcons.lock, size: 18),
+                    prefixIcon: Icon(LucideIcons.lock, size: 18),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),

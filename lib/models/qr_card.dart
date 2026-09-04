@@ -26,72 +26,6 @@ enum AccessMode {
   AUTHENTICATED_ONLY
 }
 
-class OpeningHourDay {
-  final String day;
-  final bool isOpen;
-  final String openTime;
-  final String closeTime;
-
-  OpeningHourDay({
-    required this.day,
-    required this.isOpen,
-    required this.openTime,
-    required this.closeTime,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'day': day,
-    'isOpen': isOpen,
-    'openTime': openTime,
-    'closeTime': closeTime,
-  };
-
-  factory OpeningHourDay.fromJson(Map<String, dynamic> json) => OpeningHourDay(
-    day: json['day'] ?? '',
-    isOpen: json['isOpen'] ?? false,
-    openTime: json['openTime'] ?? '08:00',
-    closeTime: json['closeTime'] ?? '18:00',
-  );
-}
-
-class SocialLink {
-  final String id;
-  final String platform;
-  final String url;
-  final String label;
-
-  SocialLink({required this.id, required this.platform, required this.url, required this.label});
-
-  Map<String, dynamic> toJson() => {'id': id, 'platform': platform, 'url': url, 'label': label};
-  factory SocialLink.fromJson(Map<String, dynamic> json) => SocialLink(
-    id: json['id'] ?? '',
-    platform: json['platform'] ?? 'website',
-    url: json['url'] ?? '',
-    label: json['label'] ?? '',
-  );
-}
-
-class MenuItem {
-  final String id;
-  final String name;
-  final String description;
-  final String price;
-  final String category;
-  final bool isAvailable;
-
-  MenuItem({required this.id, required this.name, required this.description, required this.price, required this.category, required this.isAvailable});
-
-  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'description': description, 'price': price, 'category': category, 'isAvailable': isAvailable};
-  factory MenuItem.fromJson(Map<String, dynamic> json) => MenuItem(
-    id: json['id'] ?? '',
-    name: json['name'] ?? '',
-    description: json['description'] ?? '',
-    price: json['price'] ?? '',
-    category: json['category'] ?? 'Plats',
-    isAvailable: json['isAvailable'] ?? true,
-  );
-}
-
 class QRCard {
   final String id;
   final String publicId;
@@ -105,7 +39,10 @@ class QRCard {
   final DateTime updatedAt;
   final DateTime? publishedAt;
   final DateTime? expiresAt;
-  final Map<String, dynamic> content;
+  
+  // Data separation for security
+  final Map<String, dynamic> content; // Full data (Private)
+  final Map<String, dynamic> publicContent; // Filtered data (Public)
   final Map<String, dynamic> settings;
 
   QRCard({
@@ -122,32 +59,19 @@ class QRCard {
     this.publishedAt,
     this.expiresAt,
     required this.content,
+    this.publicContent = const {},
     this.settings = const {},
   });
 
   factory QRCard.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     
-    // Support for legacy type strings from React app
-    String typeStr = data['type'] ?? 'BUSINESS_CARD';
-    if (typeStr == 'vcard') typeStr = 'BUSINESS_CARD';
-    if (typeStr == 'business') typeStr = 'COMPANY';
-    if (typeStr == 'social') typeStr = 'SOCIAL';
-    if (typeStr == 'location') typeStr = 'LOCATION';
-    if (typeStr == 'shop') typeStr = 'SHOP';
-    if (typeStr == 'book') typeStr = 'BOOK';
-    if (typeStr == 'invitation' || typeStr == 'event') typeStr = 'EVENT';
-    if (typeStr == 'product' || typeStr == 'menu') typeStr = 'PRODUCT';
-
-    String statusStr = data['status'] ?? 'DRAFT';
-    if (statusStr == 'active') statusStr = 'PUBLISHED';
-
     return QRCard(
       id: doc.id,
       publicId: data['publicId'] ?? doc.id,
       title: data['title'] ?? '',
-      type: QRType.values.firstWhere((e) => e.name == typeStr, orElse: () => QRType.BUSINESS_CARD),
-      status: CardStatus.values.firstWhere((e) => e.name == statusStr, orElse: () => CardStatus.DRAFT),
+      type: QRType.values.firstWhere((e) => e.name == data['type'], orElse: () => QRType.BUSINESS_CARD),
+      status: CardStatus.values.firstWhere((e) => e.name == data['status'], orElse: () => CardStatus.DRAFT),
       accessMode: AccessMode.values.firstWhere((e) => e.name == (data['accessMode'] ?? 'PUBLIC'), orElse: () => AccessMode.PUBLIC),
       accessPin: data['accessPin'],
       scanCount: data['scanCount'] ?? 0,
@@ -155,7 +79,8 @@ class QRCard {
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       publishedAt: (data['publishedAt'] as Timestamp?)?.toDate(),
       expiresAt: (data['expiresAt'] as Timestamp?)?.toDate(),
-      content: data['content'] ?? data, // Support flat structure from React
+      content: data['content'] ?? {},
+      publicContent: data['publicContent'] ?? {},
       settings: data['settings'] ?? {},
     );
   }
@@ -174,6 +99,7 @@ class QRCard {
       'publishedAt': publishedAt != null ? Timestamp.fromDate(publishedAt!) : null,
       'expiresAt': expiresAt != null ? Timestamp.fromDate(expiresAt!) : null,
       'content': content,
+      'publicContent': publicContent,
       'settings': settings,
     };
   }

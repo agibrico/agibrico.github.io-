@@ -48,7 +48,8 @@ class CustomField {
   bool isPublic;
   int order;
   List<CustomFieldOption>? options;
-  String? currency; // For MONEY type
+  String? currency; // For MONEY
+  double? ratingMax; // For RATING
 
   CustomField({
     required this.id,
@@ -63,6 +64,7 @@ class CustomField {
     required this.order,
     this.options,
     this.currency,
+    this.ratingMax,
   });
 
   Map<String, dynamic> toMap() {
@@ -79,6 +81,7 @@ class CustomField {
       'order': order,
       'options': options?.map((e) => e.toMap()).toList(),
       'currency': currency,
+      'ratingMax': ratingMax,
     };
   }
 
@@ -96,6 +99,7 @@ class CustomField {
       order: map['order'] ?? 0,
       options: (map['options'] as List?)?.map((e) => CustomFieldOption.fromMap(e)).toList(),
       currency: map['currency'],
+      ratingMax: map['ratingMax']?.toDouble(),
     );
   }
 }

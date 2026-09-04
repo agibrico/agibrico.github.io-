@@ -50,6 +50,7 @@ import {
 import { generateSecurePublicId, getPublicQRUrl, saveOrUpdateQRCode } from '../../utils/storage';
 import { QRScannabilityCheck } from '../preview/QRScannabilityCheck';
 import { generateVCardString } from '../../utils/vcard';
+import { OpeningHoursEditor } from './OpeningHoursEditor';
 
 interface QREditorProps {
   initialItem?: QRCodeItem | null;
@@ -60,12 +61,12 @@ interface QREditorProps {
 }
 
 const DEFAULT_DAYS: OpeningHourDay[] = [
-  { day: 'Lundi', isOpen: true, openTime: '09:00', closeTime: '18:00' },
-  { day: 'Mardi', isOpen: true, openTime: '09:00', closeTime: '18:00' },
-  { day: 'Mercredi', isOpen: true, openTime: '09:00', closeTime: '18:00' },
-  { day: 'Jeudi', isOpen: true, openTime: '09:00', closeTime: '18:00' },
-  { day: 'Vendredi', isOpen: true, openTime: '09:00', closeTime: '18:00' },
-  { day: 'Samedi', isOpen: false, openTime: '10:00', closeTime: '16:00' },
+  { day: 'Lundi', isOpen: true, openTime: '08:00', closeTime: '18:00' },
+  { day: 'Mardi', isOpen: true, openTime: '08:00', closeTime: '18:00' },
+  { day: 'Mercredi', isOpen: true, openTime: '08:00', closeTime: '18:00' },
+  { day: 'Jeudi', isOpen: true, openTime: '08:00', closeTime: '18:00' },
+  { day: 'Vendredi', isOpen: true, openTime: '08:00', closeTime: '18:00' },
+  { day: 'Samedi', isOpen: true, openTime: '09:00', closeTime: '16:00' },
   { day: 'Dimanche', isOpen: false, openTime: '10:00', closeTime: '14:00' },
 ];
 
@@ -1242,6 +1243,16 @@ export const QREditor: React.FC<QREditorProps> = ({
                         className="w-full bg-white border border-emerald-200 rounded-2xl px-4 py-3 text-xs font-medium text-slate-800 focus:border-emerald-600 focus:outline-none resize-none leading-relaxed"
                       />
                     </div>
+
+                    <div className="pt-4 border-t border-emerald-100">
+                      <OpeningHoursEditor
+                        hours={content.shopOpeningHours || content.openingHours || DEFAULT_DAYS}
+                        onChange={(newHours) => {
+                          updateContentField('shopOpeningHours', newHours);
+                          updateContentField('openingHours', newHours);
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -1802,57 +1813,12 @@ export const QREditor: React.FC<QREditorProps> = ({
                   </div>
                 </div>
 
-                {/* Opening Hours Section */}
-                <div className="space-y-4 pt-3 border-t border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <h5 className="text-xs font-bold text-slate-800 flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-emerald-600" />
-                      <span>Horaires d'Ouverture</span>
-                    </h5>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-2.5">
-                    {(content.openingHours || DEFAULT_DAYS).map((oh, idx) => (
-                      <div key={oh.day} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                        <div className="w-20">
-                          <span className="text-[11px] font-bold text-slate-700">{oh.day}</span>
-                        </div>
-
-                        <div className="flex items-center gap-2 flex-1">
-                          <label className="flex items-center gap-1.5 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={oh.isOpen}
-                              onChange={e => updateOpeningHour(idx, 'isOpen', e.target.checked)}
-                              className="w-4 h-4 accent-blue-600"
-                            />
-                            <span className="text-[10px] font-bold uppercase text-slate-500">Ouvert</span>
-                          </label>
-
-                          {oh.isOpen && (
-                            <div className="flex items-center gap-2 ml-auto">
-                              <input
-                                type="time"
-                                value={oh.openTime}
-                                onChange={e => updateOpeningHour(idx, 'openTime', e.target.value)}
-                                className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-mono"
-                              />
-                              <span className="text-slate-400">à</span>
-                              <input
-                                type="time"
-                                value={oh.closeTime}
-                                onChange={e => updateOpeningHour(idx, 'closeTime', e.target.value)}
-                                className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-mono"
-                              />
-                            </div>
-                          )}
-                          {!oh.isOpen && (
-                            <span className="ml-auto text-[10px] font-bold text-slate-400 italic">Fermé</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                {/* Opening Hours Section in Business Tab */}
+                <div className="pt-3 border-t border-slate-100">
+                  <OpeningHoursEditor
+                    hours={content.openingHours || DEFAULT_DAYS}
+                    onChange={(newHours) => updateContentField('openingHours', newHours)}
+                  />
                 </div>
 
                 {/* Custom Fields */}

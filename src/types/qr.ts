@@ -215,18 +215,22 @@ export interface QRContent {
 
   // --- LOCALISATION / ITINÉRAIRE SPECIFIC ---
   locationPlaceName?: string;
-  locationShopName?: string;
-  locationAddress?: string;
+  locationPlaceType?: string;
+  locationPhotoUrl?: string;
+  locationCountry?: string;
   locationCity?: string;
   locationCommune?: string;
   locationNeighborhood?: string;
+  locationAddress?: string;
   locationLatitude?: number;
   locationLongitude?: number;
-  locationGoogleMapsUrl?: string;
-  locationWazeUrl?: string;
+  locationLandmark?: string;
+  locationAccessDescription?: string;
   locationPhone?: string;
   locationWhatsapp?: string;
-  locationPhotoUrl?: string;
+  locationOpeningHoursText?: string;
+  locationGoogleMapsUrl?: string;
+  locationWazeUrl?: string;
 
   // --- MENU SPECIFIC ---
   menuCategories?: Array<{

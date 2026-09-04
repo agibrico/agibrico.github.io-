@@ -40,7 +40,9 @@ import {
   Instagram,
   Truck,
   Wallet,
-  Package
+  Package,
+  MapPinned,
+  LocateFixed
 } from 'lucide-react';
 import { 
   QRCodeItem, 
@@ -860,6 +862,246 @@ export const QREditor: React.FC<QREditorProps> = ({
                   </div>
                 )}
 
+                {/* SPECIALIZED FORM SECTION FOR LOCATION / GPS */}
+                {type === 'location' && (
+                  <div className="space-y-6 pt-4 border-t border-blue-100 bg-blue-50/40 p-5 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                          <MapPinned className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900">Localisation & GPS</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Navigation Directe</span>
+                    </div>
+
+                    {/* Photo du lieu */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-2xl bg-white/60 space-y-3">
+                      {content.locationPhotoUrl ? (
+                        <div className="relative group">
+                          <img src={content.locationPhotoUrl} className="w-full max-h-48 object-cover rounded-lg shadow-md" />
+                          <button
+                            onClick={() => updateContentField('locationPhotoUrl', '')}
+                            className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Photo du lieu (Facultatif)</p>
+                          <label className="px-4 py-1.5 bg-blue-600 text-white text-[10px] font-bold rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
+                            Choisir une photo
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => updateContentField('locationPhotoUrl', ev.target?.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Nom du lieu *</label>
+                        <input
+                          type="text"
+                          required
+                          value={content.locationPlaceName || ''}
+                          onChange={e => updateContentField('locationPlaceName', e.target.value)}
+                          placeholder="Ex: Siège AGB, Entrepôt Principal..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Type de lieu</label>
+                        <input
+                          type="text"
+                          value={content.locationPlaceType || ''}
+                          onChange={e => updateContentField('locationPlaceType', e.target.value)}
+                          placeholder="Bureaux, Magasin, Dépôt..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Pays</label>
+                        <input
+                          type="text"
+                          value={content.locationCountry || 'Côte d\'Ivoire'}
+                          onChange={e => updateContentField('locationCountry', e.target.value)}
+                          placeholder="Côte d'Ivoire"
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Ville (Recommandé)</label>
+                        <input
+                          type="text"
+                          value={content.locationCity || ''}
+                          onChange={e => updateContentField('locationCity', e.target.value)}
+                          placeholder="Abidjan, Yamoussoukro..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Commune / Ville</label>
+                        <input
+                          type="text"
+                          value={content.locationCommune || ''}
+                          onChange={e => updateContentField('locationCommune', e.target.value)}
+                          placeholder="Cocody, Marcory..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Quartier</label>
+                        <input
+                          type="text"
+                          value={content.locationNeighborhood || ''}
+                          onChange={e => updateContentField('locationNeighborhood', e.target.value)}
+                          placeholder="Riviera 3, Angré..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Adresse exacte</label>
+                      <input
+                        type="text"
+                        value={content.locationAddress || ''}
+                        onChange={e => updateContentField('locationAddress', e.target.value)}
+                        placeholder="Rue, lot, porte..."
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Section GPS Automatique */}
+                    <div className="p-5 bg-blue-600 rounded-3xl text-white space-y-4 shadow-lg shadow-blue-900/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <LocateFixed className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Coordonnées GPS</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (navigator.geolocation) {
+                              navigator.geolocation.getCurrentPosition((pos) => {
+                                updateContentField('locationLatitude', pos.coords.latitude);
+                                updateContentField('locationLongitude', pos.coords.longitude);
+                              }, (err) => alert("Impossible de récupérer la position : " + err.message));
+                            } else {
+                              alert("La géolocalisation n'est pas supportée par votre appareil.");
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-white text-blue-600 text-[10px] font-black uppercase rounded-full hover:bg-blue-50 transition-colors"
+                        >
+                          📍 Utiliser ma position actuelle
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[9px] font-bold text-blue-100 uppercase mb-1">Latitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={content.locationLatitude || ''}
+                            onChange={e => updateContentField('locationLatitude', parseFloat(e.target.value))}
+                            className="w-full bg-blue-700/50 border border-blue-400/30 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-blue-100 uppercase mb-1">Longitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={content.locationLongitude || ''}
+                            onChange={e => updateContentField('locationLongitude', parseFloat(e.target.value))}
+                            className="w-full bg-blue-700/50 border border-blue-400/30 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Point de repère</label>
+                        <input
+                          type="text"
+                          value={content.locationLandmark || ''}
+                          onChange={e => updateContentField('locationLandmark', e.target.value)}
+                          placeholder="Près de la pharmacie, en face de..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Horaires (Libre)</label>
+                        <input
+                          type="text"
+                          value={content.locationOpeningHoursText || ''}
+                          onChange={e => updateContentField('locationOpeningHoursText', e.target.value)}
+                          placeholder="Ex: Lun-Ven 8h-18h"
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Description d'accès</label>
+                      <textarea
+                        rows={2}
+                        value={content.locationAccessDescription || ''}
+                        onChange={e => updateContentField('locationAccessDescription', e.target.value)}
+                        placeholder="Détails pour arriver facilement (code porte, étage, etc.)"
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none resize-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Téléphone</label>
+                        <input
+                          type="tel"
+                          value={content.locationPhone || ''}
+                          onChange={e => updateContentField('locationPhone', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">WhatsApp</label>
+                        <input
+                          type="tel"
+                          value={content.locationWhatsapp || ''}
+                          onChange={e => updateContentField('locationWhatsapp', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* SPECIALIZED FORM SECTION FOR INVITATION */}
                 {type === 'invitation' && (
                   <div className="space-y-6 pt-4 border-t border-amber-100 bg-amber-50/40 p-5 rounded-3xl">
@@ -1133,6 +1375,246 @@ export const QREditor: React.FC<QREditorProps> = ({
                   </div>
                 )}
 
+                {/* SPECIALIZED FORM SECTION FOR LOCATION / GPS */}
+                {type === 'location' && (
+                  <div className="space-y-6 pt-4 border-t border-blue-100 bg-blue-50/40 p-5 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                          <MapPinned className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900">Localisation & GPS</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Navigation Directe</span>
+                    </div>
+
+                    {/* Photo du lieu */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-2xl bg-white/60 space-y-3">
+                      {content.locationPhotoUrl ? (
+                        <div className="relative group">
+                          <img src={content.locationPhotoUrl} className="w-full max-h-48 object-cover rounded-lg shadow-md" />
+                          <button
+                            onClick={() => updateContentField('locationPhotoUrl', '')}
+                            className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Photo du lieu (Facultatif)</p>
+                          <label className="px-4 py-1.5 bg-blue-600 text-white text-[10px] font-bold rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
+                            Choisir une photo
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => updateContentField('locationPhotoUrl', ev.target?.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Nom du lieu *</label>
+                        <input
+                          type="text"
+                          required
+                          value={content.locationPlaceName || ''}
+                          onChange={e => updateContentField('locationPlaceName', e.target.value)}
+                          placeholder="Ex: Siège AGB, Entrepôt Principal..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Type de lieu</label>
+                        <input
+                          type="text"
+                          value={content.locationPlaceType || ''}
+                          onChange={e => updateContentField('locationPlaceType', e.target.value)}
+                          placeholder="Bureaux, Magasin, Dépôt..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Pays</label>
+                        <input
+                          type="text"
+                          value={content.locationCountry || 'Côte d\'Ivoire'}
+                          onChange={e => updateContentField('locationCountry', e.target.value)}
+                          placeholder="Côte d'Ivoire"
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Ville (Recommandé)</label>
+                        <input
+                          type="text"
+                          value={content.locationCity || ''}
+                          onChange={e => updateContentField('locationCity', e.target.value)}
+                          placeholder="Abidjan, Yamoussoukro..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Commune / Ville</label>
+                        <input
+                          type="text"
+                          value={content.locationCommune || ''}
+                          onChange={e => updateContentField('locationCommune', e.target.value)}
+                          placeholder="Cocody, Marcory..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Quartier</label>
+                        <input
+                          type="text"
+                          value={content.locationNeighborhood || ''}
+                          onChange={e => updateContentField('locationNeighborhood', e.target.value)}
+                          placeholder="Riviera 3, Angré..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Adresse exacte</label>
+                      <input
+                        type="text"
+                        value={content.locationAddress || ''}
+                        onChange={e => updateContentField('locationAddress', e.target.value)}
+                        placeholder="Rue, lot, porte..."
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Section GPS Automatique */}
+                    <div className="p-5 bg-blue-600 rounded-3xl text-white space-y-4 shadow-lg shadow-blue-900/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <LocateFixed className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Coordonnées GPS</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (navigator.geolocation) {
+                              navigator.geolocation.getCurrentPosition((pos) => {
+                                updateContentField('locationLatitude', pos.coords.latitude);
+                                updateContentField('locationLongitude', pos.coords.longitude);
+                              }, (err) => alert("Impossible de récupérer la position : " + err.message));
+                            } else {
+                              alert("La géolocalisation n'est pas supportée par votre appareil.");
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-white text-blue-600 text-[10px] font-black uppercase rounded-full hover:bg-blue-50 transition-colors"
+                        >
+                          📍 Utiliser ma position actuelle
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[9px] font-bold text-blue-100 uppercase mb-1">Latitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={content.locationLatitude || ''}
+                            onChange={e => updateContentField('locationLatitude', parseFloat(e.target.value))}
+                            className="w-full bg-blue-700/50 border border-blue-400/30 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-blue-100 uppercase mb-1">Longitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={content.locationLongitude || ''}
+                            onChange={e => updateContentField('locationLongitude', parseFloat(e.target.value))}
+                            className="w-full bg-blue-700/50 border border-blue-400/30 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Point de repère</label>
+                        <input
+                          type="text"
+                          value={content.locationLandmark || ''}
+                          onChange={e => updateContentField('locationLandmark', e.target.value)}
+                          placeholder="Près de la pharmacie, en face de..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Horaires (Libre)</label>
+                        <input
+                          type="text"
+                          value={content.locationOpeningHoursText || ''}
+                          onChange={e => updateContentField('locationOpeningHoursText', e.target.value)}
+                          placeholder="Ex: Lun-Ven 8h-18h"
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Description d'accès</label>
+                      <textarea
+                        rows={2}
+                        value={content.locationAccessDescription || ''}
+                        onChange={e => updateContentField('locationAccessDescription', e.target.value)}
+                        placeholder="Détails pour arriver facilement (code porte, étage, etc.)"
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none resize-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Téléphone</label>
+                        <input
+                          type="tel"
+                          value={content.locationPhone || ''}
+                          onChange={e => updateContentField('locationPhone', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">WhatsApp</label>
+                        <input
+                          type="tel"
+                          value={content.locationWhatsapp || ''}
+                          onChange={e => updateContentField('locationWhatsapp', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* SPECIALIZED FORM SECTION FOR SHOP / COMMERCE */}
                 {type === 'shop' && (
                   <div className="space-y-6 pt-4 border-t border-emerald-100 bg-emerald-50/40 p-5 rounded-3xl">
@@ -1375,6 +1857,246 @@ export const QREditor: React.FC<QREditorProps> = ({
                           updateContentField('openingHours', newHours);
                         }}
                       />
+                    </div>
+                  </div>
+                )}
+
+                {/* SPECIALIZED FORM SECTION FOR LOCATION / GPS */}
+                {type === 'location' && (
+                  <div className="space-y-6 pt-4 border-t border-blue-100 bg-blue-50/40 p-5 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                          <MapPinned className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900">Localisation & GPS</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Navigation Directe</span>
+                    </div>
+
+                    {/* Photo du lieu */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-2xl bg-white/60 space-y-3">
+                      {content.locationPhotoUrl ? (
+                        <div className="relative group">
+                          <img src={content.locationPhotoUrl} className="w-full max-h-48 object-cover rounded-lg shadow-md" />
+                          <button
+                            onClick={() => updateContentField('locationPhotoUrl', '')}
+                            className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Photo du lieu (Facultatif)</p>
+                          <label className="px-4 py-1.5 bg-blue-600 text-white text-[10px] font-bold rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
+                            Choisir une photo
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => updateContentField('locationPhotoUrl', ev.target?.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Nom du lieu *</label>
+                        <input
+                          type="text"
+                          required
+                          value={content.locationPlaceName || ''}
+                          onChange={e => updateContentField('locationPlaceName', e.target.value)}
+                          placeholder="Ex: Siège AGB, Entrepôt Principal..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Type de lieu</label>
+                        <input
+                          type="text"
+                          value={content.locationPlaceType || ''}
+                          onChange={e => updateContentField('locationPlaceType', e.target.value)}
+                          placeholder="Bureaux, Magasin, Dépôt..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Pays</label>
+                        <input
+                          type="text"
+                          value={content.locationCountry || 'Côte d\'Ivoire'}
+                          onChange={e => updateContentField('locationCountry', e.target.value)}
+                          placeholder="Côte d'Ivoire"
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Ville (Recommandé)</label>
+                        <input
+                          type="text"
+                          value={content.locationCity || ''}
+                          onChange={e => updateContentField('locationCity', e.target.value)}
+                          placeholder="Abidjan, Yamoussoukro..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Commune / Ville</label>
+                        <input
+                          type="text"
+                          value={content.locationCommune || ''}
+                          onChange={e => updateContentField('locationCommune', e.target.value)}
+                          placeholder="Cocody, Marcory..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Quartier</label>
+                        <input
+                          type="text"
+                          value={content.locationNeighborhood || ''}
+                          onChange={e => updateContentField('locationNeighborhood', e.target.value)}
+                          placeholder="Riviera 3, Angré..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Adresse exacte</label>
+                      <input
+                        type="text"
+                        value={content.locationAddress || ''}
+                        onChange={e => updateContentField('locationAddress', e.target.value)}
+                        placeholder="Rue, lot, porte..."
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Section GPS Automatique */}
+                    <div className="p-5 bg-blue-600 rounded-3xl text-white space-y-4 shadow-lg shadow-blue-900/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <LocateFixed className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Coordonnées GPS</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (navigator.geolocation) {
+                              navigator.geolocation.getCurrentPosition((pos) => {
+                                updateContentField('locationLatitude', pos.coords.latitude);
+                                updateContentField('locationLongitude', pos.coords.longitude);
+                              }, (err) => alert("Impossible de récupérer la position : " + err.message));
+                            } else {
+                              alert("La géolocalisation n'est pas supportée par votre appareil.");
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-white text-blue-600 text-[10px] font-black uppercase rounded-full hover:bg-blue-50 transition-colors"
+                        >
+                          📍 Utiliser ma position actuelle
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[9px] font-bold text-blue-100 uppercase mb-1">Latitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={content.locationLatitude || ''}
+                            onChange={e => updateContentField('locationLatitude', parseFloat(e.target.value))}
+                            className="w-full bg-blue-700/50 border border-blue-400/30 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-blue-100 uppercase mb-1">Longitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={content.locationLongitude || ''}
+                            onChange={e => updateContentField('locationLongitude', parseFloat(e.target.value))}
+                            className="w-full bg-blue-700/50 border border-blue-400/30 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Point de repère</label>
+                        <input
+                          type="text"
+                          value={content.locationLandmark || ''}
+                          onChange={e => updateContentField('locationLandmark', e.target.value)}
+                          placeholder="Près de la pharmacie, en face de..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Horaires (Libre)</label>
+                        <input
+                          type="text"
+                          value={content.locationOpeningHoursText || ''}
+                          onChange={e => updateContentField('locationOpeningHoursText', e.target.value)}
+                          placeholder="Ex: Lun-Ven 8h-18h"
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Description d'accès</label>
+                      <textarea
+                        rows={2}
+                        value={content.locationAccessDescription || ''}
+                        onChange={e => updateContentField('locationAccessDescription', e.target.value)}
+                        placeholder="Détails pour arriver facilement (code porte, étage, etc.)"
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none resize-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Téléphone</label>
+                        <input
+                          type="tel"
+                          value={content.locationPhone || ''}
+                          onChange={e => updateContentField('locationPhone', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">WhatsApp</label>
+                        <input
+                          type="tel"
+                          value={content.locationWhatsapp || ''}
+                          onChange={e => updateContentField('locationWhatsapp', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1694,6 +2416,246 @@ export const QREditor: React.FC<QREditorProps> = ({
                       <p className="text-[10px] text-slate-400">
                         Une taille entre 20% et 24% garantit une scannabilité optimale sur tous les smartphones.
                       </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* SPECIALIZED FORM SECTION FOR LOCATION / GPS */}
+                {type === 'location' && (
+                  <div className="space-y-6 pt-4 border-t border-blue-100 bg-blue-50/40 p-5 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                          <MapPinned className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900">Localisation & GPS</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Navigation Directe</span>
+                    </div>
+
+                    {/* Photo du lieu */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-blue-200 rounded-2xl bg-white/60 space-y-3">
+                      {content.locationPhotoUrl ? (
+                        <div className="relative group">
+                          <img src={content.locationPhotoUrl} className="w-full max-h-48 object-cover rounded-lg shadow-md" />
+                          <button
+                            onClick={() => updateContentField('locationPhotoUrl', '')}
+                            className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Photo du lieu (Facultatif)</p>
+                          <label className="px-4 py-1.5 bg-blue-600 text-white text-[10px] font-bold rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
+                            Choisir une photo
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => updateContentField('locationPhotoUrl', ev.target?.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Nom du lieu *</label>
+                        <input
+                          type="text"
+                          required
+                          value={content.locationPlaceName || ''}
+                          onChange={e => updateContentField('locationPlaceName', e.target.value)}
+                          placeholder="Ex: Siège AGB, Entrepôt Principal..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Type de lieu</label>
+                        <input
+                          type="text"
+                          value={content.locationPlaceType || ''}
+                          onChange={e => updateContentField('locationPlaceType', e.target.value)}
+                          placeholder="Bureaux, Magasin, Dépôt..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Pays</label>
+                        <input
+                          type="text"
+                          value={content.locationCountry || 'Côte d\'Ivoire'}
+                          onChange={e => updateContentField('locationCountry', e.target.value)}
+                          placeholder="Côte d'Ivoire"
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Ville (Recommandé)</label>
+                        <input
+                          type="text"
+                          value={content.locationCity || ''}
+                          onChange={e => updateContentField('locationCity', e.target.value)}
+                          placeholder="Abidjan, Yamoussoukro..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Commune / Ville</label>
+                        <input
+                          type="text"
+                          value={content.locationCommune || ''}
+                          onChange={e => updateContentField('locationCommune', e.target.value)}
+                          placeholder="Cocody, Marcory..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Quartier</label>
+                        <input
+                          type="text"
+                          value={content.locationNeighborhood || ''}
+                          onChange={e => updateContentField('locationNeighborhood', e.target.value)}
+                          placeholder="Riviera 3, Angré..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Adresse exacte</label>
+                      <input
+                        type="text"
+                        value={content.locationAddress || ''}
+                        onChange={e => updateContentField('locationAddress', e.target.value)}
+                        placeholder="Rue, lot, porte..."
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Section GPS Automatique */}
+                    <div className="p-5 bg-blue-600 rounded-3xl text-white space-y-4 shadow-lg shadow-blue-900/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <LocateFixed className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Coordonnées GPS</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (navigator.geolocation) {
+                              navigator.geolocation.getCurrentPosition((pos) => {
+                                updateContentField('locationLatitude', pos.coords.latitude);
+                                updateContentField('locationLongitude', pos.coords.longitude);
+                              }, (err) => alert("Impossible de récupérer la position : " + err.message));
+                            } else {
+                              alert("La géolocalisation n'est pas supportée par votre appareil.");
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-white text-blue-600 text-[10px] font-black uppercase rounded-full hover:bg-blue-50 transition-colors"
+                        >
+                          📍 Utiliser ma position actuelle
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[9px] font-bold text-blue-100 uppercase mb-1">Latitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={content.locationLatitude || ''}
+                            onChange={e => updateContentField('locationLatitude', parseFloat(e.target.value))}
+                            className="w-full bg-blue-700/50 border border-blue-400/30 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-blue-100 uppercase mb-1">Longitude</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={content.locationLongitude || ''}
+                            onChange={e => updateContentField('locationLongitude', parseFloat(e.target.value))}
+                            className="w-full bg-blue-700/50 border border-blue-400/30 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Point de repère</label>
+                        <input
+                          type="text"
+                          value={content.locationLandmark || ''}
+                          onChange={e => updateContentField('locationLandmark', e.target.value)}
+                          placeholder="Près de la pharmacie, en face de..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Horaires (Libre)</label>
+                        <input
+                          type="text"
+                          value={content.locationOpeningHoursText || ''}
+                          onChange={e => updateContentField('locationOpeningHoursText', e.target.value)}
+                          placeholder="Ex: Lun-Ven 8h-18h"
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Description d'accès</label>
+                      <textarea
+                        rows={2}
+                        value={content.locationAccessDescription || ''}
+                        onChange={e => updateContentField('locationAccessDescription', e.target.value)}
+                        placeholder="Détails pour arriver facilement (code porte, étage, etc.)"
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none resize-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">Téléphone</label>
+                        <input
+                          type="tel"
+                          value={content.locationPhone || ''}
+                          onChange={e => updateContentField('locationPhone', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1.5">WhatsApp</label>
+                        <input
+                          type="tel"
+                          value={content.locationWhatsapp || ''}
+                          onChange={e => updateContentField('locationWhatsapp', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}

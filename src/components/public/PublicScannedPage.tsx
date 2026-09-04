@@ -895,44 +895,100 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <div className="w-full max-w-md mx-auto px-4 py-2 flex-1 space-y-4">
           <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center mx-auto">
-              <MapPin className="w-8 h-8" />
-            </div>
+            {/* Photo du lieu */}
+            {content.locationPhotoUrl ? (
+              <div className="w-full h-48 rounded-2xl overflow-hidden shadow-lg border border-slate-700 bg-slate-800">
+                <img src={content.locationPhotoUrl} alt={locName} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center mx-auto">
+                <MapPin className="w-8 h-8" />
+              </div>
+            )}
 
             <div className="space-y-1">
               <h1 className="text-xl font-black text-white">{locName}</h1>
+              {content.locationPlaceType && (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">
+                  {content.locationPlaceType}
+                </span>
+              )}
               {content.locationAddress && (
-                <p className="text-xs text-slate-300 font-medium">{content.locationAddress}</p>
+                <p className="text-xs text-slate-300 font-medium pt-2">{content.locationAddress}</p>
               )}
               <p className="text-[11px] text-slate-400">
-                {[content.locationCommune, content.locationCity].filter(Boolean).join(', ')}
+                {[content.locationNeighborhood, content.locationCommune, content.locationCity, content.locationCountry].filter(Boolean).join(', ')}
               </p>
+              {content.locationLandmark && (
+                <p className="text-[10px] font-bold text-amber-400 flex items-center justify-center gap-1">
+                  <MapPinned className="w-3 h-3" />
+                  <span>Repère : {content.locationLandmark}</span>
+                </p>
+              )}
             </div>
 
-            {/* Direct Navigation Buttons: Google Maps & Waze */}
-            <div className="space-y-2 pt-2">
+            {/* Quick Actions Grid for Location */}
+            <div className="grid grid-cols-2 gap-2 pt-2">
               <a
-                href={content.locationGoogleMapsUrl || `https://maps.google.com/?q=${content.locationLatitude || 5.3599},${content.locationLongitude || -3.9870}`}
+                href={content.locationGoogleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${content.locationLatitude},${content.locationLongitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all"
+                className="flex flex-col items-center justify-center gap-1.5 p-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[10px] font-bold shadow-lg shadow-blue-900/30 transition-all active:scale-95"
               >
-                <Navigation className="w-4 h-4" />
-                <span>Ouvrir dans Google Maps</span>
+                <Globe className="w-5 h-5" />
+                <span>Voir la carte</span>
               </a>
 
-              {content.locationWazeUrl && (
+              <a
+                href={content.locationWazeUrl || `https://waze.com/ul?ll=${content.locationLatitude},${content.locationLongitude}&navigate=yes`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center justify-center gap-1.5 p-3.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-2xl text-[10px] font-bold shadow-lg shadow-cyan-900/30 transition-all active:scale-95"
+              >
+                <Navigation className="w-5 h-5" />
+                <span>Démarrer l'itinéraire</span>
+              </a>
+
+              {content.locationPhone && (
                 <a
-                  href={content.locationWazeUrl}
+                  href={`tel:${content.locationPhone.replace(/\s+/g, '')}`}
+                  className="flex flex-col items-center justify-center gap-1.5 p-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-[10px] font-bold border border-slate-700 transition-colors"
+                >
+                  <Phone className="w-5 h-5 text-emerald-400" />
+                  <span>Appeler</span>
+                </a>
+              )}
+
+              {content.locationWhatsapp && (
+                <a
+                  href={`https://wa.me/${content.locationWhatsapp.replace(/[^\d]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-2xl border border-slate-700 transition-all"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-[10px] font-bold border border-slate-700 transition-colors"
                 >
-                  <Navigation className="w-4 h-4" />
-                  <span>Ouvrir dans Waze</span>
+                  <MessageSquare className="w-5 h-5 text-emerald-400" />
+                  <span>WhatsApp</span>
                 </a>
               )}
             </div>
+
+            {/* Description & Horaires */}
+            {(content.locationAccessDescription || content.locationOpeningHoursText) && (
+              <div className="space-y-2.5">
+                {content.locationOpeningHoursText && (
+                  <div className="p-3 bg-slate-800/60 border border-slate-700/40 rounded-2xl text-left flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase text-slate-400">Horaires</span>
+                    <span className="text-xs font-bold text-white">{content.locationOpeningHoursText}</span>
+                  </div>
+                )}
+                {content.locationAccessDescription && (
+                  <div className="p-4 bg-slate-800/60 border border-slate-700/40 rounded-2xl text-left">
+                    <h5 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Instructions d'accès</h5>
+                    <p className="text-xs text-slate-200 leading-relaxed">{content.locationAccessDescription}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Other Information for Location */}
             {content.otherInformation && (
@@ -941,22 +997,6 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 {content.otherInformation}
               </div>
             )}
-
-            {/* Call / WhatsApp contact */}
-            <div className="grid grid-cols-2 gap-2 w-full pt-1">
-              {content.locationPhone && (
-                <a href={`tel:${content.locationPhone.replace(/\s+/g, '')}`} className="flex items-center justify-center gap-2 p-3 bg-slate-800 text-slate-200 rounded-2xl text-xs font-semibold border border-slate-700">
-                  <Phone className="w-4 h-4 text-emerald-400" />
-                  <span>Appeler</span>
-                </a>
-              )}
-              {content.locationWhatsapp && (
-                <a href={`https://wa.me/${content.locationWhatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 p-3 bg-slate-800 text-slate-200 rounded-2xl text-xs font-semibold border border-slate-700">
-                  <MessageSquare className="w-4 h-4 text-emerald-400" />
-                  <span>WhatsApp</span>
-                </a>
-              )}
-            </div>
           </div>
         </div>
 

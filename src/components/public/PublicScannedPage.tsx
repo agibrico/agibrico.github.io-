@@ -172,6 +172,199 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     );
   }
 
+  // =========================================================================
+  // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'business') {
+    const businessName = content.company || item.title || 'Entreprise';
+    const initials = getCompanyInitials(businessName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-slate-700 selection:text-white">
+        {/* Institutional Header */}
+        <div className="w-full max-w-md mx-auto px-4 pt-4 pb-2 flex items-center justify-between border-b border-slate-900">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-slate-400" />
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-500">
+              Profil Institutionnel Certifié
+            </span>
+          </div>
+          {isSimulator && onCloseSimulator && (
+            <button onClick={onCloseSimulator} className="text-[10px] font-bold bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 uppercase">
+              Fermer
+            </button>
+          )}
+        </div>
+
+        <div className="w-full max-w-md mx-auto px-4 py-6 flex-1 space-y-6">
+
+          {/* Main Corporate Header */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {registeredLogo ? (
+              <div className="w-28 h-28 rounded-3xl bg-white p-3 shadow-2xl border-4 border-slate-900 flex items-center justify-center overflow-hidden">
+                <img src={registeredLogo} alt={businessName} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-28 h-28 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-slate-100 text-3xl font-black shadow-2xl">
+                {initials}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white uppercase tracking-tight">{businessName}</h1>
+              {content.commercialName && content.commercialName !== businessName && (
+                <p className="text-sm font-bold text-slate-400">{content.commercialName}</p>
+              )}
+              {content.industry && (
+                <div className="pt-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-widest">
+                    {content.industry}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Phone className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Appeler</span>
+              </a>
+            )}
+            {content.whatsappNumber && (
+              <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">WhatsApp</span>
+              </a>
+            )}
+            {(content.locationLatitude && content.locationLongitude) && (
+              <a href={`https://www.google.com/maps/search/?api=1&query=${content.locationLatitude},${content.locationLongitude}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Navigation className="w-5 h-5 text-blue-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Siège</span>
+              </a>
+            )}
+            {content.websiteUrl && (
+              <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Globe className="w-5 h-5 text-indigo-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Site Web</span>
+              </a>
+            )}
+          </div>
+
+          {/* Identification Juridique Block */}
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl">
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-2">Identification Juridique</h2>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              {content.businessType && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Forme</span><span className="text-white font-bold">{content.businessType}</span></div>}
+              {content.businessCreationYear && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Création</span><span className="text-white font-bold">{content.businessCreationYear}</span></div>}
+              {content.businessRegisterNumber && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">RCCM</span><span className="text-white font-mono font-bold tracking-tight">{content.businessRegisterNumber}</span></div>}
+              {content.businessTaxId && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">N° Compte Contribuable</span><span className="text-white font-mono font-bold tracking-tight">{content.businessTaxId}</span></div>}
+              {content.businessCapital && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">Capital Social</span><span className="text-white font-bold">{content.businessCapital}</span></div>}
+            </div>
+          </div>
+
+          {/* Activity Block */}
+          {(content.businessMainActivity || content.bio) && (
+            <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Activité & Expertise</h2>
+              {content.businessMainActivity && <p className="text-sm font-bold text-slate-200">{content.businessMainActivity}</p>}
+              {content.bio && <p className="text-xs text-slate-400 leading-relaxed italic">« {content.bio} »</p>}
+            </div>
+          )}
+
+          {/* Products/Services/Brands Lists */}
+          {((content.productsList?.length || 0) + (content.servicesList?.length || 0) + (content.brandsRepresented?.length || 0)) > 0 && (
+            <div className="space-y-3">
+              {content.productsList && content.productsList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Produits</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.productsList.map(p => <span key={p} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{p}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.servicesList && content.servicesList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Services</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.servicesList.map(s => <span key={s} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{s}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.brandsRepresented && content.brandsRepresented.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl text-center">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Marques représentées</h3>
+                  <p className="text-xs font-bold text-amber-400">{content.brandsRepresented.join(' • ')}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Manager Block */}
+          {content.businessManagerName && (
+            <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Direction</h2>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400"><User className="w-6 h-6" /></div>
+                <div className="text-left">
+                  <p className="text-sm font-black text-white uppercase">{content.businessManagerName}</p>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">{content.jobTitle || 'Responsable'}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {content.businessManagerPhone && <a href={`tel:${content.businessManagerPhone}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">Appeler</a>}
+                {content.businessManagerEmail && <a href={`mailto:${content.businessManagerEmail}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">E-mail</a>}
+              </div>
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {(content.businessCatalogueUrl || content.businessBrochureUrl || content.businessPresentationUrl) && (
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Documents Officiels</h2>
+              <div className="grid grid-cols-1 gap-2">
+                {content.businessCatalogueUrl && <a href={content.businessCatalogueUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-2xl text-emerald-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Consulter le Catalogue</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessBrochureUrl && <a href={content.businessBrochureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl text-blue-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Télécharger la Brochure</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessPresentationUrl && <a href={content.businessPresentationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100"><div className="flex items-center gap-3"><Layers className="w-5 h-5" /><span className="text-xs font-bold uppercase">Présentation Entreprise</span></div><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          )}
+
+          {/* Business Social Row */}
+          <div className="flex items-center justify-center gap-6 py-4">
+            {content.businessLinkedInUrl && <a href={content.businessLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-500 shadow-xl"><Linkedin className="w-6 h-6" /></a>}
+            {content.businessYouTubeUrl && <a href={content.businessYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-500 shadow-xl"><Youtube className="w-6 h-6" /></a>}
+            {content.businessFacebookUrl && <a href={content.businessFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl"><Facebook className="w-6 h-6" /></a>}
+            {content.businessInstagramUrl && <a href={content.businessInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl"><Instagram className="w-6 h-6" /></a>}
+          </div>
+
+          {/* Other Information for Business */}
+          {content.otherInformation && (
+            <div className="p-5 bg-slate-900/30 border border-slate-800/50 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+          {/* HQ Location Address */}
+          {(content.address || content.city) && (
+            <div className="text-center space-y-1 py-4 border-t border-slate-900">
+              <MapPin className="w-5 h-5 text-slate-600 mx-auto mb-1" />
+              <p className="text-xs font-bold text-slate-300">{content.address}</p>
+              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{[content.city, content.locationCountry || content.country].filter(Boolean).join(', ')}</p>
+            </div>
+          )}
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
   // 2. Error / Not Found State (Polite, no SaaS links)
   if (error || !item) {
     return (
@@ -198,6 +391,199 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     );
   }
 
+  // =========================================================================
+  // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'business') {
+    const businessName = content.company || item.title || 'Entreprise';
+    const initials = getCompanyInitials(businessName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-slate-700 selection:text-white">
+        {/* Institutional Header */}
+        <div className="w-full max-w-md mx-auto px-4 pt-4 pb-2 flex items-center justify-between border-b border-slate-900">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-slate-400" />
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-500">
+              Profil Institutionnel Certifié
+            </span>
+          </div>
+          {isSimulator && onCloseSimulator && (
+            <button onClick={onCloseSimulator} className="text-[10px] font-bold bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 uppercase">
+              Fermer
+            </button>
+          )}
+        </div>
+
+        <div className="w-full max-w-md mx-auto px-4 py-6 flex-1 space-y-6">
+
+          {/* Main Corporate Header */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {registeredLogo ? (
+              <div className="w-28 h-28 rounded-3xl bg-white p-3 shadow-2xl border-4 border-slate-900 flex items-center justify-center overflow-hidden">
+                <img src={registeredLogo} alt={businessName} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-28 h-28 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-slate-100 text-3xl font-black shadow-2xl">
+                {initials}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white uppercase tracking-tight">{businessName}</h1>
+              {content.commercialName && content.commercialName !== businessName && (
+                <p className="text-sm font-bold text-slate-400">{content.commercialName}</p>
+              )}
+              {content.industry && (
+                <div className="pt-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-widest">
+                    {content.industry}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Phone className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Appeler</span>
+              </a>
+            )}
+            {content.whatsappNumber && (
+              <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">WhatsApp</span>
+              </a>
+            )}
+            {(content.locationLatitude && content.locationLongitude) && (
+              <a href={`https://www.google.com/maps/search/?api=1&query=${content.locationLatitude},${content.locationLongitude}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Navigation className="w-5 h-5 text-blue-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Siège</span>
+              </a>
+            )}
+            {content.websiteUrl && (
+              <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Globe className="w-5 h-5 text-indigo-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Site Web</span>
+              </a>
+            )}
+          </div>
+
+          {/* Identification Juridique Block */}
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl">
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-2">Identification Juridique</h2>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              {content.businessType && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Forme</span><span className="text-white font-bold">{content.businessType}</span></div>}
+              {content.businessCreationYear && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Création</span><span className="text-white font-bold">{content.businessCreationYear}</span></div>}
+              {content.businessRegisterNumber && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">RCCM</span><span className="text-white font-mono font-bold tracking-tight">{content.businessRegisterNumber}</span></div>}
+              {content.businessTaxId && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">N° Compte Contribuable</span><span className="text-white font-mono font-bold tracking-tight">{content.businessTaxId}</span></div>}
+              {content.businessCapital && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">Capital Social</span><span className="text-white font-bold">{content.businessCapital}</span></div>}
+            </div>
+          </div>
+
+          {/* Activity Block */}
+          {(content.businessMainActivity || content.bio) && (
+            <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Activité & Expertise</h2>
+              {content.businessMainActivity && <p className="text-sm font-bold text-slate-200">{content.businessMainActivity}</p>}
+              {content.bio && <p className="text-xs text-slate-400 leading-relaxed italic">« {content.bio} »</p>}
+            </div>
+          )}
+
+          {/* Products/Services/Brands Lists */}
+          {((content.productsList?.length || 0) + (content.servicesList?.length || 0) + (content.brandsRepresented?.length || 0)) > 0 && (
+            <div className="space-y-3">
+              {content.productsList && content.productsList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Produits</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.productsList.map(p => <span key={p} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{p}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.servicesList && content.servicesList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Services</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.servicesList.map(s => <span key={s} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{s}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.brandsRepresented && content.brandsRepresented.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl text-center">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Marques représentées</h3>
+                  <p className="text-xs font-bold text-amber-400">{content.brandsRepresented.join(' • ')}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Manager Block */}
+          {content.businessManagerName && (
+            <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Direction</h2>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400"><User className="w-6 h-6" /></div>
+                <div className="text-left">
+                  <p className="text-sm font-black text-white uppercase">{content.businessManagerName}</p>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">{content.jobTitle || 'Responsable'}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {content.businessManagerPhone && <a href={`tel:${content.businessManagerPhone}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">Appeler</a>}
+                {content.businessManagerEmail && <a href={`mailto:${content.businessManagerEmail}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">E-mail</a>}
+              </div>
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {(content.businessCatalogueUrl || content.businessBrochureUrl || content.businessPresentationUrl) && (
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Documents Officiels</h2>
+              <div className="grid grid-cols-1 gap-2">
+                {content.businessCatalogueUrl && <a href={content.businessCatalogueUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-2xl text-emerald-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Consulter le Catalogue</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessBrochureUrl && <a href={content.businessBrochureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl text-blue-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Télécharger la Brochure</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessPresentationUrl && <a href={content.businessPresentationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100"><div className="flex items-center gap-3"><Layers className="w-5 h-5" /><span className="text-xs font-bold uppercase">Présentation Entreprise</span></div><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          )}
+
+          {/* Business Social Row */}
+          <div className="flex items-center justify-center gap-6 py-4">
+            {content.businessLinkedInUrl && <a href={content.businessLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-500 shadow-xl"><Linkedin className="w-6 h-6" /></a>}
+            {content.businessYouTubeUrl && <a href={content.businessYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-500 shadow-xl"><Youtube className="w-6 h-6" /></a>}
+            {content.businessFacebookUrl && <a href={content.businessFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl"><Facebook className="w-6 h-6" /></a>}
+            {content.businessInstagramUrl && <a href={content.businessInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl"><Instagram className="w-6 h-6" /></a>}
+          </div>
+
+          {/* Other Information for Business */}
+          {content.otherInformation && (
+            <div className="p-5 bg-slate-900/30 border border-slate-800/50 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+          {/* HQ Location Address */}
+          {(content.address || content.city) && (
+            <div className="text-center space-y-1 py-4 border-t border-slate-900">
+              <MapPin className="w-5 h-5 text-slate-600 mx-auto mb-1" />
+              <p className="text-xs font-bold text-slate-300">{content.address}</p>
+              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{[content.city, content.locationCountry || content.country].filter(Boolean).join(', ')}</p>
+            </div>
+          )}
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
   // 3. Deactivated / Suspended State
   if (item.status === 'inactive' || item.status === 'archived') {
     return (
@@ -213,6 +599,199 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             </p>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'business') {
+    const businessName = content.company || item.title || 'Entreprise';
+    const initials = getCompanyInitials(businessName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-slate-700 selection:text-white">
+        {/* Institutional Header */}
+        <div className="w-full max-w-md mx-auto px-4 pt-4 pb-2 flex items-center justify-between border-b border-slate-900">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-slate-400" />
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-500">
+              Profil Institutionnel Certifié
+            </span>
+          </div>
+          {isSimulator && onCloseSimulator && (
+            <button onClick={onCloseSimulator} className="text-[10px] font-bold bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 uppercase">
+              Fermer
+            </button>
+          )}
+        </div>
+
+        <div className="w-full max-w-md mx-auto px-4 py-6 flex-1 space-y-6">
+
+          {/* Main Corporate Header */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {registeredLogo ? (
+              <div className="w-28 h-28 rounded-3xl bg-white p-3 shadow-2xl border-4 border-slate-900 flex items-center justify-center overflow-hidden">
+                <img src={registeredLogo} alt={businessName} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-28 h-28 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-slate-100 text-3xl font-black shadow-2xl">
+                {initials}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white uppercase tracking-tight">{businessName}</h1>
+              {content.commercialName && content.commercialName !== businessName && (
+                <p className="text-sm font-bold text-slate-400">{content.commercialName}</p>
+              )}
+              {content.industry && (
+                <div className="pt-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-widest">
+                    {content.industry}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Phone className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Appeler</span>
+              </a>
+            )}
+            {content.whatsappNumber && (
+              <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">WhatsApp</span>
+              </a>
+            )}
+            {(content.locationLatitude && content.locationLongitude) && (
+              <a href={`https://www.google.com/maps/search/?api=1&query=${content.locationLatitude},${content.locationLongitude}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Navigation className="w-5 h-5 text-blue-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Siège</span>
+              </a>
+            )}
+            {content.websiteUrl && (
+              <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Globe className="w-5 h-5 text-indigo-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Site Web</span>
+              </a>
+            )}
+          </div>
+
+          {/* Identification Juridique Block */}
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl">
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-2">Identification Juridique</h2>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              {content.businessType && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Forme</span><span className="text-white font-bold">{content.businessType}</span></div>}
+              {content.businessCreationYear && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Création</span><span className="text-white font-bold">{content.businessCreationYear}</span></div>}
+              {content.businessRegisterNumber && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">RCCM</span><span className="text-white font-mono font-bold tracking-tight">{content.businessRegisterNumber}</span></div>}
+              {content.businessTaxId && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">N° Compte Contribuable</span><span className="text-white font-mono font-bold tracking-tight">{content.businessTaxId}</span></div>}
+              {content.businessCapital && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">Capital Social</span><span className="text-white font-bold">{content.businessCapital}</span></div>}
+            </div>
+          </div>
+
+          {/* Activity Block */}
+          {(content.businessMainActivity || content.bio) && (
+            <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Activité & Expertise</h2>
+              {content.businessMainActivity && <p className="text-sm font-bold text-slate-200">{content.businessMainActivity}</p>}
+              {content.bio && <p className="text-xs text-slate-400 leading-relaxed italic">« {content.bio} »</p>}
+            </div>
+          )}
+
+          {/* Products/Services/Brands Lists */}
+          {((content.productsList?.length || 0) + (content.servicesList?.length || 0) + (content.brandsRepresented?.length || 0)) > 0 && (
+            <div className="space-y-3">
+              {content.productsList && content.productsList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Produits</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.productsList.map(p => <span key={p} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{p}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.servicesList && content.servicesList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Services</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.servicesList.map(s => <span key={s} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{s}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.brandsRepresented && content.brandsRepresented.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl text-center">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Marques représentées</h3>
+                  <p className="text-xs font-bold text-amber-400">{content.brandsRepresented.join(' • ')}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Manager Block */}
+          {content.businessManagerName && (
+            <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Direction</h2>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400"><User className="w-6 h-6" /></div>
+                <div className="text-left">
+                  <p className="text-sm font-black text-white uppercase">{content.businessManagerName}</p>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">{content.jobTitle || 'Responsable'}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {content.businessManagerPhone && <a href={`tel:${content.businessManagerPhone}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">Appeler</a>}
+                {content.businessManagerEmail && <a href={`mailto:${content.businessManagerEmail}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">E-mail</a>}
+              </div>
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {(content.businessCatalogueUrl || content.businessBrochureUrl || content.businessPresentationUrl) && (
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Documents Officiels</h2>
+              <div className="grid grid-cols-1 gap-2">
+                {content.businessCatalogueUrl && <a href={content.businessCatalogueUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-2xl text-emerald-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Consulter le Catalogue</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessBrochureUrl && <a href={content.businessBrochureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl text-blue-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Télécharger la Brochure</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessPresentationUrl && <a href={content.businessPresentationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100"><div className="flex items-center gap-3"><Layers className="w-5 h-5" /><span className="text-xs font-bold uppercase">Présentation Entreprise</span></div><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          )}
+
+          {/* Business Social Row */}
+          <div className="flex items-center justify-center gap-6 py-4">
+            {content.businessLinkedInUrl && <a href={content.businessLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-500 shadow-xl"><Linkedin className="w-6 h-6" /></a>}
+            {content.businessYouTubeUrl && <a href={content.businessYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-500 shadow-xl"><Youtube className="w-6 h-6" /></a>}
+            {content.businessFacebookUrl && <a href={content.businessFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl"><Facebook className="w-6 h-6" /></a>}
+            {content.businessInstagramUrl && <a href={content.businessInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl"><Instagram className="w-6 h-6" /></a>}
+          </div>
+
+          {/* Other Information for Business */}
+          {content.otherInformation && (
+            <div className="p-5 bg-slate-900/30 border border-slate-800/50 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+          {/* HQ Location Address */}
+          {(content.address || content.city) && (
+            <div className="text-center space-y-1 py-4 border-t border-slate-900">
+              <MapPin className="w-5 h-5 text-slate-600 mx-auto mb-1" />
+              <p className="text-xs font-bold text-slate-300">{content.address}</p>
+              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{[content.city, content.locationCountry || content.country].filter(Boolean).join(', ')}</p>
+            </div>
+          )}
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
       </div>
     );
   }
@@ -416,6 +995,199 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-6 px-4 text-center space-y-1">
           <p className="text-[10px] font-medium text-slate-500">Fiche de Livre Publique • AGB QR Code Designer</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'business') {
+    const businessName = content.company || item.title || 'Entreprise';
+    const initials = getCompanyInitials(businessName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-slate-700 selection:text-white">
+        {/* Institutional Header */}
+        <div className="w-full max-w-md mx-auto px-4 pt-4 pb-2 flex items-center justify-between border-b border-slate-900">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-slate-400" />
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-500">
+              Profil Institutionnel Certifié
+            </span>
+          </div>
+          {isSimulator && onCloseSimulator && (
+            <button onClick={onCloseSimulator} className="text-[10px] font-bold bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 uppercase">
+              Fermer
+            </button>
+          )}
+        </div>
+
+        <div className="w-full max-w-md mx-auto px-4 py-6 flex-1 space-y-6">
+
+          {/* Main Corporate Header */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {registeredLogo ? (
+              <div className="w-28 h-28 rounded-3xl bg-white p-3 shadow-2xl border-4 border-slate-900 flex items-center justify-center overflow-hidden">
+                <img src={registeredLogo} alt={businessName} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-28 h-28 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-slate-100 text-3xl font-black shadow-2xl">
+                {initials}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white uppercase tracking-tight">{businessName}</h1>
+              {content.commercialName && content.commercialName !== businessName && (
+                <p className="text-sm font-bold text-slate-400">{content.commercialName}</p>
+              )}
+              {content.industry && (
+                <div className="pt-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-widest">
+                    {content.industry}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Phone className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Appeler</span>
+              </a>
+            )}
+            {content.whatsappNumber && (
+              <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">WhatsApp</span>
+              </a>
+            )}
+            {(content.locationLatitude && content.locationLongitude) && (
+              <a href={`https://www.google.com/maps/search/?api=1&query=${content.locationLatitude},${content.locationLongitude}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Navigation className="w-5 h-5 text-blue-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Siège</span>
+              </a>
+            )}
+            {content.websiteUrl && (
+              <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Globe className="w-5 h-5 text-indigo-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Site Web</span>
+              </a>
+            )}
+          </div>
+
+          {/* Identification Juridique Block */}
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl">
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-2">Identification Juridique</h2>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              {content.businessType && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Forme</span><span className="text-white font-bold">{content.businessType}</span></div>}
+              {content.businessCreationYear && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Création</span><span className="text-white font-bold">{content.businessCreationYear}</span></div>}
+              {content.businessRegisterNumber && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">RCCM</span><span className="text-white font-mono font-bold tracking-tight">{content.businessRegisterNumber}</span></div>}
+              {content.businessTaxId && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">N° Compte Contribuable</span><span className="text-white font-mono font-bold tracking-tight">{content.businessTaxId}</span></div>}
+              {content.businessCapital && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">Capital Social</span><span className="text-white font-bold">{content.businessCapital}</span></div>}
+            </div>
+          </div>
+
+          {/* Activity Block */}
+          {(content.businessMainActivity || content.bio) && (
+            <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Activité & Expertise</h2>
+              {content.businessMainActivity && <p className="text-sm font-bold text-slate-200">{content.businessMainActivity}</p>}
+              {content.bio && <p className="text-xs text-slate-400 leading-relaxed italic">« {content.bio} »</p>}
+            </div>
+          )}
+
+          {/* Products/Services/Brands Lists */}
+          {((content.productsList?.length || 0) + (content.servicesList?.length || 0) + (content.brandsRepresented?.length || 0)) > 0 && (
+            <div className="space-y-3">
+              {content.productsList && content.productsList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Produits</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.productsList.map(p => <span key={p} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{p}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.servicesList && content.servicesList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Services</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.servicesList.map(s => <span key={s} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{s}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.brandsRepresented && content.brandsRepresented.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl text-center">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Marques représentées</h3>
+                  <p className="text-xs font-bold text-amber-400">{content.brandsRepresented.join(' • ')}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Manager Block */}
+          {content.businessManagerName && (
+            <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Direction</h2>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400"><User className="w-6 h-6" /></div>
+                <div className="text-left">
+                  <p className="text-sm font-black text-white uppercase">{content.businessManagerName}</p>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">{content.jobTitle || 'Responsable'}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {content.businessManagerPhone && <a href={`tel:${content.businessManagerPhone}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">Appeler</a>}
+                {content.businessManagerEmail && <a href={`mailto:${content.businessManagerEmail}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">E-mail</a>}
+              </div>
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {(content.businessCatalogueUrl || content.businessBrochureUrl || content.businessPresentationUrl) && (
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Documents Officiels</h2>
+              <div className="grid grid-cols-1 gap-2">
+                {content.businessCatalogueUrl && <a href={content.businessCatalogueUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-2xl text-emerald-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Consulter le Catalogue</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessBrochureUrl && <a href={content.businessBrochureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl text-blue-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Télécharger la Brochure</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessPresentationUrl && <a href={content.businessPresentationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100"><div className="flex items-center gap-3"><Layers className="w-5 h-5" /><span className="text-xs font-bold uppercase">Présentation Entreprise</span></div><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          )}
+
+          {/* Business Social Row */}
+          <div className="flex items-center justify-center gap-6 py-4">
+            {content.businessLinkedInUrl && <a href={content.businessLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-500 shadow-xl"><Linkedin className="w-6 h-6" /></a>}
+            {content.businessYouTubeUrl && <a href={content.businessYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-500 shadow-xl"><Youtube className="w-6 h-6" /></a>}
+            {content.businessFacebookUrl && <a href={content.businessFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl"><Facebook className="w-6 h-6" /></a>}
+            {content.businessInstagramUrl && <a href={content.businessInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl"><Instagram className="w-6 h-6" /></a>}
+          </div>
+
+          {/* Other Information for Business */}
+          {content.otherInformation && (
+            <div className="p-5 bg-slate-900/30 border border-slate-800/50 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+          {/* HQ Location Address */}
+          {(content.address || content.city) && (
+            <div className="text-center space-y-1 py-4 border-t border-slate-900">
+              <MapPin className="w-5 h-5 text-slate-600 mx-auto mb-1" />
+              <p className="text-xs font-bold text-slate-300">{content.address}</p>
+              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{[content.city, content.locationCountry || content.country].filter(Boolean).join(', ')}</p>
+            </div>
+          )}
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
         </footer>
       </div>
     );
@@ -638,6 +1410,199 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-6 px-4 text-center space-y-1">
           <p className="text-[10px] font-medium text-slate-500">Invitation Numérique Certifiée • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'business') {
+    const businessName = content.company || item.title || 'Entreprise';
+    const initials = getCompanyInitials(businessName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-slate-700 selection:text-white">
+        {/* Institutional Header */}
+        <div className="w-full max-w-md mx-auto px-4 pt-4 pb-2 flex items-center justify-between border-b border-slate-900">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-slate-400" />
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-500">
+              Profil Institutionnel Certifié
+            </span>
+          </div>
+          {isSimulator && onCloseSimulator && (
+            <button onClick={onCloseSimulator} className="text-[10px] font-bold bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 uppercase">
+              Fermer
+            </button>
+          )}
+        </div>
+
+        <div className="w-full max-w-md mx-auto px-4 py-6 flex-1 space-y-6">
+
+          {/* Main Corporate Header */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {registeredLogo ? (
+              <div className="w-28 h-28 rounded-3xl bg-white p-3 shadow-2xl border-4 border-slate-900 flex items-center justify-center overflow-hidden">
+                <img src={registeredLogo} alt={businessName} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-28 h-28 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-slate-100 text-3xl font-black shadow-2xl">
+                {initials}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white uppercase tracking-tight">{businessName}</h1>
+              {content.commercialName && content.commercialName !== businessName && (
+                <p className="text-sm font-bold text-slate-400">{content.commercialName}</p>
+              )}
+              {content.industry && (
+                <div className="pt-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-widest">
+                    {content.industry}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Phone className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Appeler</span>
+              </a>
+            )}
+            {content.whatsappNumber && (
+              <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">WhatsApp</span>
+              </a>
+            )}
+            {(content.locationLatitude && content.locationLongitude) && (
+              <a href={`https://www.google.com/maps/search/?api=1&query=${content.locationLatitude},${content.locationLongitude}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Navigation className="w-5 h-5 text-blue-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Siège</span>
+              </a>
+            )}
+            {content.websiteUrl && (
+              <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Globe className="w-5 h-5 text-indigo-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Site Web</span>
+              </a>
+            )}
+          </div>
+
+          {/* Identification Juridique Block */}
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl">
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-2">Identification Juridique</h2>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              {content.businessType && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Forme</span><span className="text-white font-bold">{content.businessType}</span></div>}
+              {content.businessCreationYear && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Création</span><span className="text-white font-bold">{content.businessCreationYear}</span></div>}
+              {content.businessRegisterNumber && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">RCCM</span><span className="text-white font-mono font-bold tracking-tight">{content.businessRegisterNumber}</span></div>}
+              {content.businessTaxId && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">N° Compte Contribuable</span><span className="text-white font-mono font-bold tracking-tight">{content.businessTaxId}</span></div>}
+              {content.businessCapital && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">Capital Social</span><span className="text-white font-bold">{content.businessCapital}</span></div>}
+            </div>
+          </div>
+
+          {/* Activity Block */}
+          {(content.businessMainActivity || content.bio) && (
+            <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Activité & Expertise</h2>
+              {content.businessMainActivity && <p className="text-sm font-bold text-slate-200">{content.businessMainActivity}</p>}
+              {content.bio && <p className="text-xs text-slate-400 leading-relaxed italic">« {content.bio} »</p>}
+            </div>
+          )}
+
+          {/* Products/Services/Brands Lists */}
+          {((content.productsList?.length || 0) + (content.servicesList?.length || 0) + (content.brandsRepresented?.length || 0)) > 0 && (
+            <div className="space-y-3">
+              {content.productsList && content.productsList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Produits</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.productsList.map(p => <span key={p} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{p}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.servicesList && content.servicesList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Services</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.servicesList.map(s => <span key={s} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{s}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.brandsRepresented && content.brandsRepresented.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl text-center">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Marques représentées</h3>
+                  <p className="text-xs font-bold text-amber-400">{content.brandsRepresented.join(' • ')}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Manager Block */}
+          {content.businessManagerName && (
+            <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Direction</h2>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400"><User className="w-6 h-6" /></div>
+                <div className="text-left">
+                  <p className="text-sm font-black text-white uppercase">{content.businessManagerName}</p>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">{content.jobTitle || 'Responsable'}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {content.businessManagerPhone && <a href={`tel:${content.businessManagerPhone}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">Appeler</a>}
+                {content.businessManagerEmail && <a href={`mailto:${content.businessManagerEmail}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">E-mail</a>}
+              </div>
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {(content.businessCatalogueUrl || content.businessBrochureUrl || content.businessPresentationUrl) && (
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Documents Officiels</h2>
+              <div className="grid grid-cols-1 gap-2">
+                {content.businessCatalogueUrl && <a href={content.businessCatalogueUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-2xl text-emerald-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Consulter le Catalogue</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessBrochureUrl && <a href={content.businessBrochureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl text-blue-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Télécharger la Brochure</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessPresentationUrl && <a href={content.businessPresentationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100"><div className="flex items-center gap-3"><Layers className="w-5 h-5" /><span className="text-xs font-bold uppercase">Présentation Entreprise</span></div><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          )}
+
+          {/* Business Social Row */}
+          <div className="flex items-center justify-center gap-6 py-4">
+            {content.businessLinkedInUrl && <a href={content.businessLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-500 shadow-xl"><Linkedin className="w-6 h-6" /></a>}
+            {content.businessYouTubeUrl && <a href={content.businessYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-500 shadow-xl"><Youtube className="w-6 h-6" /></a>}
+            {content.businessFacebookUrl && <a href={content.businessFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl"><Facebook className="w-6 h-6" /></a>}
+            {content.businessInstagramUrl && <a href={content.businessInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl"><Instagram className="w-6 h-6" /></a>}
+          </div>
+
+          {/* Other Information for Business */}
+          {content.otherInformation && (
+            <div className="p-5 bg-slate-900/30 border border-slate-800/50 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+          {/* HQ Location Address */}
+          {(content.address || content.city) && (
+            <div className="text-center space-y-1 py-4 border-t border-slate-900">
+              <MapPin className="w-5 h-5 text-slate-600 mx-auto mb-1" />
+              <p className="text-xs font-bold text-slate-300">{content.address}</p>
+              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{[content.city, content.locationCountry || content.country].filter(Boolean).join(', ')}</p>
+            </div>
+          )}
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
         </footer>
       </div>
     );
@@ -872,6 +1837,199 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   }
 
   // =========================================================================
+  // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'business') {
+    const businessName = content.company || item.title || 'Entreprise';
+    const initials = getCompanyInitials(businessName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-slate-700 selection:text-white">
+        {/* Institutional Header */}
+        <div className="w-full max-w-md mx-auto px-4 pt-4 pb-2 flex items-center justify-between border-b border-slate-900">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-slate-400" />
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-500">
+              Profil Institutionnel Certifié
+            </span>
+          </div>
+          {isSimulator && onCloseSimulator && (
+            <button onClick={onCloseSimulator} className="text-[10px] font-bold bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 uppercase">
+              Fermer
+            </button>
+          )}
+        </div>
+
+        <div className="w-full max-w-md mx-auto px-4 py-6 flex-1 space-y-6">
+
+          {/* Main Corporate Header */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {registeredLogo ? (
+              <div className="w-28 h-28 rounded-3xl bg-white p-3 shadow-2xl border-4 border-slate-900 flex items-center justify-center overflow-hidden">
+                <img src={registeredLogo} alt={businessName} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-28 h-28 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-slate-100 text-3xl font-black shadow-2xl">
+                {initials}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white uppercase tracking-tight">{businessName}</h1>
+              {content.commercialName && content.commercialName !== businessName && (
+                <p className="text-sm font-bold text-slate-400">{content.commercialName}</p>
+              )}
+              {content.industry && (
+                <div className="pt-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-widest">
+                    {content.industry}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Phone className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Appeler</span>
+              </a>
+            )}
+            {content.whatsappNumber && (
+              <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">WhatsApp</span>
+              </a>
+            )}
+            {(content.locationLatitude && content.locationLongitude) && (
+              <a href={`https://www.google.com/maps/search/?api=1&query=${content.locationLatitude},${content.locationLongitude}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Navigation className="w-5 h-5 text-blue-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Siège</span>
+              </a>
+            )}
+            {content.websiteUrl && (
+              <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Globe className="w-5 h-5 text-indigo-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Site Web</span>
+              </a>
+            )}
+          </div>
+
+          {/* Identification Juridique Block */}
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl">
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-2">Identification Juridique</h2>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              {content.businessType && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Forme</span><span className="text-white font-bold">{content.businessType}</span></div>}
+              {content.businessCreationYear && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Création</span><span className="text-white font-bold">{content.businessCreationYear}</span></div>}
+              {content.businessRegisterNumber && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">RCCM</span><span className="text-white font-mono font-bold tracking-tight">{content.businessRegisterNumber}</span></div>}
+              {content.businessTaxId && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">N° Compte Contribuable</span><span className="text-white font-mono font-bold tracking-tight">{content.businessTaxId}</span></div>}
+              {content.businessCapital && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">Capital Social</span><span className="text-white font-bold">{content.businessCapital}</span></div>}
+            </div>
+          </div>
+
+          {/* Activity Block */}
+          {(content.businessMainActivity || content.bio) && (
+            <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Activité & Expertise</h2>
+              {content.businessMainActivity && <p className="text-sm font-bold text-slate-200">{content.businessMainActivity}</p>}
+              {content.bio && <p className="text-xs text-slate-400 leading-relaxed italic">« {content.bio} »</p>}
+            </div>
+          )}
+
+          {/* Products/Services/Brands Lists */}
+          {((content.productsList?.length || 0) + (content.servicesList?.length || 0) + (content.brandsRepresented?.length || 0)) > 0 && (
+            <div className="space-y-3">
+              {content.productsList && content.productsList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Produits</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.productsList.map(p => <span key={p} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{p}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.servicesList && content.servicesList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Services</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.servicesList.map(s => <span key={s} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{s}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.brandsRepresented && content.brandsRepresented.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl text-center">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Marques représentées</h3>
+                  <p className="text-xs font-bold text-amber-400">{content.brandsRepresented.join(' • ')}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Manager Block */}
+          {content.businessManagerName && (
+            <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Direction</h2>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400"><User className="w-6 h-6" /></div>
+                <div className="text-left">
+                  <p className="text-sm font-black text-white uppercase">{content.businessManagerName}</p>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">{content.jobTitle || 'Responsable'}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {content.businessManagerPhone && <a href={`tel:${content.businessManagerPhone}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">Appeler</a>}
+                {content.businessManagerEmail && <a href={`mailto:${content.businessManagerEmail}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">E-mail</a>}
+              </div>
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {(content.businessCatalogueUrl || content.businessBrochureUrl || content.businessPresentationUrl) && (
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Documents Officiels</h2>
+              <div className="grid grid-cols-1 gap-2">
+                {content.businessCatalogueUrl && <a href={content.businessCatalogueUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-2xl text-emerald-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Consulter le Catalogue</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessBrochureUrl && <a href={content.businessBrochureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl text-blue-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Télécharger la Brochure</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessPresentationUrl && <a href={content.businessPresentationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100"><div className="flex items-center gap-3"><Layers className="w-5 h-5" /><span className="text-xs font-bold uppercase">Présentation Entreprise</span></div><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          )}
+
+          {/* Business Social Row */}
+          <div className="flex items-center justify-center gap-6 py-4">
+            {content.businessLinkedInUrl && <a href={content.businessLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-500 shadow-xl"><Linkedin className="w-6 h-6" /></a>}
+            {content.businessYouTubeUrl && <a href={content.businessYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-500 shadow-xl"><Youtube className="w-6 h-6" /></a>}
+            {content.businessFacebookUrl && <a href={content.businessFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl"><Facebook className="w-6 h-6" /></a>}
+            {content.businessInstagramUrl && <a href={content.businessInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl"><Instagram className="w-6 h-6" /></a>}
+          </div>
+
+          {/* Other Information for Business */}
+          {content.otherInformation && (
+            <div className="p-5 bg-slate-900/30 border border-slate-800/50 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+          {/* HQ Location Address */}
+          {(content.address || content.city) && (
+            <div className="text-center space-y-1 py-4 border-t border-slate-900">
+              <MapPin className="w-5 h-5 text-slate-600 mx-auto mb-1" />
+              <p className="text-xs font-bold text-slate-300">{content.address}</p>
+              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{[content.city, content.locationCountry || content.country].filter(Boolean).join(', ')}</p>
+            </div>
+          )}
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
   // TYPE 4: LOCALISATION / ITINÉRAIRE PUBLIC VIEW
   // =========================================================================
   if (item.type === 'location') {
@@ -1002,6 +2160,199 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-6 px-4 text-center space-y-1">
           <p className="text-[10px] font-medium text-slate-500">Localisation & Itinéraire Connecté • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'business') {
+    const businessName = content.company || item.title || 'Entreprise';
+    const initials = getCompanyInitials(businessName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-slate-700 selection:text-white">
+        {/* Institutional Header */}
+        <div className="w-full max-w-md mx-auto px-4 pt-4 pb-2 flex items-center justify-between border-b border-slate-900">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-slate-400" />
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-500">
+              Profil Institutionnel Certifié
+            </span>
+          </div>
+          {isSimulator && onCloseSimulator && (
+            <button onClick={onCloseSimulator} className="text-[10px] font-bold bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 uppercase">
+              Fermer
+            </button>
+          )}
+        </div>
+
+        <div className="w-full max-w-md mx-auto px-4 py-6 flex-1 space-y-6">
+
+          {/* Main Corporate Header */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {registeredLogo ? (
+              <div className="w-28 h-28 rounded-3xl bg-white p-3 shadow-2xl border-4 border-slate-900 flex items-center justify-center overflow-hidden">
+                <img src={registeredLogo} alt={businessName} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-28 h-28 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-slate-100 text-3xl font-black shadow-2xl">
+                {initials}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white uppercase tracking-tight">{businessName}</h1>
+              {content.commercialName && content.commercialName !== businessName && (
+                <p className="text-sm font-bold text-slate-400">{content.commercialName}</p>
+              )}
+              {content.industry && (
+                <div className="pt-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-widest">
+                    {content.industry}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Phone className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Appeler</span>
+              </a>
+            )}
+            {content.whatsappNumber && (
+              <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">WhatsApp</span>
+              </a>
+            )}
+            {(content.locationLatitude && content.locationLongitude) && (
+              <a href={`https://www.google.com/maps/search/?api=1&query=${content.locationLatitude},${content.locationLongitude}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Navigation className="w-5 h-5 text-blue-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Siège</span>
+              </a>
+            )}
+            {content.websiteUrl && (
+              <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-colors">
+                <Globe className="w-5 h-5 text-indigo-400" />
+                <span className="text-[8px] font-black uppercase text-slate-400">Site Web</span>
+              </a>
+            )}
+          </div>
+
+          {/* Identification Juridique Block */}
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl">
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-2">Identification Juridique</h2>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              {content.businessType && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Forme</span><span className="text-white font-bold">{content.businessType}</span></div>}
+              {content.businessCreationYear && <div><span className="text-slate-500 block text-[9px] uppercase font-bold">Création</span><span className="text-white font-bold">{content.businessCreationYear}</span></div>}
+              {content.businessRegisterNumber && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">RCCM</span><span className="text-white font-mono font-bold tracking-tight">{content.businessRegisterNumber}</span></div>}
+              {content.businessTaxId && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">N° Compte Contribuable</span><span className="text-white font-mono font-bold tracking-tight">{content.businessTaxId}</span></div>}
+              {content.businessCapital && <div className="col-span-2"><span className="text-slate-500 block text-[9px] uppercase font-bold">Capital Social</span><span className="text-white font-bold">{content.businessCapital}</span></div>}
+            </div>
+          </div>
+
+          {/* Activity Block */}
+          {(content.businessMainActivity || content.bio) && (
+            <div className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-5 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Activité & Expertise</h2>
+              {content.businessMainActivity && <p className="text-sm font-bold text-slate-200">{content.businessMainActivity}</p>}
+              {content.bio && <p className="text-xs text-slate-400 leading-relaxed italic">« {content.bio} »</p>}
+            </div>
+          )}
+
+          {/* Products/Services/Brands Lists */}
+          {((content.productsList?.length || 0) + (content.servicesList?.length || 0) + (content.brandsRepresented?.length || 0)) > 0 && (
+            <div className="space-y-3">
+              {content.productsList && content.productsList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Produits</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.productsList.map(p => <span key={p} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{p}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.servicesList && content.servicesList.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Services</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {content.servicesList.map(s => <span key={s} className="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-slate-200 border border-slate-700">{s}</span>)}
+                  </div>
+                </div>
+              )}
+              {content.brandsRepresented && content.brandsRepresented.length > 0 && (
+                <div className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl text-center">
+                  <h3 className="text-[9px] font-black uppercase text-slate-500 mb-2">Marques représentées</h3>
+                  <p className="text-xs font-bold text-amber-400">{content.brandsRepresented.join(' • ')}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Manager Block */}
+          {content.businessManagerName && (
+            <div className="p-5 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Direction</h2>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400"><User className="w-6 h-6" /></div>
+                <div className="text-left">
+                  <p className="text-sm font-black text-white uppercase">{content.businessManagerName}</p>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">{content.jobTitle || 'Responsable'}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                {content.businessManagerPhone && <a href={`tel:${content.businessManagerPhone}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">Appeler</a>}
+                {content.businessManagerEmail && <a href={`mailto:${content.businessManagerEmail}`} className="flex-1 py-2 bg-slate-800 text-[10px] font-black uppercase text-slate-200 rounded-xl border border-slate-700 text-center">E-mail</a>}
+              </div>
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {(content.businessCatalogueUrl || content.businessBrochureUrl || content.businessPresentationUrl) && (
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Documents Officiels</h2>
+              <div className="grid grid-cols-1 gap-2">
+                {content.businessCatalogueUrl && <a href={content.businessCatalogueUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-emerald-600/10 border border-emerald-600/20 rounded-2xl text-emerald-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Consulter le Catalogue</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessBrochureUrl && <a href={content.businessBrochureUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl text-blue-400"><div className="flex items-center gap-3"><FileText className="w-5 h-5" /><span className="text-xs font-bold uppercase">Télécharger la Brochure</span></div><ExternalLink className="w-4 h-4" /></a>}
+                {content.businessPresentationUrl && <a href={content.businessPresentationUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-100"><div className="flex items-center gap-3"><Layers className="w-5 h-5" /><span className="text-xs font-bold uppercase">Présentation Entreprise</span></div><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          )}
+
+          {/* Business Social Row */}
+          <div className="flex items-center justify-center gap-6 py-4">
+            {content.businessLinkedInUrl && <a href={content.businessLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-500 shadow-xl"><Linkedin className="w-6 h-6" /></a>}
+            {content.businessYouTubeUrl && <a href={content.businessYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-500 shadow-xl"><Youtube className="w-6 h-6" /></a>}
+            {content.businessFacebookUrl && <a href={content.businessFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl"><Facebook className="w-6 h-6" /></a>}
+            {content.businessInstagramUrl && <a href={content.businessInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl"><Instagram className="w-6 h-6" /></a>}
+          </div>
+
+          {/* Other Information for Business */}
+          {content.otherInformation && (
+            <div className="p-5 bg-slate-900/30 border border-slate-800/50 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+          {/* HQ Location Address */}
+          {(content.address || content.city) && (
+            <div className="text-center space-y-1 py-4 border-t border-slate-900">
+              <MapPin className="w-5 h-5 text-slate-600 mx-auto mb-1" />
+              <p className="text-xs font-bold text-slate-300">{content.address}</p>
+              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{[content.city, content.locationCountry || content.country].filter(Boolean).join(', ')}</p>
+            </div>
+          )}
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
         </footer>
       </div>
     );

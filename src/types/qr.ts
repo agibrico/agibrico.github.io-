@@ -238,15 +238,33 @@ export interface QRContent {
     items: Array<{ name: string; description?: string; price: string }>;
   }>;
 
-  // Business specific
+  // --- BUSINESS / SOCIÉTÉ SPECIFIC ---
+  businessType?: string; // SARL, SA, SAS, etc.
+  businessCreationYear?: string;
+  businessCapital?: string;
+  businessMainActivity?: string;
+  brandsRepresented?: string[];
+  businessManagerName?: string;
+  businessManagerPhone?: string;
+  businessManagerEmail?: string;
+  businessCatalogueUrl?: string;
+  businessBrochureUrl?: string;
+  businessPresentationUrl?: string;
+  businessLinkedInUrl?: string;
+  businessYouTubeUrl?: string;
+  businessFacebookUrl?: string;
+  businessInstagramUrl?: string;
+  businessTikTokUrl?: string;
+
+  // Business common
   slogan?: string;
-  operatingZone?: string; // Zone d'intervention
+  operatingZone?: string;
   servicesList?: string[];
   productsList?: string[];
-  businessTaxId?: string; // Compte Contribuable / TVA
-  businessRegisterNumber?: string; // RCCM / SIREN
+  businessTaxId?: string;
+  businessRegisterNumber?: string;
   openingHours?: OpeningHourDay[];
-  
+
   // Product / Event / Image specific
   productPrice?: string;
   productCurrency?: string;

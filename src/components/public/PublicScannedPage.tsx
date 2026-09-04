@@ -372,6 +372,15 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             {content.bookGenre && <p><span className="text-slate-400">Genre :</span> <span className="text-slate-200 font-semibold">{content.bookGenre}</span></p>}
             {content.bookLanguage && <p><span className="text-slate-400">Langue :</span> <span className="text-slate-200 font-semibold">{content.bookLanguage}</span></p>}
           </div>
+
+          {content.otherInformation && (
+            <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 space-y-3 shadow-xl">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Autres informations</h2>
+              <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">
+                {content.otherInformation}
+              </p>
+            </div>
+          )}
         </div>
 
         <footer className="w-full max-w-md mx-auto py-6 px-4 text-center space-y-1">

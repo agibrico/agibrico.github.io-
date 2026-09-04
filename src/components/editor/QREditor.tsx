@@ -835,6 +835,17 @@ export const QREditor: React.FC<QREditorProps> = ({
                         className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none resize-none leading-relaxed"
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1.5">Autres informations</label>
+                      <textarea
+                        rows={3}
+                        value={content.otherInformation || ''}
+                        onChange={e => updateContentField('otherInformation', e.target.value)}
+                        placeholder="Informations complémentaires, dédicaces, événements à venir..."
+                        className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none resize-none leading-relaxed"
+                      />
+                    </div>
                   </div>
                 )}
 

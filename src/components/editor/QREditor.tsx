@@ -851,113 +851,273 @@ export const QREditor: React.FC<QREditorProps> = ({
 
                 {/* SPECIALIZED FORM SECTION FOR INVITATION */}
                 {type === 'invitation' && (
-                  <div className="space-y-4 pt-4 border-t border-amber-100 bg-amber-50/40 p-5 rounded-2xl">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-amber-600" />
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900">Détails de l'Invitation</h4>
+                  <div className="space-y-6 pt-4 border-t border-amber-100 bg-amber-50/40 p-5 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-amber-600" />
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900">Détails de l'Invitation</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Événement Certifié</span>
+                    </div>
+
+                    {/* Affiche de l'événement */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-amber-200 rounded-2xl bg-white/60 space-y-3">
+                      {content.invitationImageUrl ? (
+                        <div className="relative group">
+                          <img src={content.invitationImageUrl} className="w-full max-h-48 object-cover rounded-lg shadow-md" />
+                          <button
+                            onClick={() => updateContentField('invitationImageUrl', '')}
+                            className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Affiche / Image de l'événement</p>
+                          <label className="px-4 py-1.5 bg-amber-600 text-white text-[10px] font-bold rounded-full cursor-pointer hover:bg-amber-700 transition-colors">
+                            Choisir une image
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => updateContentField('invitationImageUrl', ev.target?.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Type d'événement</label>
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Nom de l'événement *</label>
                         <input
                           type="text"
-                          value={content.invitationEventType || ''}
-                          onChange={e => updateContentField('invitationEventType', e.target.value)}
-                          placeholder="Gala Prestige / Mariage / Conférence"
-                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:border-amber-600 focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Intitulé de l'événement</label>
-                        <input
-                          type="text"
+                          required
                           value={content.invitationTitle || ''}
                           onChange={e => updateContentField('invitationTitle', e.target.value)}
-                          placeholder="Sommet Annuel de l'Innovation 2026"
-                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:border-amber-600 focus:outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Organisateur / Hôte</label>
-                        <input
-                          type="text"
-                          value={content.invitationHost || ''}
-                          onChange={e => updateContentField('invitationHost', e.target.value)}
-                          placeholder="Gilles Brice ATSÉ & AGB Studio"
-                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                          placeholder="Ex: Gala de l'Innovation"
+                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-amber-600 focus:outline-none shadow-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nom de l'Invité (Optionnel)</label>
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Type d'événement *</label>
                         <input
                           type="text"
-                          value={content.invitationGuest || ''}
-                          onChange={e => updateContentField('invitationGuest', e.target.value)}
-                          placeholder="Invité d'Honneur"
-                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Date de l'événement</label>
-                        <input
-                          type="text"
-                          value={content.invitationDate || ''}
-                          onChange={e => updateContentField('invitationDate', e.target.value)}
-                          placeholder="Vendredi 18 Septembre 2026"
-                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Horaires</label>
-                        <input
-                          type="text"
-                          value={content.invitationTime || ''}
-                          onChange={e => updateContentField('invitationTime', e.target.value)}
-                          placeholder="18h30 - 23h00"
-                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nom du lieu / Salle</label>
-                        <input
-                          type="text"
-                          value={content.invitationLocationName || ''}
-                          onChange={e => updateContentField('invitationLocationName', e.target.value)}
-                          placeholder="Sofitel Hôtel Ivoire, Salle des Fêtes"
-                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Adresse du lieu</label>
-                        <input
-                          type="text"
-                          value={content.invitationAddress || ''}
-                          onChange={e => updateContentField('invitationAddress', e.target.value)}
-                          placeholder="Boulevard Hassan II, Cocody, Abidjan"
-                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                          required
+                          value={content.invitationEventType || ''}
+                          onChange={e => updateContentField('invitationEventType', e.target.value)}
+                          placeholder="Mariage, Conférence, Anniversaire..."
+                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-amber-600 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Message d'invitation personnalisé</label>
+                      <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Organisateur</label>
+                      <input
+                        type="text"
+                        value={content.invitationHost || ''}
+                        onChange={e => updateContentField('invitationHost', e.target.value)}
+                        placeholder="Nom de l'organisation ou de l'hôte"
+                        className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="col-span-1">
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Date Début *</label>
+                        <input
+                          type="date"
+                          required
+                          value={content.invitationDate || ''}
+                          onChange={e => updateContentField('invitationDate', e.target.value)}
+                          className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Heure Début *</label>
+                        <input
+                          type="time"
+                          required
+                          value={content.invitationTime || ''}
+                          onChange={e => updateContentField('invitationTime', e.target.value)}
+                          className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Date Fin</label>
+                        <input
+                          type="date"
+                          value={content.invitationEndDate || ''}
+                          onChange={e => updateContentField('invitationEndDate', e.target.value)}
+                          className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Heure Fin</label>
+                        <input
+                          type="time"
+                          value={content.invitationEndTime || ''}
+                          onChange={e => updateContentField('invitationEndTime', e.target.value)}
+                          className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Lieu / Salle *</label>
+                        <input
+                          type="text"
+                          required
+                          value={content.invitationLocationName || ''}
+                          onChange={e => updateContentField('invitationLocationName', e.target.value)}
+                          placeholder="Nom de la salle ou du lieu"
+                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-amber-600 focus:outline-none shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Adresse</label>
+                        <input
+                          type="text"
+                          value={content.invitationAddress || ''}
+                          onChange={e => updateContentField('invitationAddress', e.target.value)}
+                          placeholder="Adresse géographique complète"
+                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Position GPS (Lien Maps/Waze)</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-amber-400" />
+                        <input
+                          type="url"
+                          value={content.invitationMapsUrl || ''}
+                          onChange={e => updateContentField('invitationMapsUrl', e.target.value)}
+                          placeholder="https://maps.app.goo.gl/..."
+                          className="w-full bg-white border border-amber-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Description de l'événement</label>
                       <textarea
                         rows={3}
-                        value={content.invitationMessage || ''}
-                        onChange={e => updateContentField('invitationMessage', e.target.value)}
-                        placeholder="Nous avons l'honneur de vous convier à cette soirée d'exception..."
-                        className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        value={content.invitationDescription || ''}
+                        onChange={e => updateContentField('invitationDescription', e.target.value)}
+                        placeholder="Présentez l'objectif de l'événement en quelques mots..."
+                        className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none resize-none"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Programme / Déroulement</label>
+                      <textarea
+                        rows={4}
+                        value={content.invitationProgram || ''}
+                        onChange={e => updateContentField('invitationProgram', e.target.value)}
+                        placeholder="Ex: 19h00 Accueil, 20h00 Dîner, 22h00 Soirée dansante..."
+                        className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none resize-none leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Dress Code</label>
+                        <input
+                          type="text"
+                          value={content.invitationDressCode || ''}
+                          onChange={e => updateContentField('invitationDressCode', e.target.value)}
+                          placeholder="Ex: Tenue de soirée, Décontracté..."
+                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Invité(s) Spécial(aux)</label>
+                        <input
+                          type="text"
+                          value={content.invitationSpecialGuest || ''}
+                          onChange={e => updateContentField('invitationSpecialGuest', e.target.value)}
+                          placeholder="Noms des VIP ou intervenants"
+                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Contact Organisateur</label>
+                        <input
+                          type="tel"
+                          value={content.invitationPhone || ''}
+                          onChange={e => updateContentField('invitationPhone', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">WhatsApp RSVP</label>
+                        <input
+                          type="tel"
+                          value={content.invitationWhatsapp || ''}
+                          onChange={e => updateContentField('invitationWhatsapp', e.target.value)}
+                          placeholder="+225..."
+                          className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Lien de Réservation / Billetterie</label>
+                      <div className="relative">
+                        <ShoppingCart className="absolute left-3 top-2.5 w-3.5 h-3.5 text-amber-400" />
+                        <input
+                          type="url"
+                          value={content.invitationBookingUrl || ''}
+                          onChange={e => updateContentField('invitationBookingUrl', e.target.value)}
+                          placeholder="https://..."
+                          className="w-full bg-white border border-amber-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-medium text-slate-800 focus:border-amber-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white/60 border border-amber-100 rounded-2xl space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={content.invitationRsvpEnabled || false}
+                            onChange={e => updateContentField('invitationRsvpEnabled', e.target.checked)}
+                            className="w-4 h-4 accent-amber-600"
+                          />
+                          <span className="text-[10px] font-black text-amber-900 uppercase tracking-widest">Activer la demande RSVP</span>
+                        </label>
+                      </div>
+                      {content.invitationRsvpEnabled && (
+                        <div>
+                          <label className="block text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Date limite de réponse</label>
+                          <input
+                            type="date"
+                            value={content.invitationRsvpDeadline || ''}
+                            onChange={e => updateContentField('invitationRsvpDeadline', e.target.value)}
+                            className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:border-amber-600 focus:outline-none"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

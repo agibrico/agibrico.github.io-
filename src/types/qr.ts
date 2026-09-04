@@ -180,6 +180,8 @@ export interface QRContent {
   invitationGuest?: string;
   invitationDate?: string;
   invitationTime?: string;
+  invitationEndDate?: string;
+  invitationEndTime?: string;
   invitationLocationName?: string;
   invitationAddress?: string;
   invitationMessage?: string;
@@ -187,6 +189,13 @@ export interface QRContent {
   invitationWhatsapp?: string;
   invitationImageUrl?: string;
   invitationMapsUrl?: string;
+  invitationDescription?: string;
+  invitationProgram?: string;
+  invitationDressCode?: string;
+  invitationSpecialGuest?: string;
+  invitationBookingUrl?: string;
+  invitationRsvpEnabled?: boolean;
+  invitationRsvpDeadline?: string;
 
   // --- COMMERCE / SHOP SPECIFIC ---
   shopName?: string;

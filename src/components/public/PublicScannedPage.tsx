@@ -433,16 +433,19 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               )}
             </div>
 
-            {/* Date & Time Box */}
             <div className="grid grid-cols-2 gap-2 p-3 bg-slate-800/60 rounded-2xl border border-slate-700/50 text-left">
               <div>
-                <span className="text-[10px] font-medium text-slate-400 block">Date</span>
+                <span className="text-[10px] font-medium text-slate-400 block uppercase tracking-wider">Début</span>
                 <span className="text-xs font-bold text-white">{content.invitationDate || 'Date à confirmer'}</span>
+                <span className="text-[10px] font-bold text-amber-400 block">{content.invitationTime || '18h30'}</span>
               </div>
-              <div>
-                <span className="text-[10px] font-medium text-slate-400 block">Heure</span>
-                <span className="text-xs font-bold text-white">{content.invitationTime || '18h30'}</span>
-              </div>
+              {content.invitationEndDate && (
+                <div>
+                  <span className="text-[10px] font-medium text-slate-400 block uppercase tracking-wider">Fin</span>
+                  <span className="text-xs font-bold text-white">{content.invitationEndDate}</span>
+                  {content.invitationEndTime && <span className="text-[10px] font-bold text-slate-400 block">{content.invitationEndTime}</span>}
+                </div>
+              )}
             </div>
 
             {/* Location & Itinerary */}
@@ -473,6 +476,56 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               </div>
             )}
 
+            {/* Description & Program */}
+            {(content.invitationDescription || content.invitationProgram) && (
+              <div className="space-y-3">
+                {content.invitationDescription && (
+                  <div className="p-4 bg-slate-800/60 border border-slate-700/40 rounded-2xl text-left">
+                    <h5 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">À propos de l'événement</h5>
+                    <p className="text-xs text-slate-200 leading-relaxed">{content.invitationDescription}</p>
+                  </div>
+                )}
+                {content.invitationProgram && (
+                  <div className="p-4 bg-slate-800/60 border border-slate-700/40 rounded-2xl text-left">
+                    <h5 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Programme</h5>
+                    <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-line">{content.invitationProgram}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Details: Dress Code & Guests */}
+            {(content.invitationDressCode || content.invitationSpecialGuest) && (
+              <div className="grid grid-cols-1 gap-2">
+                {content.invitationDressCode && (
+                  <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-left flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase text-indigo-300">Dress Code</span>
+                    <span className="text-xs font-bold text-white">{content.invitationDressCode}</span>
+                  </div>
+                )}
+                {content.invitationSpecialGuest && (
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-left">
+                    <span className="text-[10px] font-bold uppercase text-amber-300 block mb-1">Invité(s) Spécial(aux)</span>
+                    <span className="text-xs font-bold text-white">{content.invitationSpecialGuest}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* RSVP Section */}
+            {content.invitationRsvpEnabled && (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-left space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Confirmation RSVP</span>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+                {content.invitationRsvpDeadline && (
+                  <p className="text-[11px] text-emerald-100/80">Date limite : <span className="font-bold">{content.invitationRsvpDeadline}</span></p>
+                )}
+                <p className="text-[10px] text-slate-400 italic">Veuillez confirmer votre présence via le bouton WhatsApp ci-dessous.</p>
+              </div>
+            )}
+
             {/* Other Information for Invitation */}
             {content.otherInformation && (
               <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-xs text-slate-300 leading-relaxed text-left">
@@ -482,13 +535,13 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* RSVP buttons */}
-            <div className="grid grid-cols-2 gap-2 w-full pt-1">
+            <div className={`grid ${content.invitationBookingUrl ? 'grid-cols-3' : 'grid-cols-2'} gap-2 w-full pt-1`}>
               {content.invitationWhatsapp && (
                 <a
                   href={`https://wa.me/${content.invitationWhatsapp.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`Bonjour, je confirme ma présence à l'événement ${invTitle}.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 p-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-bold"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-bold"
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span>Confirmer RSVP</span>
@@ -497,10 +550,21 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               {content.invitationPhone && (
                 <a
                   href={`tel:${content.invitationPhone.replace(/\s+/g, '')}`}
-                  className="flex items-center justify-center gap-2 p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-xs font-bold border border-slate-700"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-[10px] font-bold border border-slate-700"
                 >
                   <Phone className="w-4 h-4 text-emerald-400" />
                   <span>Appeler l'Hôte</span>
+                </a>
+              )}
+              {content.invitationBookingUrl && (
+                <a
+                  href={content.invitationBookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition-colors"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Réserver</span>
                 </a>
               )}
             </div>

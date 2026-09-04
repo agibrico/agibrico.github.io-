@@ -1,4 +1,4 @@
-package com.example.smart_qr_app
+package QR.ODE01
 
 import io.flutter.embedding.android.FlutterActivity
 

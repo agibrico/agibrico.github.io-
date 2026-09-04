@@ -317,7 +317,12 @@ export const QREditor: React.FC<QREditorProps> = ({
       return;
     }
 
-    if (type !== 'book' && !title.trim() && !content.firstName && !content.company) {
+    if (type === 'shop' && (!content.shopName?.trim() && !content.company?.trim())) {
+      alert("Veuillez renseigner au moins le nom du commerce.");
+      return;
+    }
+
+    if (type !== 'book' && type !== 'shop' && !title.trim() && !content.firstName && !content.company) {
       alert("Veuillez renseigner au moins un prénom, un nom ou une entreprise pour votre carte.");
       return;
     }
@@ -1118,6 +1123,124 @@ export const QREditor: React.FC<QREditorProps> = ({
                           />
                         </div>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* SPECIALIZED FORM SECTION FOR SHOP / COMMERCE */}
+                {type === 'shop' && (
+                  <div className="space-y-6 pt-4 border-t border-emerald-100 bg-emerald-50/40 p-5 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                          <Store className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900">Commerce & Boutique</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Fiche Marchande</span>
+                    </div>
+
+                    {/* Logo du commerce */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-emerald-200 rounded-2xl bg-white/60 space-y-3">
+                      {content.logoUrl ? (
+                        <div className="relative group">
+                          <img src={content.logoUrl} className="w-24 h-24 object-contain rounded-xl bg-white p-1 shadow-md" />
+                          <button
+                            onClick={() => {
+                              updateContentField('logoUrl', '');
+                              updateStylingField('logoUrl', '');
+                            }}
+                            className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Logo du commerce (Facultatif)</p>
+                          <label className="px-4 py-1.5 bg-emerald-600 text-white text-[10px] font-bold rounded-full cursor-pointer hover:bg-emerald-700 transition-colors">
+                            Choisir un logo
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    const url = ev.target?.result as string;
+                                    updateContentField('logoUrl', url);
+                                    updateStylingField('logoUrl', url);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-emerald-900 uppercase tracking-widest mb-1.5">Nom du commerce *</label>
+                        <input
+                          type="text"
+                          required
+                          value={content.shopName || content.company || ''}
+                          onChange={e => {
+                            updateContentField('shopName', e.target.value);
+                            updateContentField('company', e.target.value);
+                          }}
+                          placeholder="Ex: Boutique AGB Mode"
+                          className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-emerald-600 focus:outline-none shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-emerald-900 uppercase tracking-widest mb-1.5">Secteur d'activité</label>
+                        <input
+                          type="text"
+                          value={content.shopIndustry || content.industry || ''}
+                          onChange={e => {
+                            updateContentField('shopIndustry', e.target.value);
+                            updateContentField('industry', e.target.value);
+                          }}
+                          placeholder="Ex: Prêt-à-porter, Alimentation..."
+                          className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-emerald-900 uppercase tracking-widest mb-1.5">Slogan</label>
+                      <input
+                        type="text"
+                        value={content.shopSlogan || content.slogan || ''}
+                        onChange={e => {
+                          updateContentField('shopSlogan', e.target.value);
+                          updateContentField('slogan', e.target.value);
+                        }}
+                        placeholder="Votre promesse client..."
+                        className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-emerald-600 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-emerald-900 uppercase tracking-widest mb-1.5">Description de la boutique</label>
+                      <textarea
+                        rows={3}
+                        value={content.shopDescription || content.bio || ''}
+                        onChange={e => {
+                          updateContentField('shopDescription', e.target.value);
+                          updateContentField('bio', e.target.value);
+                        }}
+                        placeholder="Présentez votre boutique, vos produits phares et votre univers..."
+                        className="w-full bg-white border border-emerald-200 rounded-2xl px-4 py-3 text-xs font-medium text-slate-800 focus:border-emerald-600 focus:outline-none resize-none leading-relaxed"
+                      />
                     </div>
                   </div>
                 )}

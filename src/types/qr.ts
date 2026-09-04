@@ -199,6 +199,8 @@ export interface QRContent {
 
   // --- COMMERCE / SHOP SPECIFIC ---
   shopName?: string;
+  shopIndustry?: string;
+  shopSlogan?: string;
   shopDescription?: string;
   shopOpeningHours?: OpeningHourDay[];
   shopServices?: string[];

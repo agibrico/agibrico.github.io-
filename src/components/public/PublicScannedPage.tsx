@@ -675,8 +675,14 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
             <div className="space-y-1">
               <h1 className="text-xl sm:text-2xl font-black text-white">{shopName}</h1>
+              {content.shopIndustry && (
+                <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">{content.shopIndustry}</p>
+              )}
+              {content.shopSlogan && (
+                <p className="text-xs italic text-slate-300 pt-1">« {content.shopSlogan} »</p>
+              )}
               {content.shopDescription && (
-                <p className="text-xs text-slate-300 leading-relaxed">{content.shopDescription}</p>
+                <p className="text-xs text-slate-300 leading-relaxed pt-2">{content.shopDescription}</p>
               )}
               {content.address && (
                 <p className="text-xs text-slate-400 flex items-center justify-center gap-1 pt-1">

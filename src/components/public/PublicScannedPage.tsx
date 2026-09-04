@@ -473,6 +473,14 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               </div>
             )}
 
+            {/* Other Information for Invitation */}
+            {content.otherInformation && (
+              <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-xs text-slate-300 leading-relaxed text-left">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 block mb-1">Notes complémentaires</span>
+                {content.otherInformation}
+              </div>
+            )}
+
             {/* RSVP buttons */}
             <div className="grid grid-cols-2 gap-2 w-full pt-1">
               {content.invitationWhatsapp && (
@@ -575,6 +583,19 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               )}
             </div>
           </div>
+
+          {/* Other Information for Shop */}
+          {content.otherInformation && (
+            <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 space-y-3 shadow-xl text-left">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <Info className="w-3.5 h-3.5 text-blue-400" />
+                <span>Précisions & Notes</span>
+              </h2>
+              <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">
+                {content.otherInformation}
+              </p>
+            </div>
+          )}
 
           {/* Horaires d'ouverture */}
           {content.shopOpeningHours && content.shopOpeningHours.length > 0 && (
@@ -682,6 +703,14 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 </a>
               )}
             </div>
+
+            {/* Other Information for Location */}
+            {content.otherInformation && (
+              <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl text-xs text-slate-300 leading-relaxed text-left">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400 block mb-1">Note sur le lieu</span>
+                {content.otherInformation}
+              </div>
+            )}
 
             {/* Call / WhatsApp contact */}
             <div className="grid grid-cols-2 gap-2 w-full pt-1">
@@ -1125,6 +1154,19 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             {content.businessTaxId && (
               <p><span className="font-semibold text-slate-300">Compte Contribuable :</span> {content.businessTaxId}</p>
             )}
+          </div>
+        )}
+
+        {/* Other Information for Standard View */}
+        {content.otherInformation && (
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 space-y-3 shadow-xl">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Autres informations</span>
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line text-left">
+              {content.otherInformation}
+            </p>
           </div>
         )}
 

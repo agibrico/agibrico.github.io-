@@ -1148,26 +1148,26 @@ export const QREditor: React.FC<QREditorProps> = ({
                     </p>
                   </div>
 
-                  {/* Case Autre / Informations complémentaires non prévues */}
-                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                        <span>Autre : Informations complémentaires (Optionnel)</span>
-                      </label>
-                      <span className="text-[10px] text-slate-400 font-medium">
-                        Disponibilités, horaires spéciaux, notes
-                      </span>
-                    </div>
-                    <textarea
-                      rows={2}
-                      value={content.otherInformation || ''}
-                      onChange={e => updateContentField('otherInformation', e.target.value)}
-                      placeholder="Ex: Rendez-vous uniquement sur confirmation, permanence le samedi matin, contact d'urgence direct..."
-                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs sm:text-sm font-medium text-slate-800 focus:border-blue-600 focus:outline-none transition-colors"
-                    />
-                  </div>
+                </div>
 
+                {/* Case Autre / Informations complémentaires pour TOUS les types */}
+                <div className="p-5 rounded-3xl border border-slate-200 bg-slate-50/60 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Autres informations / Notes</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium uppercase tracking-widest">
+                      Libre
+                    </span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={content.otherInformation || ''}
+                    onChange={e => updateContentField('otherInformation', e.target.value)}
+                    placeholder="Saisissez ici toute information complémentaire (notes, précisions, horaires spéciaux, messages, etc.)"
+                    className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-xs sm:text-sm font-medium text-slate-800 focus:border-blue-600 focus:outline-none transition-colors resize-none leading-relaxed"
+                  />
                 </div>
 
                 {/* Tab 1 Footer Actions */}

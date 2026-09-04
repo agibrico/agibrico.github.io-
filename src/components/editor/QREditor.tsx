@@ -35,7 +35,12 @@ import {
   Hash,
   Languages,
   DollarSign,
-  ShoppingCart
+  ShoppingCart,
+  Facebook,
+  Instagram,
+  Truck,
+  Wallet,
+  Package
 } from 'lucide-react';
 import { 
   QRCodeItem, 
@@ -1242,6 +1247,124 @@ export const QREditor: React.FC<QREditorProps> = ({
                         placeholder="Présentez votre boutique, vos produits phares et votre univers..."
                         className="w-full bg-white border border-emerald-200 rounded-2xl px-4 py-3 text-xs font-medium text-slate-800 focus:border-emerald-600 focus:outline-none resize-none leading-relaxed"
                       />
+                    </div>
+
+                    {/* Services & Produits */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-emerald-900 uppercase tracking-widest mb-1.5">Services Proposés</label>
+                        <textarea
+                          rows={3}
+                          value={(content.shopServices || []).join('\n')}
+                          onChange={e => updateContentField('shopServices', e.target.value.split('\n').map(s => s.trim()).filter(Boolean))}
+                          placeholder="Un service par ligne..."
+                          className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-emerald-900 uppercase tracking-widest mb-1.5">Produits Vendus</label>
+                        <textarea
+                          rows={3}
+                          value={(content.shopProducts || []).join('\n')}
+                          onChange={e => updateContentField('shopProducts', e.target.value.split('\n').map(s => s.trim()).filter(Boolean))}
+                          placeholder="Un produit par ligne..."
+                          className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Livraison & Paiement */}
+                    <div className="space-y-4 p-4 bg-white/40 border border-emerald-100 rounded-2xl">
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <Truck className="w-4 h-4 text-emerald-600" />
+                          <span className="text-[10px] font-black text-emerald-900 uppercase tracking-widest">Livraison disponible</span>
+                          <input
+                            type="checkbox"
+                            checked={content.shopDeliveryAvailable || false}
+                            onChange={e => updateContentField('shopDeliveryAvailable', e.target.checked)}
+                            className="w-4 h-4 accent-emerald-600 ml-2"
+                          />
+                        </label>
+                      </div>
+
+                      {content.shopDeliveryAvailable && (
+                        <div className="animate-in fade-in slide-in-from-top-2">
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Zone de livraison</label>
+                          <input
+                            type="text"
+                            value={content.shopDeliveryZone || ''}
+                            onChange={e => updateContentField('shopDeliveryZone', e.target.value)}
+                            placeholder="Abidjan, Yamoussoukro..."
+                            className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2 text-xs font-medium text-slate-800 focus:border-emerald-600 focus:outline-none"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="flex items-center gap-2 text-[10px] font-black text-emerald-900 uppercase tracking-widest mb-1.5">
+                          <Wallet className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Moyens de paiement</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={(content.shopPaymentMethods || []).join(', ')}
+                          onChange={e => updateContentField('shopPaymentMethods', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                          placeholder="Orange Money, Wave, Espèces..."
+                          className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-emerald-600 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Liens & Réseaux Sociaux Boutique */}
+                    <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                      <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <Globe className="w-3.5 h-3.5" />
+                        Lien Web & Réseaux
+                      </h5>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400" />
+                          <input
+                            type="url"
+                            value={content.shopWebsiteUrl || ''}
+                            onChange={e => updateContentField('shopWebsiteUrl', e.target.value)}
+                            placeholder="Site Internet"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs font-medium focus:border-blue-600 outline-none"
+                          />
+                        </div>
+                        <div className="relative">
+                          <Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" />
+                          <input
+                            type="url"
+                            value={content.shopFacebookUrl || ''}
+                            onChange={e => updateContentField('shopFacebookUrl', e.target.value)}
+                            placeholder="Facebook"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs font-medium focus:border-blue-600 outline-none"
+                          />
+                        </div>
+                        <div className="relative">
+                          <Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" />
+                          <input
+                            type="url"
+                            value={content.shopInstagramUrl || ''}
+                            onChange={e => updateContentField('shopInstagramUrl', e.target.value)}
+                            placeholder="Instagram"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs font-medium focus:border-blue-600 outline-none"
+                          />
+                        </div>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2 text-[10px] font-bold text-slate-900">Tik</span>
+                          <input
+                            type="url"
+                            value={content.shopTikTokUrl || ''}
+                            onChange={e => updateContentField('shopTikTokUrl', e.target.value)}
+                            placeholder="TikTok"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs font-medium focus:border-blue-600 outline-none"
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     <div className="pt-4 border-t border-emerald-100">

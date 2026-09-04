@@ -693,16 +693,14 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             </div>
 
             {/* Quick Actions: Maps & Call */}
-            <div className="grid grid-cols-2 gap-2 w-full pt-1">
-              {(content.shopMapsUrl || content.locationLink || content.address) && (
+            <div className="grid grid-cols-4 gap-2 w-full pt-1">
+              {content.primaryPhone && (
                 <a
-                  href={content.shopMapsUrl || content.locationLink || `https://maps.google.com/?q=${encodeURIComponent(content.address || '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 p-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-bold shadow-lg"
+                  href={`tel:${content.primaryPhone.replace(/\s+/g, '')}`}
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200 transition-colors"
                 >
-                  <Navigation className="w-4 h-4" />
-                  <span>Itinéraire GPS</span>
+                  <Phone className="w-4 h-4 text-emerald-400" />
+                  <span className="text-[8px] font-bold uppercase">Appeler</span>
                 </a>
               )}
               {content.whatsappNumber && (
@@ -710,14 +708,60 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                   href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 p-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-xs font-bold border border-slate-700"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200 transition-colors"
                 >
                   <MessageSquare className="w-4 h-4 text-emerald-400" />
-                  <span>WhatsApp</span>
+                  <span className="text-[8px] font-bold uppercase">WhatsApp</span>
                 </a>
+              )}
+              {(content.shopMapsUrl || content.locationLink || content.address) && (
+                <a
+                  href={content.shopMapsUrl || content.locationLink || `https://maps.google.com/?q=${encodeURIComponent(content.address || '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl border border-emerald-700/40 transition-colors"
+                >
+                  <Navigation className="w-4 h-4" />
+                  <span className="text-[8px] font-bold uppercase">Itinéraire</span>
+                </a>
+              )}
+              {((content.shopServices?.length || 0) + (content.shopProducts?.length || 0) > 0) && (
+                <button
+                  onClick={() => document.getElementById('shop-products')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all active:scale-95"
+                >
+                  <Package className="w-4 h-4" />
+                  <span className="text-[8px] font-bold uppercase text-center">Services & Produits</span>
+                </button>
               )}
             </div>
           </div>
+
+          {/* Social Quick Links Row for Shop */}
+          {(content.shopWebsiteUrl || content.shopFacebookUrl || content.shopInstagramUrl || content.shopTikTokUrl) && (
+            <div className="flex items-center justify-center gap-4 py-2 bg-slate-900/60 border border-slate-800/80 rounded-2xl mx-4">
+              {content.shopWebsiteUrl && (
+                <a href={content.shopWebsiteUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors">
+                  <Globe className="w-5 h-5 text-blue-400" />
+                </a>
+              )}
+              {content.shopFacebookUrl && (
+                <a href={content.shopFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors">
+                  <Facebook className="w-5 h-5 text-blue-600" />
+                </a>
+              )}
+              {content.shopInstagramUrl && (
+                <a href={content.shopInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors">
+                  <Instagram className="w-5 h-5 text-rose-500" />
+                </a>
+              )}
+              {content.shopTikTokUrl && (
+                <a href={content.shopTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors">
+                  <span className="text-xs font-black text-white px-1">Tik</span>
+                </a>
+              )}
+            </div>
+          )}
 
           {/* Other Information for Shop */}
           {content.otherInformation && (
@@ -754,17 +798,68 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
           )}
 
           {/* Services & Produits */}
-          {content.shopServices && content.shopServices.length > 0 && (
-            <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 space-y-3 shadow-xl">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Services & Prestations</h2>
-              <div className="space-y-1.5">
-                {content.shopServices.map((s, i) => (
-                  <div key={i} className="flex items-center gap-2 p-2 rounded-xl bg-slate-800/40 text-xs text-slate-200">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <span>{s}</span>
+          {((content.shopServices && content.shopServices.length > 0) || (content.shopProducts && content.shopProducts.length > 0)) && (
+            <div id="shop-products" className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl text-left">
+              {content.shopServices && content.shopServices.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-slate-800/60 pb-1.5">
+                    <Briefcase className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Services Proposés</span>
+                  </h2>
+                  <div className="space-y-1.5">
+                    {content.shopServices.map((s, i) => (
+                      <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-800/40 text-xs text-slate-200 border border-slate-700/30">
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <span>{s}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+
+              {content.shopProducts && content.shopProducts.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-slate-800/60 pb-1.5">
+                    <Package className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Produits en Vente</span>
+                  </h2>
+                  <div className="grid grid-cols-1 gap-2">
+                    {content.shopProducts.map((p, i) => (
+                      <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-800/40 text-xs text-slate-200 border border-slate-700/30">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                        <span>{p}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Livraison & Paiement Details */}
+          {(content.shopDeliveryAvailable || (content.shopPaymentMethods && content.shopPaymentMethods.length > 0)) && (
+            <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl text-left text-xs">
+              {content.shopDeliveryAvailable && (
+                <div className="flex items-start gap-3 p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                  <Truck className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <div>
+                    <span className="font-bold text-emerald-400 uppercase tracking-widest text-[10px] block">Livraison disponible</span>
+                    {content.shopDeliveryZone && <p className="text-slate-300 mt-0.5">Zone : <span className="font-semibold text-white">{content.shopDeliveryZone}</span></p>}
+                  </div>
+                </div>
+              )}
+
+              {content.shopPaymentMethods && content.shopPaymentMethods.length > 0 && (
+                <div className="flex items-start gap-3 p-3 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
+                  <Wallet className="w-5 h-5 text-blue-400 shrink-0" />
+                  <div>
+                    <span className="font-bold text-blue-400 uppercase tracking-widest text-[10px] block">Moyens de paiement</span>
+                    <p className="text-slate-200 font-medium mt-1 leading-relaxed">
+                      {content.shopPaymentMethods.join(' • ')}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

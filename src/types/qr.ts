@@ -205,8 +205,13 @@ export interface QRContent {
   shopOpeningHours?: OpeningHourDay[];
   shopServices?: string[];
   shopProducts?: string[];
-  shopWazeUrl?: string;
-  shopMapsUrl?: string;
+  shopDeliveryAvailable?: boolean;
+  shopDeliveryZone?: string;
+  shopPaymentMethods?: string[];
+  shopWebsiteUrl?: string;
+  shopFacebookUrl?: string;
+  shopInstagramUrl?: string;
+  shopTikTokUrl?: string;
 
   // --- LOCALISATION / ITINÉRAIRE SPECIFIC ---
   locationPlaceName?: string;

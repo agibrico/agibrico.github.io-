@@ -126,6 +126,37 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     }
   };
 
+  const handleAddToCalendar = () => {
+    if (!item) return;
+    const { invitationTitle, invitationDate, invitationTime, invitationLocationName, invitationAddress } = content;
+
+    const calTitle = invitationTitle || item.title || 'Événement';
+    const startDateStr = invitationDate ? invitationDate.replace(/-/g, '') : '';
+    const startTimeStr = invitationTime ? invitationTime.replace(/:/g, '') : '0000';
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//AGB Studio//Smart QR App//FR',
+      'BEGIN:VEVENT',
+      `SUMMARY:${calTitle}`,
+      `DTSTART:${startDateStr}T${startTimeStr}00`,
+      `LOCATION:${invitationLocationName || ''} ${invitationAddress || ''}`,
+      `DESCRIPTION:Invitation générée par AGB vCard Studio`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.body.appendChild(document.createElement('a'));
+    link.href = url;
+    link.download = `${calTitle.replace(/\s+/g, '_')}.ics`;
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
   // 1. Loading State
   if (loading) {
     return (
@@ -534,37 +565,71 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               </div>
             )}
 
-            {/* RSVP buttons */}
-            <div className={`grid ${content.invitationBookingUrl ? 'grid-cols-3' : 'grid-cols-2'} gap-2 w-full pt-1`}>
+            {/* Action Buttons Grid */}
+            <div className="grid grid-cols-2 gap-2 w-full pt-1">
               {content.invitationWhatsapp && (
                 <a
                   href={`https://wa.me/${content.invitationWhatsapp.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`Bonjour, je confirme ma présence à l'événement ${invTitle}.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-bold"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-bold shadow-lg shadow-emerald-900/20 transition-all active:scale-95"
                 >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Confirmer RSVP</span>
+                  <Check className="w-5 h-5" />
+                  <span>Confirmer ma présence</span>
                 </a>
               )}
+
+              <button
+                onClick={handleAddToCalendar}
+                className="flex flex-col items-center justify-center gap-1.5 p-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-bold shadow-lg shadow-indigo-900/20 transition-all active:scale-95"
+              >
+                <Calendar className="w-5 h-5" />
+                <span>Ajouter au calendrier</span>
+              </button>
+
+              {(content.invitationMapsUrl || content.locationLink || content.invitationAddress) && (
+                <a
+                  href={content.invitationMapsUrl || content.locationLink || `https://maps.google.com/?q=${encodeURIComponent(content.invitationAddress || '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-[10px] font-bold border border-slate-700 transition-colors"
+                >
+                  <Navigation className="w-5 h-5 text-amber-400" />
+                  <span>Voir l'itinéraire</span>
+                </a>
+              )}
+
               {content.invitationPhone && (
                 <a
                   href={`tel:${content.invitationPhone.replace(/\s+/g, '')}`}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-[10px] font-bold border border-slate-700"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-[10px] font-bold border border-slate-700 transition-colors"
                 >
-                  <Phone className="w-4 h-4 text-emerald-400" />
-                  <span>Appeler l'Hôte</span>
+                  <Phone className="w-5 h-5 text-emerald-400" />
+                  <span>Appeler</span>
                 </a>
               )}
+
+              {content.invitationWhatsapp && (
+                <a
+                  href={`https://wa.me/${content.invitationWhatsapp.replace(/[^\d]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-[10px] font-bold border border-slate-700 transition-colors"
+                >
+                  <MessageSquare className="w-5 h-5 text-emerald-400" />
+                  <span>WhatsApp</span>
+                </a>
+              )}
+
               {content.invitationBookingUrl && (
                 <a
                   href={content.invitationBookingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition-colors"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold shadow-lg shadow-blue-900/20 transition-all active:scale-95"
                 >
-                  <ShoppingCart className="w-4 h-4" />
-                  <span>Réserver</span>
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>Réserver ma place</span>
                 </a>
               )}
             </div>

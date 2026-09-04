@@ -232,10 +232,32 @@ export interface QRContent {
   locationGoogleMapsUrl?: string;
   locationWazeUrl?: string;
 
-  // --- MENU SPECIFIC ---
-  menuCategories?: Array<{
-    category: string;
-    items: Array<{ name: string; description?: string; price: string }>;
+  // --- PRODUCT / MENU / SERVICE SPECIFIC ---
+  productSheetType?: 'product' | 'menu' | 'service';
+  productName?: string;
+  productCategory?: string;
+  productSku?: string;
+  productDescription?: string;
+  productPriceNormal?: string;
+  productPricePromo?: string;
+  productCurrency?: string;
+  productStock?: number | string;
+  productAvailability?: 'available' | 'out_of_stock';
+  productVariants?: string;
+  productOrderPhone?: string;
+  productOrderWhatsapp?: string;
+  productBuyUrl?: string;
+  productMainImageUrl?: string;
+  productExtraImages?: string[];
+
+  menuItems?: Array<{
+    id: string;
+    category: 'Entrées' | 'Plats' | 'Desserts' | 'Boissons' | 'Menus' | 'Promotions';
+    name: string;
+    description?: string;
+    price: string;
+    photoUrl?: string;
+    isAvailable: boolean;
   }>;
 
   // --- BUSINESS / SOCIÉTÉ SPECIFIC ---

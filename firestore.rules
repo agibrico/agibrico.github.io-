@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admin unique configuration
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'atsegillesbrice@gmail.com';
+    }
+
+    match /cards/{cardId} {
+      // Lecture d'une fiche individuelle : publique si publiée ou admin
+      allow get: if resource.data.status == 'PUBLISHED' || isAdmin();
+
+      // Liste de toutes les fiches : admin seulement
+      allow list: if isAdmin();
+
+      // Création et suppression : admin seulement
+      allow create, delete: if isAdmin();
+
+      // Mise à jour : admin peut tout faire, le public peut seulement incrémenter le scanCount
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['scanCount', 'lastScanAt'])
+        && resource.data.status == 'PUBLISHED'
+      );
+    }
+  }
+}

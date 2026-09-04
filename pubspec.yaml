@@ -1,0 +1,38 @@
+name: smart_qr_app
+description: "Application professionnelle de création et gestion de fiches numériques associées à des QR codes dynamiques."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.4.0
+  firebase_auth: ^5.2.0
+  cloud_firestore: ^5.3.0
+  firebase_storage: ^12.2.0
+  qr_flutter: ^4.1.0
+  url_launcher: ^6.3.0
+  image_picker: ^1.1.2
+  provider: ^6.1.2
+  intl: ^0.19.0
+  google_fonts: ^6.2.1
+  lucide_icons: ^0.7.0
+  cached_network_image: ^3.4.0
+  share_plus: ^10.1.0
+  path_provider: ^2.1.4
+  geolocator: ^13.0.1
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

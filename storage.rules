@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'atsegillesbrice@gmail.com';
+    }
+
+    match /cards/{cardId}/{allPaths=**} {
+      // Lecture publique
+      allow read: if true;
+      // Écriture réservée à l'admin
+      allow write: if isAdmin();
+    }
+  }
+}

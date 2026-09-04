@@ -46,7 +46,9 @@ import {
   Linkedin,
   Youtube,
   FileText,
-  Briefcase
+  Briefcase,
+  Twitter,
+  Send
 } from 'lucide-react';
 import { 
   QRCodeItem, 
@@ -412,7 +414,7 @@ export const QREditor: React.FC<QREditorProps> = ({
     { type: 'shop', label: 'Commerce & Boutique', desc: 'Horaires d\'ouverture, boutique & GPS', icon: Store },
     { type: 'location', label: 'Localisation & GPS', desc: 'Position géographique, Waze & Google Maps', icon: Navigation },
     { type: 'business', label: 'Entreprise & Société', desc: 'RCCM, horaires, catalogue & services', icon: Building2 },
-    { type: 'social', label: 'Bio & Réseaux', desc: 'Instagram, TikTok, LinkedIn, YouTube', icon: Share2 },
+    { type: 'social', label: 'Bio & Réseaux', desc: 'Mini page Linktree, photo & liens personnalisés', icon: Share2 },
     { type: 'product', label: 'Produit & Menu', desc: 'Restaurant, prix, description & commande', icon: ShoppingBag },
     { type: 'url', label: 'Lien Web Simple', desc: 'Redirection vers une page externe', icon: Globe },
     { type: 'custom', label: 'Fiche Personnalisée', desc: 'Champs dynamiques entièrement libres', icon: Sparkles },
@@ -862,6 +864,112 @@ export const QREditor: React.FC<QREditorProps> = ({
                         placeholder="Informations complémentaires, dédicaces, événements à venir..."
                         className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs font-medium text-slate-800 focus:border-indigo-600 focus:outline-none resize-none leading-relaxed"
                       />
+                    </div>
+                  </div>
+                )}
+
+                {/* SPECIALIZED FORM SECTION FOR SOCIAL / BIO (LINKTREE STYLE) */}
+                {type === 'social' && (
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Profil Bio & Réseaux</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Multi-liens</span>
+                    </div>
+
+                    {/* Photo de Profil / Avatar */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-full w-32 h-32 mx-auto bg-white space-y-2 overflow-hidden">
+                      {content.photoUrl ? (
+                        <div className="relative group w-full h-full">
+                          <img src={content.photoUrl} className="w-full h-full object-cover" />
+                          <button onClick={() => updateContentField('photoUrl', '')} className="absolute inset-0 flex items-center justify-center bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <User className="w-8 h-8 text-indigo-200 mb-1" />
+                          <span className="text-[8px] font-black text-indigo-400 uppercase">Photo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = ev => updateContentField('photoUrl', ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Nom affiché *</label>
+                        <input type="text" required value={content.socialDisplayName || content.fullName || ''} onChange={e => {updateContentField('socialDisplayName', e.target.value); updateContentField('fullName', e.target.value);}} placeholder="Votre nom ou marque" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs font-bold outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Pseudo / Username</label>
+                        <input type="text" value={content.socialNickname || ''} onChange={e => updateContentField('socialNickname', e.target.value)} placeholder="@pseudo" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Profession / Activité</label>
+                        <input type="text" value={content.socialProfession || content.jobTitle || ''} onChange={e => {updateContentField('socialProfession', e.target.value); updateContentField('jobTitle', e.target.value);}} placeholder="Ex: Créateur de contenu" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Entreprise</label>
+                        <input type="text" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} placeholder="Nom de votre structure" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Bio / Présentation Courte</label>
+                      <textarea rows={3} value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} placeholder="Dites-en plus sur vous en quelques lignes..." className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs outline-none resize-none leading-relaxed" />
+                    </div>
+
+                    {/* Réseaux Sociaux Dédiés */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Réseaux Sociaux Directs</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative"><Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" /><input type="url" value={content.socialFacebookUrl || ''} onChange={e => updateContentField('socialFacebookUrl', e.target.value)} placeholder="Facebook" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" /><input type="url" value={content.socialInstagramUrl || ''} onChange={e => updateContentField('socialInstagramUrl', e.target.value)} placeholder="Instagram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><span className="absolute left-3 top-2.5 text-[9px] font-bold">Tik</span><input type="url" value={content.socialTikTokUrl || ''} onChange={e => updateContentField('socialTikTokUrl', e.target.value)} placeholder="TikTok" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Youtube className="absolute left-3 top-2.5 w-3.5 h-3.5 text-red-600" /><input type="url" value={content.socialYouTubeUrl || ''} onChange={e => updateContentField('socialYouTubeUrl', e.target.value)} placeholder="YouTube" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Linkedin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-700" /><input type="url" value={content.socialLinkedInUrl || ''} onChange={e => updateContentField('socialLinkedInUrl', e.target.value)} placeholder="LinkedIn" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Twitter className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-500" /><input type="url" value={content.socialTwitterUrl || ''} onChange={e => updateContentField('socialTwitterUrl', e.target.value)} placeholder="X / Twitter" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Send className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-600" /><input type="url" value={content.socialTelegramUrl || ''} onChange={e => updateContentField('socialTelegramUrl', e.target.value)} placeholder="Telegram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><MessageSquare className="absolute left-3 top-2.5 w-3.5 h-3.5 text-emerald-500" /><input type="url" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} placeholder="WhatsApp" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                      </div>
+                    </div>
+
+                    {/* Liens Personnalisés Libres */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Liens Personnalisés Libres</h5>
+                        <button type="button" onClick={addSocialLink} className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-sm">+ Ajouter un lien</button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {content.socialLinks.map((link) => (
+                          <div key={link.id} className="p-3 bg-white border border-indigo-100 rounded-2xl flex gap-3 items-start shadow-xs">
+                            <div className="flex-1 space-y-2">
+                              <input type="text" value={link.label || ''} onChange={e => {
+                                const newLinks = content.socialLinks.map(l => l.id === link.id ? {...l, label: e.target.value} : l);
+                                updateContentField('socialLinks', newLinks);
+                              }} placeholder="Titre (ex: Mon Catalogue, Ma Boutique...)" className="w-full border-b border-slate-100 text-[11px] font-bold text-slate-800 outline-none pb-1" />
+                              <div className="flex items-center gap-2">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <input type="url" value={link.url} onChange={e => updateSocialLink(link.id, link.platform, e.target.value)} placeholder="https://..." className="w-full text-[10px] text-indigo-600 outline-none" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeSocialLink(link.id)} className="p-1.5 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1338,6 +1446,112 @@ export const QREditor: React.FC<QREditorProps> = ({
                           placeholder="+225..."
                           className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
                         />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* SPECIALIZED FORM SECTION FOR SOCIAL / BIO (LINKTREE STYLE) */}
+                {type === 'social' && (
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Profil Bio & Réseaux</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Multi-liens</span>
+                    </div>
+
+                    {/* Photo de Profil / Avatar */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-full w-32 h-32 mx-auto bg-white space-y-2 overflow-hidden">
+                      {content.photoUrl ? (
+                        <div className="relative group w-full h-full">
+                          <img src={content.photoUrl} className="w-full h-full object-cover" />
+                          <button onClick={() => updateContentField('photoUrl', '')} className="absolute inset-0 flex items-center justify-center bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <User className="w-8 h-8 text-indigo-200 mb-1" />
+                          <span className="text-[8px] font-black text-indigo-400 uppercase">Photo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = ev => updateContentField('photoUrl', ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Nom affiché *</label>
+                        <input type="text" required value={content.socialDisplayName || content.fullName || ''} onChange={e => {updateContentField('socialDisplayName', e.target.value); updateContentField('fullName', e.target.value);}} placeholder="Votre nom ou marque" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs font-bold outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Pseudo / Username</label>
+                        <input type="text" value={content.socialNickname || ''} onChange={e => updateContentField('socialNickname', e.target.value)} placeholder="@pseudo" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Profession / Activité</label>
+                        <input type="text" value={content.socialProfession || content.jobTitle || ''} onChange={e => {updateContentField('socialProfession', e.target.value); updateContentField('jobTitle', e.target.value);}} placeholder="Ex: Créateur de contenu" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Entreprise</label>
+                        <input type="text" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} placeholder="Nom de votre structure" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Bio / Présentation Courte</label>
+                      <textarea rows={3} value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} placeholder="Dites-en plus sur vous en quelques lignes..." className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs outline-none resize-none leading-relaxed" />
+                    </div>
+
+                    {/* Réseaux Sociaux Dédiés */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Réseaux Sociaux Directs</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative"><Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" /><input type="url" value={content.socialFacebookUrl || ''} onChange={e => updateContentField('socialFacebookUrl', e.target.value)} placeholder="Facebook" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" /><input type="url" value={content.socialInstagramUrl || ''} onChange={e => updateContentField('socialInstagramUrl', e.target.value)} placeholder="Instagram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><span className="absolute left-3 top-2.5 text-[9px] font-bold">Tik</span><input type="url" value={content.socialTikTokUrl || ''} onChange={e => updateContentField('socialTikTokUrl', e.target.value)} placeholder="TikTok" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Youtube className="absolute left-3 top-2.5 w-3.5 h-3.5 text-red-600" /><input type="url" value={content.socialYouTubeUrl || ''} onChange={e => updateContentField('socialYouTubeUrl', e.target.value)} placeholder="YouTube" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Linkedin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-700" /><input type="url" value={content.socialLinkedInUrl || ''} onChange={e => updateContentField('socialLinkedInUrl', e.target.value)} placeholder="LinkedIn" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Twitter className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-500" /><input type="url" value={content.socialTwitterUrl || ''} onChange={e => updateContentField('socialTwitterUrl', e.target.value)} placeholder="X / Twitter" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Send className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-600" /><input type="url" value={content.socialTelegramUrl || ''} onChange={e => updateContentField('socialTelegramUrl', e.target.value)} placeholder="Telegram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><MessageSquare className="absolute left-3 top-2.5 w-3.5 h-3.5 text-emerald-500" /><input type="url" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} placeholder="WhatsApp" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                      </div>
+                    </div>
+
+                    {/* Liens Personnalisés Libres */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Liens Personnalisés Libres</h5>
+                        <button type="button" onClick={addSocialLink} className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-sm">+ Ajouter un lien</button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {content.socialLinks.map((link) => (
+                          <div key={link.id} className="p-3 bg-white border border-indigo-100 rounded-2xl flex gap-3 items-start shadow-xs">
+                            <div className="flex-1 space-y-2">
+                              <input type="text" value={link.label || ''} onChange={e => {
+                                const newLinks = content.socialLinks.map(l => l.id === link.id ? {...l, label: e.target.value} : l);
+                                updateContentField('socialLinks', newLinks);
+                              }} placeholder="Titre (ex: Mon Catalogue, Ma Boutique...)" className="w-full border-b border-slate-100 text-[11px] font-bold text-slate-800 outline-none pb-1" />
+                              <div className="flex items-center gap-2">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <input type="url" value={link.url} onChange={e => updateSocialLink(link.id, link.platform, e.target.value)} placeholder="https://..." className="w-full text-[10px] text-indigo-600 outline-none" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeSocialLink(link.id)} className="p-1.5 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -1853,6 +2067,112 @@ export const QREditor: React.FC<QREditorProps> = ({
                   </div>
                 )}
 
+                {/* SPECIALIZED FORM SECTION FOR SOCIAL / BIO (LINKTREE STYLE) */}
+                {type === 'social' && (
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Profil Bio & Réseaux</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Multi-liens</span>
+                    </div>
+
+                    {/* Photo de Profil / Avatar */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-full w-32 h-32 mx-auto bg-white space-y-2 overflow-hidden">
+                      {content.photoUrl ? (
+                        <div className="relative group w-full h-full">
+                          <img src={content.photoUrl} className="w-full h-full object-cover" />
+                          <button onClick={() => updateContentField('photoUrl', '')} className="absolute inset-0 flex items-center justify-center bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <User className="w-8 h-8 text-indigo-200 mb-1" />
+                          <span className="text-[8px] font-black text-indigo-400 uppercase">Photo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = ev => updateContentField('photoUrl', ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Nom affiché *</label>
+                        <input type="text" required value={content.socialDisplayName || content.fullName || ''} onChange={e => {updateContentField('socialDisplayName', e.target.value); updateContentField('fullName', e.target.value);}} placeholder="Votre nom ou marque" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs font-bold outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Pseudo / Username</label>
+                        <input type="text" value={content.socialNickname || ''} onChange={e => updateContentField('socialNickname', e.target.value)} placeholder="@pseudo" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Profession / Activité</label>
+                        <input type="text" value={content.socialProfession || content.jobTitle || ''} onChange={e => {updateContentField('socialProfession', e.target.value); updateContentField('jobTitle', e.target.value);}} placeholder="Ex: Créateur de contenu" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Entreprise</label>
+                        <input type="text" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} placeholder="Nom de votre structure" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Bio / Présentation Courte</label>
+                      <textarea rows={3} value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} placeholder="Dites-en plus sur vous en quelques lignes..." className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs outline-none resize-none leading-relaxed" />
+                    </div>
+
+                    {/* Réseaux Sociaux Dédiés */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Réseaux Sociaux Directs</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative"><Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" /><input type="url" value={content.socialFacebookUrl || ''} onChange={e => updateContentField('socialFacebookUrl', e.target.value)} placeholder="Facebook" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" /><input type="url" value={content.socialInstagramUrl || ''} onChange={e => updateContentField('socialInstagramUrl', e.target.value)} placeholder="Instagram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><span className="absolute left-3 top-2.5 text-[9px] font-bold">Tik</span><input type="url" value={content.socialTikTokUrl || ''} onChange={e => updateContentField('socialTikTokUrl', e.target.value)} placeholder="TikTok" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Youtube className="absolute left-3 top-2.5 w-3.5 h-3.5 text-red-600" /><input type="url" value={content.socialYouTubeUrl || ''} onChange={e => updateContentField('socialYouTubeUrl', e.target.value)} placeholder="YouTube" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Linkedin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-700" /><input type="url" value={content.socialLinkedInUrl || ''} onChange={e => updateContentField('socialLinkedInUrl', e.target.value)} placeholder="LinkedIn" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Twitter className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-500" /><input type="url" value={content.socialTwitterUrl || ''} onChange={e => updateContentField('socialTwitterUrl', e.target.value)} placeholder="X / Twitter" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Send className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-600" /><input type="url" value={content.socialTelegramUrl || ''} onChange={e => updateContentField('socialTelegramUrl', e.target.value)} placeholder="Telegram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><MessageSquare className="absolute left-3 top-2.5 w-3.5 h-3.5 text-emerald-500" /><input type="url" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} placeholder="WhatsApp" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                      </div>
+                    </div>
+
+                    {/* Liens Personnalisés Libres */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Liens Personnalisés Libres</h5>
+                        <button type="button" onClick={addSocialLink} className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-sm">+ Ajouter un lien</button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {content.socialLinks.map((link) => (
+                          <div key={link.id} className="p-3 bg-white border border-indigo-100 rounded-2xl flex gap-3 items-start shadow-xs">
+                            <div className="flex-1 space-y-2">
+                              <input type="text" value={link.label || ''} onChange={e => {
+                                const newLinks = content.socialLinks.map(l => l.id === link.id ? {...l, label: e.target.value} : l);
+                                updateContentField('socialLinks', newLinks);
+                              }} placeholder="Titre (ex: Mon Catalogue, Ma Boutique...)" className="w-full border-b border-slate-100 text-[11px] font-bold text-slate-800 outline-none pb-1" />
+                              <div className="flex items-center gap-2">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <input type="url" value={link.url} onChange={e => updateSocialLink(link.id, link.platform, e.target.value)} placeholder="https://..." className="w-full text-[10px] text-indigo-600 outline-none" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeSocialLink(link.id)} className="p-1.5 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* SPECIALIZED FORM SECTION FOR BUSINESS / SOCIÉTÉ */}
                 {type === 'business' && (
                   <div className="space-y-6 pt-4 border-t border-slate-200 bg-slate-50/80 p-6 rounded-3xl">
@@ -2325,6 +2645,112 @@ export const QREditor: React.FC<QREditorProps> = ({
                           placeholder="+225..."
                           className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
                         />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* SPECIALIZED FORM SECTION FOR SOCIAL / BIO (LINKTREE STYLE) */}
+                {type === 'social' && (
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Profil Bio & Réseaux</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Multi-liens</span>
+                    </div>
+
+                    {/* Photo de Profil / Avatar */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-full w-32 h-32 mx-auto bg-white space-y-2 overflow-hidden">
+                      {content.photoUrl ? (
+                        <div className="relative group w-full h-full">
+                          <img src={content.photoUrl} className="w-full h-full object-cover" />
+                          <button onClick={() => updateContentField('photoUrl', '')} className="absolute inset-0 flex items-center justify-center bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <User className="w-8 h-8 text-indigo-200 mb-1" />
+                          <span className="text-[8px] font-black text-indigo-400 uppercase">Photo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = ev => updateContentField('photoUrl', ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Nom affiché *</label>
+                        <input type="text" required value={content.socialDisplayName || content.fullName || ''} onChange={e => {updateContentField('socialDisplayName', e.target.value); updateContentField('fullName', e.target.value);}} placeholder="Votre nom ou marque" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs font-bold outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Pseudo / Username</label>
+                        <input type="text" value={content.socialNickname || ''} onChange={e => updateContentField('socialNickname', e.target.value)} placeholder="@pseudo" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Profession / Activité</label>
+                        <input type="text" value={content.socialProfession || content.jobTitle || ''} onChange={e => {updateContentField('socialProfession', e.target.value); updateContentField('jobTitle', e.target.value);}} placeholder="Ex: Créateur de contenu" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Entreprise</label>
+                        <input type="text" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} placeholder="Nom de votre structure" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Bio / Présentation Courte</label>
+                      <textarea rows={3} value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} placeholder="Dites-en plus sur vous en quelques lignes..." className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs outline-none resize-none leading-relaxed" />
+                    </div>
+
+                    {/* Réseaux Sociaux Dédiés */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Réseaux Sociaux Directs</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative"><Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" /><input type="url" value={content.socialFacebookUrl || ''} onChange={e => updateContentField('socialFacebookUrl', e.target.value)} placeholder="Facebook" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" /><input type="url" value={content.socialInstagramUrl || ''} onChange={e => updateContentField('socialInstagramUrl', e.target.value)} placeholder="Instagram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><span className="absolute left-3 top-2.5 text-[9px] font-bold">Tik</span><input type="url" value={content.socialTikTokUrl || ''} onChange={e => updateContentField('socialTikTokUrl', e.target.value)} placeholder="TikTok" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Youtube className="absolute left-3 top-2.5 w-3.5 h-3.5 text-red-600" /><input type="url" value={content.socialYouTubeUrl || ''} onChange={e => updateContentField('socialYouTubeUrl', e.target.value)} placeholder="YouTube" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Linkedin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-700" /><input type="url" value={content.socialLinkedInUrl || ''} onChange={e => updateContentField('socialLinkedInUrl', e.target.value)} placeholder="LinkedIn" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Twitter className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-500" /><input type="url" value={content.socialTwitterUrl || ''} onChange={e => updateContentField('socialTwitterUrl', e.target.value)} placeholder="X / Twitter" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Send className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-600" /><input type="url" value={content.socialTelegramUrl || ''} onChange={e => updateContentField('socialTelegramUrl', e.target.value)} placeholder="Telegram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><MessageSquare className="absolute left-3 top-2.5 w-3.5 h-3.5 text-emerald-500" /><input type="url" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} placeholder="WhatsApp" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                      </div>
+                    </div>
+
+                    {/* Liens Personnalisés Libres */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Liens Personnalisés Libres</h5>
+                        <button type="button" onClick={addSocialLink} className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-sm">+ Ajouter un lien</button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {content.socialLinks.map((link) => (
+                          <div key={link.id} className="p-3 bg-white border border-indigo-100 rounded-2xl flex gap-3 items-start shadow-xs">
+                            <div className="flex-1 space-y-2">
+                              <input type="text" value={link.label || ''} onChange={e => {
+                                const newLinks = content.socialLinks.map(l => l.id === link.id ? {...l, label: e.target.value} : l);
+                                updateContentField('socialLinks', newLinks);
+                              }} placeholder="Titre (ex: Mon Catalogue, Ma Boutique...)" className="w-full border-b border-slate-100 text-[11px] font-bold text-slate-800 outline-none pb-1" />
+                              <div className="flex items-center gap-2">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <input type="url" value={link.url} onChange={e => updateSocialLink(link.id, link.platform, e.target.value)} placeholder="https://..." className="w-full text-[10px] text-indigo-600 outline-none" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeSocialLink(link.id)} className="p-1.5 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -2813,6 +3239,112 @@ export const QREditor: React.FC<QREditorProps> = ({
                   </div>
                 )}
 
+                {/* SPECIALIZED FORM SECTION FOR SOCIAL / BIO (LINKTREE STYLE) */}
+                {type === 'social' && (
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Profil Bio & Réseaux</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Multi-liens</span>
+                    </div>
+
+                    {/* Photo de Profil / Avatar */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-full w-32 h-32 mx-auto bg-white space-y-2 overflow-hidden">
+                      {content.photoUrl ? (
+                        <div className="relative group w-full h-full">
+                          <img src={content.photoUrl} className="w-full h-full object-cover" />
+                          <button onClick={() => updateContentField('photoUrl', '')} className="absolute inset-0 flex items-center justify-center bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <User className="w-8 h-8 text-indigo-200 mb-1" />
+                          <span className="text-[8px] font-black text-indigo-400 uppercase">Photo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = ev => updateContentField('photoUrl', ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Nom affiché *</label>
+                        <input type="text" required value={content.socialDisplayName || content.fullName || ''} onChange={e => {updateContentField('socialDisplayName', e.target.value); updateContentField('fullName', e.target.value);}} placeholder="Votre nom ou marque" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs font-bold outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Pseudo / Username</label>
+                        <input type="text" value={content.socialNickname || ''} onChange={e => updateContentField('socialNickname', e.target.value)} placeholder="@pseudo" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Profession / Activité</label>
+                        <input type="text" value={content.socialProfession || content.jobTitle || ''} onChange={e => {updateContentField('socialProfession', e.target.value); updateContentField('jobTitle', e.target.value);}} placeholder="Ex: Créateur de contenu" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Entreprise</label>
+                        <input type="text" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} placeholder="Nom de votre structure" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Bio / Présentation Courte</label>
+                      <textarea rows={3} value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} placeholder="Dites-en plus sur vous en quelques lignes..." className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs outline-none resize-none leading-relaxed" />
+                    </div>
+
+                    {/* Réseaux Sociaux Dédiés */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Réseaux Sociaux Directs</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative"><Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" /><input type="url" value={content.socialFacebookUrl || ''} onChange={e => updateContentField('socialFacebookUrl', e.target.value)} placeholder="Facebook" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" /><input type="url" value={content.socialInstagramUrl || ''} onChange={e => updateContentField('socialInstagramUrl', e.target.value)} placeholder="Instagram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><span className="absolute left-3 top-2.5 text-[9px] font-bold">Tik</span><input type="url" value={content.socialTikTokUrl || ''} onChange={e => updateContentField('socialTikTokUrl', e.target.value)} placeholder="TikTok" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Youtube className="absolute left-3 top-2.5 w-3.5 h-3.5 text-red-600" /><input type="url" value={content.socialYouTubeUrl || ''} onChange={e => updateContentField('socialYouTubeUrl', e.target.value)} placeholder="YouTube" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Linkedin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-700" /><input type="url" value={content.socialLinkedInUrl || ''} onChange={e => updateContentField('socialLinkedInUrl', e.target.value)} placeholder="LinkedIn" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Twitter className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-500" /><input type="url" value={content.socialTwitterUrl || ''} onChange={e => updateContentField('socialTwitterUrl', e.target.value)} placeholder="X / Twitter" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Send className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-600" /><input type="url" value={content.socialTelegramUrl || ''} onChange={e => updateContentField('socialTelegramUrl', e.target.value)} placeholder="Telegram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><MessageSquare className="absolute left-3 top-2.5 w-3.5 h-3.5 text-emerald-500" /><input type="url" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} placeholder="WhatsApp" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                      </div>
+                    </div>
+
+                    {/* Liens Personnalisés Libres */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Liens Personnalisés Libres</h5>
+                        <button type="button" onClick={addSocialLink} className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-sm">+ Ajouter un lien</button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {content.socialLinks.map((link) => (
+                          <div key={link.id} className="p-3 bg-white border border-indigo-100 rounded-2xl flex gap-3 items-start shadow-xs">
+                            <div className="flex-1 space-y-2">
+                              <input type="text" value={link.label || ''} onChange={e => {
+                                const newLinks = content.socialLinks.map(l => l.id === link.id ? {...l, label: e.target.value} : l);
+                                updateContentField('socialLinks', newLinks);
+                              }} placeholder="Titre (ex: Mon Catalogue, Ma Boutique...)" className="w-full border-b border-slate-100 text-[11px] font-bold text-slate-800 outline-none pb-1" />
+                              <div className="flex items-center gap-2">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <input type="url" value={link.url} onChange={e => updateSocialLink(link.id, link.platform, e.target.value)} placeholder="https://..." className="w-full text-[10px] text-indigo-600 outline-none" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeSocialLink(link.id)} className="p-1.5 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* SPECIALIZED FORM SECTION FOR BUSINESS / SOCIÉTÉ */}
                 {type === 'business' && (
                   <div className="space-y-6 pt-4 border-t border-slate-200 bg-slate-50/80 p-6 rounded-3xl">
@@ -3285,6 +3817,112 @@ export const QREditor: React.FC<QREditorProps> = ({
                           placeholder="+225..."
                           className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
                         />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* SPECIALIZED FORM SECTION FOR SOCIAL / BIO (LINKTREE STYLE) */}
+                {type === 'social' && (
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Profil Bio & Réseaux</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Multi-liens</span>
+                    </div>
+
+                    {/* Photo de Profil / Avatar */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-full w-32 h-32 mx-auto bg-white space-y-2 overflow-hidden">
+                      {content.photoUrl ? (
+                        <div className="relative group w-full h-full">
+                          <img src={content.photoUrl} className="w-full h-full object-cover" />
+                          <button onClick={() => updateContentField('photoUrl', '')} className="absolute inset-0 flex items-center justify-center bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <User className="w-8 h-8 text-indigo-200 mb-1" />
+                          <span className="text-[8px] font-black text-indigo-400 uppercase">Photo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = ev => updateContentField('photoUrl', ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Nom affiché *</label>
+                        <input type="text" required value={content.socialDisplayName || content.fullName || ''} onChange={e => {updateContentField('socialDisplayName', e.target.value); updateContentField('fullName', e.target.value);}} placeholder="Votre nom ou marque" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs font-bold outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Pseudo / Username</label>
+                        <input type="text" value={content.socialNickname || ''} onChange={e => updateContentField('socialNickname', e.target.value)} placeholder="@pseudo" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Profession / Activité</label>
+                        <input type="text" value={content.socialProfession || content.jobTitle || ''} onChange={e => {updateContentField('socialProfession', e.target.value); updateContentField('jobTitle', e.target.value);}} placeholder="Ex: Créateur de contenu" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Entreprise</label>
+                        <input type="text" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} placeholder="Nom de votre structure" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Bio / Présentation Courte</label>
+                      <textarea rows={3} value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} placeholder="Dites-en plus sur vous en quelques lignes..." className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs outline-none resize-none leading-relaxed" />
+                    </div>
+
+                    {/* Réseaux Sociaux Dédiés */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Réseaux Sociaux Directs</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative"><Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" /><input type="url" value={content.socialFacebookUrl || ''} onChange={e => updateContentField('socialFacebookUrl', e.target.value)} placeholder="Facebook" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" /><input type="url" value={content.socialInstagramUrl || ''} onChange={e => updateContentField('socialInstagramUrl', e.target.value)} placeholder="Instagram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><span className="absolute left-3 top-2.5 text-[9px] font-bold">Tik</span><input type="url" value={content.socialTikTokUrl || ''} onChange={e => updateContentField('socialTikTokUrl', e.target.value)} placeholder="TikTok" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Youtube className="absolute left-3 top-2.5 w-3.5 h-3.5 text-red-600" /><input type="url" value={content.socialYouTubeUrl || ''} onChange={e => updateContentField('socialYouTubeUrl', e.target.value)} placeholder="YouTube" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Linkedin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-700" /><input type="url" value={content.socialLinkedInUrl || ''} onChange={e => updateContentField('socialLinkedInUrl', e.target.value)} placeholder="LinkedIn" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Twitter className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-500" /><input type="url" value={content.socialTwitterUrl || ''} onChange={e => updateContentField('socialTwitterUrl', e.target.value)} placeholder="X / Twitter" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Send className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-600" /><input type="url" value={content.socialTelegramUrl || ''} onChange={e => updateContentField('socialTelegramUrl', e.target.value)} placeholder="Telegram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><MessageSquare className="absolute left-3 top-2.5 w-3.5 h-3.5 text-emerald-500" /><input type="url" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} placeholder="WhatsApp" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                      </div>
+                    </div>
+
+                    {/* Liens Personnalisés Libres */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Liens Personnalisés Libres</h5>
+                        <button type="button" onClick={addSocialLink} className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-sm">+ Ajouter un lien</button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {content.socialLinks.map((link) => (
+                          <div key={link.id} className="p-3 bg-white border border-indigo-100 rounded-2xl flex gap-3 items-start shadow-xs">
+                            <div className="flex-1 space-y-2">
+                              <input type="text" value={link.label || ''} onChange={e => {
+                                const newLinks = content.socialLinks.map(l => l.id === link.id ? {...l, label: e.target.value} : l);
+                                updateContentField('socialLinks', newLinks);
+                              }} placeholder="Titre (ex: Mon Catalogue, Ma Boutique...)" className="w-full border-b border-slate-100 text-[11px] font-bold text-slate-800 outline-none pb-1" />
+                              <div className="flex items-center gap-2">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <input type="url" value={link.url} onChange={e => updateSocialLink(link.id, link.platform, e.target.value)} placeholder="https://..." className="w-full text-[10px] text-indigo-600 outline-none" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeSocialLink(link.id)} className="p-1.5 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -3846,6 +4484,112 @@ export const QREditor: React.FC<QREditorProps> = ({
                   </div>
                 )}
 
+                {/* SPECIALIZED FORM SECTION FOR SOCIAL / BIO (LINKTREE STYLE) */}
+                {type === 'social' && (
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Profil Bio & Réseaux</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Multi-liens</span>
+                    </div>
+
+                    {/* Photo de Profil / Avatar */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-full w-32 h-32 mx-auto bg-white space-y-2 overflow-hidden">
+                      {content.photoUrl ? (
+                        <div className="relative group w-full h-full">
+                          <img src={content.photoUrl} className="w-full h-full object-cover" />
+                          <button onClick={() => updateContentField('photoUrl', '')} className="absolute inset-0 flex items-center justify-center bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <User className="w-8 h-8 text-indigo-200 mb-1" />
+                          <span className="text-[8px] font-black text-indigo-400 uppercase">Photo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = ev => updateContentField('photoUrl', ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Nom affiché *</label>
+                        <input type="text" required value={content.socialDisplayName || content.fullName || ''} onChange={e => {updateContentField('socialDisplayName', e.target.value); updateContentField('fullName', e.target.value);}} placeholder="Votre nom ou marque" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs font-bold outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Pseudo / Username</label>
+                        <input type="text" value={content.socialNickname || ''} onChange={e => updateContentField('socialNickname', e.target.value)} placeholder="@pseudo" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Profession / Activité</label>
+                        <input type="text" value={content.socialProfession || content.jobTitle || ''} onChange={e => {updateContentField('socialProfession', e.target.value); updateContentField('jobTitle', e.target.value);}} placeholder="Ex: Créateur de contenu" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Entreprise</label>
+                        <input type="text" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} placeholder="Nom de votre structure" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Bio / Présentation Courte</label>
+                      <textarea rows={3} value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} placeholder="Dites-en plus sur vous en quelques lignes..." className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs outline-none resize-none leading-relaxed" />
+                    </div>
+
+                    {/* Réseaux Sociaux Dédiés */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Réseaux Sociaux Directs</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative"><Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" /><input type="url" value={content.socialFacebookUrl || ''} onChange={e => updateContentField('socialFacebookUrl', e.target.value)} placeholder="Facebook" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" /><input type="url" value={content.socialInstagramUrl || ''} onChange={e => updateContentField('socialInstagramUrl', e.target.value)} placeholder="Instagram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><span className="absolute left-3 top-2.5 text-[9px] font-bold">Tik</span><input type="url" value={content.socialTikTokUrl || ''} onChange={e => updateContentField('socialTikTokUrl', e.target.value)} placeholder="TikTok" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Youtube className="absolute left-3 top-2.5 w-3.5 h-3.5 text-red-600" /><input type="url" value={content.socialYouTubeUrl || ''} onChange={e => updateContentField('socialYouTubeUrl', e.target.value)} placeholder="YouTube" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Linkedin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-700" /><input type="url" value={content.socialLinkedInUrl || ''} onChange={e => updateContentField('socialLinkedInUrl', e.target.value)} placeholder="LinkedIn" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Twitter className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-500" /><input type="url" value={content.socialTwitterUrl || ''} onChange={e => updateContentField('socialTwitterUrl', e.target.value)} placeholder="X / Twitter" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Send className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-600" /><input type="url" value={content.socialTelegramUrl || ''} onChange={e => updateContentField('socialTelegramUrl', e.target.value)} placeholder="Telegram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><MessageSquare className="absolute left-3 top-2.5 w-3.5 h-3.5 text-emerald-500" /><input type="url" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} placeholder="WhatsApp" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                      </div>
+                    </div>
+
+                    {/* Liens Personnalisés Libres */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Liens Personnalisés Libres</h5>
+                        <button type="button" onClick={addSocialLink} className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-sm">+ Ajouter un lien</button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {content.socialLinks.map((link) => (
+                          <div key={link.id} className="p-3 bg-white border border-indigo-100 rounded-2xl flex gap-3 items-start shadow-xs">
+                            <div className="flex-1 space-y-2">
+                              <input type="text" value={link.label || ''} onChange={e => {
+                                const newLinks = content.socialLinks.map(l => l.id === link.id ? {...l, label: e.target.value} : l);
+                                updateContentField('socialLinks', newLinks);
+                              }} placeholder="Titre (ex: Mon Catalogue, Ma Boutique...)" className="w-full border-b border-slate-100 text-[11px] font-bold text-slate-800 outline-none pb-1" />
+                              <div className="flex items-center gap-2">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <input type="url" value={link.url} onChange={e => updateSocialLink(link.id, link.platform, e.target.value)} placeholder="https://..." className="w-full text-[10px] text-indigo-600 outline-none" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeSocialLink(link.id)} className="p-1.5 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* SPECIALIZED FORM SECTION FOR BUSINESS / SOCIÉTÉ */}
                 {type === 'business' && (
                   <div className="space-y-6 pt-4 border-t border-slate-200 bg-slate-50/80 p-6 rounded-3xl">
@@ -4318,6 +5062,112 @@ export const QREditor: React.FC<QREditorProps> = ({
                           placeholder="+225..."
                           className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"
                         />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* SPECIALIZED FORM SECTION FOR SOCIAL / BIO (LINKTREE STYLE) */}
+                {type === 'social' && (
+                  <div className="space-y-6 pt-4 border-t border-indigo-100 bg-indigo-50/40 p-6 rounded-3xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Profil Bio & Réseaux</h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Multi-liens</span>
+                    </div>
+
+                    {/* Photo de Profil / Avatar */}
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-200 rounded-full w-32 h-32 mx-auto bg-white space-y-2 overflow-hidden">
+                      {content.photoUrl ? (
+                        <div className="relative group w-full h-full">
+                          <img src={content.photoUrl} className="w-full h-full object-cover" />
+                          <button onClick={() => updateContentField('photoUrl', '')} className="absolute inset-0 flex items-center justify-center bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <User className="w-8 h-8 text-indigo-200 mb-1" />
+                          <span className="text-[8px] font-black text-indigo-400 uppercase">Photo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = ev => updateContentField('photoUrl', ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Nom affiché *</label>
+                        <input type="text" required value={content.socialDisplayName || content.fullName || ''} onChange={e => {updateContentField('socialDisplayName', e.target.value); updateContentField('fullName', e.target.value);}} placeholder="Votre nom ou marque" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs font-bold outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Pseudo / Username</label>
+                        <input type="text" value={content.socialNickname || ''} onChange={e => updateContentField('socialNickname', e.target.value)} placeholder="@pseudo" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Profession / Activité</label>
+                        <input type="text" value={content.socialProfession || content.jobTitle || ''} onChange={e => {updateContentField('socialProfession', e.target.value); updateContentField('jobTitle', e.target.value);}} placeholder="Ex: Créateur de contenu" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Entreprise</label>
+                        <input type="text" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} placeholder="Nom de votre structure" className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-2 text-xs outline-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-indigo-900 uppercase mb-1">Bio / Présentation Courte</label>
+                      <textarea rows={3} value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} placeholder="Dites-en plus sur vous en quelques lignes..." className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-3 text-xs outline-none resize-none leading-relaxed" />
+                    </div>
+
+                    {/* Réseaux Sociaux Dédiés */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Réseaux Sociaux Directs</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="relative"><Facebook className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-600" /><input type="url" value={content.socialFacebookUrl || ''} onChange={e => updateContentField('socialFacebookUrl', e.target.value)} placeholder="Facebook" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Instagram className="absolute left-3 top-2.5 w-3.5 h-3.5 text-rose-500" /><input type="url" value={content.socialInstagramUrl || ''} onChange={e => updateContentField('socialInstagramUrl', e.target.value)} placeholder="Instagram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><span className="absolute left-3 top-2.5 text-[9px] font-bold">Tik</span><input type="url" value={content.socialTikTokUrl || ''} onChange={e => updateContentField('socialTikTokUrl', e.target.value)} placeholder="TikTok" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Youtube className="absolute left-3 top-2.5 w-3.5 h-3.5 text-red-600" /><input type="url" value={content.socialYouTubeUrl || ''} onChange={e => updateContentField('socialYouTubeUrl', e.target.value)} placeholder="YouTube" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Linkedin className="absolute left-3 top-2.5 w-3.5 h-3.5 text-blue-700" /><input type="url" value={content.socialLinkedInUrl || ''} onChange={e => updateContentField('socialLinkedInUrl', e.target.value)} placeholder="LinkedIn" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Twitter className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-500" /><input type="url" value={content.socialTwitterUrl || ''} onChange={e => updateContentField('socialTwitterUrl', e.target.value)} placeholder="X / Twitter" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><Send className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-600" /><input type="url" value={content.socialTelegramUrl || ''} onChange={e => updateContentField('socialTelegramUrl', e.target.value)} placeholder="Telegram" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                        <div className="relative"><MessageSquare className="absolute left-3 top-2.5 w-3.5 h-3.5 text-emerald-500" /><input type="url" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} placeholder="WhatsApp" className="w-full bg-white border border-indigo-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none" /></div>
+                      </div>
+                    </div>
+
+                    {/* Liens Personnalisés Libres */}
+                    <div className="space-y-4 pt-4 border-t border-indigo-200">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Liens Personnalisés Libres</h5>
+                        <button type="button" onClick={addSocialLink} className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-sm">+ Ajouter un lien</button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {content.socialLinks.map((link) => (
+                          <div key={link.id} className="p-3 bg-white border border-indigo-100 rounded-2xl flex gap-3 items-start shadow-xs">
+                            <div className="flex-1 space-y-2">
+                              <input type="text" value={link.label || ''} onChange={e => {
+                                const newLinks = content.socialLinks.map(l => l.id === link.id ? {...l, label: e.target.value} : l);
+                                updateContentField('socialLinks', newLinks);
+                              }} placeholder="Titre (ex: Mon Catalogue, Ma Boutique...)" className="w-full border-b border-slate-100 text-[11px] font-bold text-slate-800 outline-none pb-1" />
+                              <div className="flex items-center gap-2">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <input type="url" value={link.url} onChange={e => updateSocialLink(link.id, link.platform, e.target.value)} placeholder="https://..." className="w-full text-[10px] text-indigo-600 outline-none" />
+                              </div>
+                            </div>
+                            <button onClick={() => removeSocialLink(link.id)} className="p-1.5 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

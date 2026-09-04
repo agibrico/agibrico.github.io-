@@ -21,7 +21,16 @@ import {
   Award,
   RefreshCw,
   BookOpen,
-  Clock
+  Clock,
+  User,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Send,
+  Youtube,
+  Package,
+  Info
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
@@ -173,6 +182,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   }
 
   // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
   // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
   // =========================================================================
   if (item.type === 'business') {
@@ -360,6 +475,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
         </footer>
       </div>
     );
@@ -392,6 +613,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   }
 
   // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
   // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
   // =========================================================================
   if (item.type === 'business') {
@@ -584,6 +911,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     );
   }
 
+  // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
   // 3. Deactivated / Suspended State
   if (item.status === 'inactive' || item.status === 'archived') {
     return (
@@ -599,6 +1032,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             </p>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
+        </footer>
       </div>
     );
   }
@@ -791,6 +1330,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
         </footer>
       </div>
     );
@@ -1001,6 +1646,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   }
 
   // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
   // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
   // =========================================================================
   if (item.type === 'business') {
@@ -1188,6 +1939,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
         </footer>
       </div>
     );
@@ -1416,6 +2273,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   }
 
   // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
   // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
   // =========================================================================
   if (item.type === 'business') {
@@ -1603,6 +2566,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
         </footer>
       </div>
     );
@@ -1837,6 +2906,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   }
 
   // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
   // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
   // =========================================================================
   if (item.type === 'business') {
@@ -2024,6 +3199,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
         </footer>
       </div>
     );
@@ -2166,6 +3447,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   }
 
   // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
   // TYPE 6: ENTREPRISE & SOCIÉTÉ PUBLIC VIEW
   // =========================================================================
   if (item.type === 'business') {
@@ -2353,6 +3740,112 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
         <footer className="w-full max-w-md mx-auto py-8 px-4 text-center">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Profil Société Officiel • AGB Studio</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TYPE 7: BIO & RÉSEAUX (LINKTREE STYLE) PUBLIC VIEW
+  // =========================================================================
+  if (item.type === 'social') {
+    const displayName = content.socialDisplayName || content.fullName || item.title || 'Mon Profil';
+    const initials = getCompanyInitials(displayName, '');
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-indigo-600 selection:text-white">
+        <div className="w-full max-w-md mx-auto px-4 pt-6 pb-2 flex-1 space-y-8">
+
+          {/* Hero Profile Section */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              {content.photoUrl ? (
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-600/30 shadow-2xl">
+                  <img src={content.photoUrl} alt={displayName} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 border-4 border-indigo-600/30 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full border-4 border-slate-950 flex items-center justify-center">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-black text-white tracking-tight">{displayName}</h1>
+              {content.socialNickname && <p className="text-indigo-400 font-bold text-sm">{content.socialNickname}</p>}
+              {(content.socialProfession || content.company) && (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest pt-1">
+                  {content.socialProfession || content.jobTitle} {content.company ? `• ${content.company}` : ''}
+                </p>
+              )}
+              {content.slogan && <p className="text-xs italic text-slate-300 pt-1">« {content.slogan} »</p>}
+            </div>
+
+            {content.bio && (
+              <div className="max-w-xs mx-auto">
+                <p className="text-xs text-slate-300 leading-relaxed">{content.bio}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Social Icons Row */}
+          <div className="flex flex-wrap justify-center gap-4 py-2">
+            {content.socialFacebookUrl && <a href={content.socialFacebookUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-600 shadow-xl hover:scale-110 transition-transform"><Facebook className="w-6 h-6" /></a>}
+            {content.socialInstagramUrl && <a href={content.socialInstagramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-500 shadow-xl hover:scale-110 transition-transform"><Instagram className="w-6 h-6" /></a>}
+            {content.socialTikTokUrl && <a href={content.socialTikTokUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-white shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">Tik</span></a>}
+            {content.socialYouTubeUrl && <a href={content.socialYouTubeUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-red-600 shadow-xl hover:scale-110 transition-transform"><Youtube className="w-6 h-6" /></a>}
+            {content.socialLinkedInUrl && <a href={content.socialLinkedInUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-blue-700 shadow-xl hover:scale-110 transition-transform"><Linkedin className="w-6 h-6" /></a>}
+            {content.socialTwitterUrl && <a href={content.socialTwitterUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-500 shadow-xl hover:scale-110 transition-transform"><Twitter className="w-6 h-6" /></a>}
+            {content.socialTelegramUrl && <a href={content.socialTelegramUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-sky-600 shadow-xl hover:scale-110 transition-transform"><Send className="w-6 h-6" /></a>}
+            {content.socialWhatsappUrl && <a href={content.socialWhatsappUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-500 shadow-xl hover:scale-110 transition-transform"><MessageSquare className="w-6 h-6" /></a>}
+            {content.socialPinterestUrl && <a href={content.socialPinterestUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-rose-600 shadow-xl hover:scale-110 transition-transform"><span className="text-lg font-black">P</span></a>}
+          </div>
+
+          {/* Contact Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            {content.primaryPhone && (
+              <a href={`tel:${content.primaryPhone}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+            )}
+            {content.email && (
+              <a href={`mailto:${content.email}`} className="flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-white"><Mail className="w-4 h-4 text-blue-400" /> E-mail</a>
+            )}
+          </div>
+
+          {/* Custom Links (The Linktree part) */}
+          {content.socialLinks && content.socialLinks.length > 0 && (
+            <div className="space-y-3">
+              {content.socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between p-5 bg-white text-slate-900 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-50 transition-all active:scale-95"
+                >
+                  <span className="truncate">{link.label || 'Lien personnalisé'}</span>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Other Information for Bio */}
+          {content.otherInformation && (
+            <div className="p-5 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl text-left">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Informations complémentaires</h2>
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.otherInformation}</p>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="w-full max-w-md mx-auto py-10 px-4 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Page de Profil Digitale • AGB Studio</p>
         </footer>
       </div>
     );

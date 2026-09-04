@@ -265,6 +265,20 @@ export interface QRContent {
   businessRegisterNumber?: string;
   openingHours?: OpeningHourDay[];
 
+  // --- SOCIAL / BIO SPECIFIC ---
+  socialDisplayName?: string;
+  socialNickname?: string;
+  socialProfession?: string;
+  socialFacebookUrl?: string;
+  socialInstagramUrl?: string;
+  socialTikTokUrl?: string;
+  socialYouTubeUrl?: string;
+  socialLinkedInUrl?: string;
+  socialTwitterUrl?: string;
+  socialSnapchatUrl?: string;
+  socialTelegramUrl?: string;
+  socialPinterestUrl?: string;
+
   // Product / Event / Image specific
   productPrice?: string;
   productCurrency?: string;

@@ -410,7 +410,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
   {
     id: 'qr_demo_10',
     cardNumber: 'CARD-2026-0010',
-    publicId: 'ERIC2026',
+    publicId: 'GPKNURUP',
     clientId: 'client_006',
     title: 'Eric Thierry OHOUEU — Administrateur du Travail',
     type: 'BUSINESS_CARD',

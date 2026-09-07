@@ -67,20 +67,32 @@ export function generateVCardString(content: QRContent): string {
 
   // Slogan as TITLE suffix or NOTE
   let noteParts: string[] = [];
+  if (content.professionalTitle) {
+    noteParts.push(`Titre professionnel : ${content.professionalTitle}`);
+  }
+  if (content.acronym && content.acronymDesc) {
+    noteParts.push(`${content.acronym} : ${content.acronymDesc}`);
+  }
   if (content.slogan) {
     noteParts.push(`Devise / Slogan : ${content.slogan}`);
   }
+  if (content.department) {
+    noteParts.push(`Département : ${content.department}`);
+  }
   if (content.bio) {
     noteParts.push(content.bio);
+  }
+  if (content.servicesList && content.servicesList.length > 0) {
+    noteParts.push(`Services offerts : ${content.servicesList.join(', ')}`);
+  }
+  if (content.internalNotes) {
+    noteParts.push(`Notes : ${content.internalNotes}`);
   }
   if (content.locationLink) {
     noteParts.push(`Lien de localisation : ${content.locationLink.trim()}`);
   }
   if (content.otherInformation) {
     noteParts.push(`Autres informations : ${content.otherInformation.trim()}`);
-  }
-  if (content.servicesList && content.servicesList.length > 0) {
-    noteParts.push(`Services : ${content.servicesList.join(', ')}`);
   }
   if (content.operatingZone) {
     noteParts.push(`Zone d'intervention : ${content.operatingZone}`);

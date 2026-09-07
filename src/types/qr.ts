@@ -102,6 +102,9 @@ export interface SocialLink {
     | 'telegram' 
     | 'snapchat' 
     | 'github' 
+    | 'discord'
+    | 'threads'
+    | 'twitch'
     | 'website'
     | 'other';
   url: string;
@@ -115,11 +118,14 @@ export interface QRContent {
   lastName?: string;
   fullName?: string;
   civility?: string;
+  middleName?: string;
+  professionalTitle?: string;
   jobTitle?: string;
   profession?: string;
   company?: string;
   commercialName?: string;
   acronym?: string; // Sigle
+  acronymDesc?: string; // Signification du sigle
   department?: string;
   industry?: string;
   slogan?: string;
@@ -266,6 +272,7 @@ export interface QRContent {
 
   // --- COMPANY SPECIFIC ---
   companyLegalForm?: string;
+  companyMainActivity?: string;
   companyCreationDate?: string;
   companyCapital?: string;
   companyRccm?: string;

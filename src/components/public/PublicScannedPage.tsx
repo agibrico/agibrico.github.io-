@@ -41,7 +41,13 @@ import {
   CheckCircle2,
   FileText,
   Store,
-  LocateFixed
+  LocateFixed,
+  Headphones,
+  Video,
+  List,
+  Truck,
+  Activity,
+  Landmark
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
@@ -156,7 +162,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   const linkedClient = item.clientId ? getClientById(item.clientId) : null;
   const content: QRContent = linkedClient ? { ...item.content, ...linkedClient } : item.content;
   const { styling } = item;
-  const fullName = content.fullName || `${content.firstName || ''} ${content.lastName || ''}`.trim() || 'Fiche Professionnelle';
+  const fullName = content.fullName || `${content.firstName || ''} ${content.middleName ? content.middleName + ' ' : ''}${content.lastName || ''}`.trim() || 'Fiche Professionnelle';
 
   const registeredLogo = (content.logoUrl && !content.logoUrl.includes('unsplash.com')) ? content.logoUrl : (styling?.logoUrl && !styling.logoUrl.includes('unsplash.com')) ? styling.logoUrl : getCompanyDefaultLogo(content.company || content.commercialName || fullName);
 
@@ -207,30 +213,50 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 {registeredLogo ? <img src={registeredLogo} className="w-full h-full object-contain" /> : <span className="text-slate-950 text-4xl font-black">{getCompanyInitials(content.company, fullName)}</span>}
               </div>
               <div className="space-y-2">
-                <h1 className="text-2xl font-black text-white leading-tight uppercase tracking-tight">{fullName}</h1>
+                <div className="flex items-center justify-center gap-2">
+                  {content.civility && <span className="text-xs font-bold text-slate-500">{content.civility}</span>}
+                  <h1 className="text-2xl font-black text-white leading-tight uppercase tracking-tight">{fullName}</h1>
+                </div>
+                {content.professionalTitle && <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{content.professionalTitle}</p>}
                 <p className="text-xs font-black text-blue-500 uppercase tracking-[0.3em]">{content.jobTitle}</p>
-                {content.company && <p className="text-sm font-bold text-slate-400">{content.company}</p>}
+                {content.company && (
+                  <div className="flex flex-col items-center gap-1">
+                    <p className="text-sm font-bold text-slate-300">{content.company}</p>
+                    {content.acronym && <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">{content.acronym} — {content.acronymDesc}</p>}
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <button onClick={handleDownloadContact} className="col-span-2 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><UserPlus className="w-4 h-4" /> {savedContact ? 'Contact Enregistré' : 'Ajouter aux contacts'}</button>
+                <button onClick={handleDownloadContact} className="col-span-2 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><UserPlus className="w-4 h-4" /> {savedContact ? 'Fiche Enregistrée' : 'Ajouter aux contacts'}</button>
                 {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Phone className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">Appel</span></a>}
                 {content.whatsappNumber && <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><MessageSquare className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">WhatsApp</span></a>}
               </div>
             </div>
 
-            {(content.email || content.websiteUrl || content.address) && (
+            {(content.email || content.workEmail || content.websiteUrl || content.address) && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-3">
                 <SectionHeader title="Informations de contact" icon={Info} />
-                <InfoRow label="Email Professionnel" value={content.email} icon={Mail} href={`mailto:${content.email}`} />
-                <InfoRow label="Site Web" value={content.websiteUrl} icon={Globe} href={content.websiteUrl} />
+                <InfoRow label="Email Personnel" value={content.email} icon={Mail} href={`mailto:${content.email}`} />
+                <InfoRow label="Email Professionnel" value={content.workEmail} icon={Mail} href={`mailto:${content.workEmail}`} />
+                <InfoRow label="Site Web / Portfolio" value={content.websiteUrl} icon={Globe} href={content.websiteUrl} />
                 <InfoRow label="Adresse" value={content.address} icon={MapPin} />
+                {content.city && <InfoRow label="Ville / Zone" value={`${content.city}${content.operatingZone ? ` — ${content.operatingZone}` : ''}`} icon={Navigation} />}
               </div>
             )}
 
-            {content.availabilityHours && (
+            {content.servicesList && content.servicesList.length > 0 && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Expertises & Services" icon={Briefcase} />
+                <div className="flex flex-wrap gap-2">
+                  {content.servicesList.map(s => <span key={s} className="px-3 py-1 bg-slate-800 text-slate-300 text-[9px] font-black uppercase rounded-lg border border-slate-700">{s}</span>)}
+                </div>
+              </div>
+            )}
+
+            {content.bio && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6">
-                <SectionHeader title="Disponibilité" icon={Clock} />
-                <p className="text-xs font-bold text-slate-300 bg-slate-800/50 p-4 rounded-2xl border border-slate-700/30 italic">« {content.availabilityHours} »</p>
+                <SectionHeader title="Profil" icon={User} />
+                <p className="text-xs font-medium text-slate-400 leading-relaxed italic">« {content.bio} »</p>
               </div>
             )}
           </div>
@@ -240,31 +266,48 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
         return (
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
-              <div className="mx-auto w-44 h-64 rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-800">
-                {content.photoUrl ? <img src={content.photoUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex flex-col items-center justify-center text-indigo-500"><BookOpen className="w-12 h-12 mb-3" /><span className="text-[10px] font-black uppercase tracking-widest">Pas de couverture</span></div>}
+              <div className="mx-auto w-44 h-64 rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-800 relative">
+                {content.photoUrl ? <img src={content.photoUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex flex-col items-center justify-center text-indigo-500"><BookOpen className="w-12 h-12 mb-3" /><span className="text-[10px] font-black uppercase tracking-widest">Couverture</span></div>}
+                {content.bookMediumType === 'audio' && <div className="absolute top-2 right-2 p-2 bg-slate-900/80 rounded-full"><Headphones className="w-4 h-4 text-indigo-400" /></div>}
               </div>
               <div className="space-y-2">
                 <h1 className="text-2xl font-black text-white uppercase">{content.bookTitle || 'Sans Titre'}</h1>
+                {content.bookSubtitle && <p className="text-xs font-bold text-slate-500 uppercase">{content.bookSubtitle}</p>}
                 <p className="text-sm font-bold text-slate-400">Par <span className="text-indigo-400 uppercase">{content.bookAuthor || 'Auteur Inconnu'}</span></p>
+                {content.bookIllustrator && <p className="text-[9px] font-bold text-slate-500">Illustré par {content.bookIllustrator}</p>}
                 {content.bookPrice && <div className="inline-block px-4 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-sm font-black mt-2">{content.bookPrice} {content.bookCurrency || 'FCFA'}</div>}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {content.bookBuyUrl && <a href={content.bookBuyUrl} className="col-span-2 py-4 bg-indigo-600 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest"><ShoppingCart className="w-4 h-4" /> Acheter le livre</a>}
-                {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200"><Phone className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">Contact</span></a>}
-                {content.whatsappNumber && <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200"><MessageSquare className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">WhatsApp</span></a>}
+                {content.bookBuyUrl && <a href={content.bookBuyUrl} className="col-span-2 py-4 bg-indigo-600 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><ShoppingCart className="w-4 h-4" /> Acheter l'ouvrage</a>}
+                {content.bookTrailerUrl && <a href={content.bookTrailerUrl} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200"><Video className="w-5 h-5 text-indigo-400" /><span className="text-[8px] font-black uppercase">Trailer</span></a>}
+                {content.bookAudioUrl && <a href={content.bookAudioUrl} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200"><Headphones className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">Audio</span></a>}
               </div>
             </div>
-            {content.bookSummary && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-3">
-                <SectionHeader title="Résumé de l'œuvre" icon={FileText} />
-                <p className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-line">{content.bookSummary}</p>
+            {(content.bookSummary || content.bookTableOfContents) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                {content.bookSummary && (
+                  <div className="space-y-3">
+                    <SectionHeader title="Résumé de l'œuvre" icon={FileText} />
+                    <p className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-line">{content.bookSummary}</p>
+                  </div>
+                )}
+                {content.bookTableOfContents && (
+                  <div className="space-y-3">
+                    <SectionHeader title="Table des matières" icon={List} />
+                    <p className="text-[10px] text-slate-500 font-bold whitespace-pre-line">{content.bookTableOfContents}</p>
+                  </div>
+                )}
               </div>
             )}
             <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 grid grid-cols-2 gap-3">
-              <InfoRow label="ISBN" value={content.bookIsbn13} />
-              <InfoRow label="Éditeur" value={content.bookPublisher} />
+              <InfoRow label="ISBN 13" value={content.bookIsbn13} />
+              <InfoRow label="Maison d'Édition" value={content.bookPublisher} />
+              <InfoRow label="Édition" value={content.bookEditionNumber} />
+              <InfoRow label="Langue" value={content.bookLanguage} />
               <InfoRow label="Année" value={content.bookYear} />
-              <InfoRow label="Pages" value={content.bookPages} />
+              <InfoRow label="Nb. Pages" value={content.bookPages} />
+              <InfoRow label="Format" value={content.bookFormat} />
+              <InfoRow label="Public" value={content.bookTargetAudience} />
             </div>
           </div>
         );
@@ -275,32 +318,49 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-600" />
               <div className="space-y-2 pt-2">
-                <span className="px-3 py-1 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-full">Événement Spécial</span>
-                <h1 className="text-3xl font-black text-white uppercase tracking-tight pt-2">{content.eventTitle || 'Événement'}</h1>
+                <span className="px-3 py-1 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-full">{content.eventTheme || 'Événement Spécial'}</span>
+                <h1 className="text-3xl font-black text-white uppercase tracking-tight pt-2 leading-none">{content.eventTitle || 'Événement'}</h1>
                 <p className="text-sm font-bold text-slate-400">{content.eventHost && `Organisé par ${content.eventHost}`}</p>
               </div>
               <div className="grid grid-cols-2 gap-3 p-4 bg-slate-950 rounded-[32px] border border-slate-800 shadow-inner">
                 <div className="text-left space-y-1">
-                  <span className="text-[9px] font-black text-slate-500 uppercase block">Quand</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase block">Date & Heure</span>
                   <p className="text-xs font-black text-white">{content.eventStartDate}</p>
                   <p className="text-[10px] font-bold text-rose-500">{content.eventStartTime}</p>
+                  {content.eventDoorsOpenTime && <p className="text-[8px] font-black text-slate-600 uppercase">Portes: {content.eventDoorsOpenTime}</p>}
                 </div>
                 <div className="text-right space-y-1">
-                  <span className="text-[9px] font-black text-slate-500 uppercase block">Où</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase block">Lieu</span>
                   <p className="text-xs font-black text-white truncate">{content.eventLocationName}</p>
                   <p className="text-[9px] text-slate-400 font-bold truncate">{content.eventAddress}</p>
+                  {content.eventDressCode && <p className="text-[8px] font-black text-rose-500/60 uppercase">{content.eventDressCode}</p>}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={handleAddToCalendar} className="col-span-2 py-4 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><Calendar className="w-4 h-4" /> Ajouter au Calendrier</button>
-                {content.eventBookingUrl && <a href={content.eventBookingUrl} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-white font-bold text-[10px]"><ShoppingCart className="w-5 h-5" /><span>Réserver</span></a>}
-                <button onClick={() => { if(content.whatsappNumber || content.primaryPhone) window.open(`https://wa.me/${(content.whatsappNumber || content.primaryPhone!).replace(/[^\d]/g,'')}?text=Confirmation Presence`, '_blank')}} className="flex flex-col items-center gap-2 p-4 bg-emerald-600 rounded-2xl text-white font-bold text-[10px]"><CheckCircle2 className="w-5 h-5" /><span>Confirmer RSVP</span></button>
+                {content.eventBookingUrl && <a href={content.eventBookingUrl} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-white font-bold text-[10px]"><ShoppingCart className="w-5 h-5 text-rose-400" /><span>Réserver</span></a>}
+                <button onClick={() => { if(content.whatsappNumber || content.primaryPhone) window.open(`https://wa.me/${(content.whatsappNumber || content.primaryPhone!).replace(/[^\d]/g,'')}?text=Confirmation Presence pour ${content.eventTitle}`, '_blank')}} className="flex flex-col items-center gap-2 p-4 bg-emerald-600 rounded-2xl text-white font-bold text-[10px]"><CheckCircle2 className="w-5 h-5" /><span>RSVP WhatsApp</span></button>
               </div>
             </div>
-            {content.eventDescription && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6">
-                <SectionHeader title="À propos de l'événement" icon={Info} colorClass="text-rose-500" />
-                <p className="text-xs text-slate-300 leading-relaxed font-medium">{content.eventDescription}</p>
+
+            {(content.eventDescription || content.eventSponsor || content.eventGodmother) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Détails & Protocole" icon={Info} colorClass="text-rose-500" />
+                {content.eventDescription && <p className="text-xs text-slate-300 leading-relaxed font-medium">{content.eventDescription}</p>}
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  {content.eventSponsor && (
+                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                      <span className="text-[8px] font-black text-slate-500 uppercase block">Parrain</span>
+                      <span className="text-[10px] font-bold text-white">{content.eventSponsor}</span>
+                    </div>
+                  )}
+                  {content.eventGodmother && (
+                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                      <span className="text-[8px] font-black text-slate-500 uppercase block">Marraine</span>
+                      <span className="text-[10px] font-bold text-white">{content.eventGodmother}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -314,25 +374,48 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                  {registeredLogo ? <img src={registeredLogo} className="w-full h-full object-contain" /> : <Store className="w-12 h-12 text-emerald-600" />}
                </div>
                <div className="space-y-2">
-                 <h1 className="text-2xl font-black text-white uppercase">{content.commercialName || content.company || 'Boutique'}</h1>
+                 <h1 className="text-2xl font-black text-white uppercase leading-none tracking-tight">{content.commercialName || content.company || 'Boutique'}</h1>
                  {content.shopIndustry && <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-black uppercase rounded-full">{content.shopIndustry}</span>}
                </div>
                <div className="grid grid-cols-4 gap-3">
-                 <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200"><Phone className="w-5 h-5 text-emerald-400" /><span className="text-[7px] font-black uppercase">Appel</span></a>
-                 <a href={`https://wa.me/${(content.whatsappNumber || content.primaryPhone || '').replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200"><MessageSquare className="w-5 h-5 text-emerald-400" /><span className="text-[7px] font-black uppercase">WhatsApp</span></a>
-                 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200"><Navigation className="w-5 h-5 text-blue-400" /><span className="text-[7px] font-black uppercase">Y aller</span></a>
-                 <a href={content.websiteUrl} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200"><Globe className="w-5 h-5 text-indigo-400" /><span className="text-[7px] font-black uppercase">Site</span></a>
+                 <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Phone className="w-5 h-5 text-emerald-400" /><span className="text-[7px] font-black uppercase">Appel</span></a>
+                 <a href={`https://wa.me/${(content.whatsappNumber || content.primaryPhone || '').replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><MessageSquare className="w-5 h-5 text-emerald-400" /><span className="text-[7px] font-black uppercase">WhatsApp</span></a>
+                 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Navigation className="w-5 h-5 text-blue-400" /><span className="text-[7px] font-black uppercase">GPS</span></a>
+                 <a href={content.websiteUrl} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Globe className="w-5 h-5 text-indigo-400" /><span className="text-[7px] font-black uppercase">Web</span></a>
                </div>
             </div>
 
+            {(content.shopDeliveryAvailable || content.shopPaymentMethods) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Services & Paiements" icon={ShoppingCart} colorClass="text-emerald-500" />
+                {content.shopDeliveryAvailable && (
+                  <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-center gap-3">
+                    <Truck className="w-5 h-5 text-emerald-500" />
+                    <div className="flex-1">
+                      <span className="text-[10px] font-black uppercase text-emerald-500 block">Livraison à domicile</span>
+                      <p className="text-[9px] font-bold text-slate-400">Zone: {content.shopDeliveryZone || 'Locale'} | Min: {content.shopMinOrderAmount || 'Aucun'}</p>
+                    </div>
+                  </div>
+                )}
+                {content.shopPaymentMethods && content.shopPaymentMethods.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[8px] font-black uppercase text-slate-600 block tracking-widest">Modes de paiement</span>
+                    <div className="flex flex-wrap gap-2">
+                      {content.shopPaymentMethods.map(p => <span key={p} className="px-2 py-1 bg-slate-800 text-[8px] font-black text-slate-400 uppercase rounded border border-slate-700">{p}</span>)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {content.openingHours && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6">
-                <SectionHeader title="Horaires d'ouverture" icon={Clock} colorClass="text-emerald-500" />
+                <SectionHeader title="Horaires d'ouverture" icon={Clock} colorClass="text-slate-500" />
                 <div className="space-y-2">
                   {content.openingHours.map(d => (
                     <div key={d.day} className="flex justify-between items-center text-[10px] font-bold">
                       <span className="text-slate-500">{d.day}</span>
-                      <span className={d.isOpen ? "text-white" : "text-rose-500"}>{d.isOpen ? `${d.openTime} - ${d.closeTime}` : 'Fermé'}</span>
+                      <span className={d.isOpen ? "text-white" : "text-rose-500/70"}>{d.isOpen ? `${d.openTime} - ${d.closeTime}` : 'Fermé'}</span>
                     </div>
                   ))}
                 </div>
@@ -380,32 +463,43 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                  {content.slogan && <p className="text-xs font-bold text-slate-400 italic mt-2">« {content.slogan} »</p>}
                </div>
                <div className="grid grid-cols-2 gap-3">
-                 <a href={`tel:${content.primaryPhone}`} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
-                 <a href={content.websiteUrl} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"><Globe className="w-4 h-4 text-indigo-400" /> Visiter</a>
+                 <a href={`tel:${content.primaryPhone}`} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
+                 <a href={content.websiteUrl} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><Globe className="w-4 h-4 text-indigo-400" /> Visiter</a>
                </div>
             </div>
 
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4 shadow-xl">
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6 shadow-xl">
               <SectionHeader title="Profil Institutionnel" icon={Building2} />
               <div className="grid grid-cols-2 gap-3">
                 <InfoRow label="RCCM" value={content.companyRccm} />
-                <InfoRow label="ID Fiscal" value={content.companyTaxId} />
-                <InfoRow label="Dirigeant" value={content.companyManagerName} />
-                <InfoRow label="Capital" value={content.companyCapital} />
+                <InfoRow label="ID Fiscal / IFU" value={content.companyTaxId} />
+                <InfoRow label="Dirigeant / Gérant" value={content.companyManagerName} icon={User} />
+                {content.companyManagerPhone && <InfoRow label="Tél. Direct" value={content.companyManagerPhone} icon={Phone} href={`tel:${content.companyManagerPhone}`} />}
+                <InfoRow label="Activité Principale" value={content.companyMainActivity} icon={Activity} />
+                <InfoRow label="Capital Social" value={content.companyCapital} icon={Landmark} />
               </div>
-              {content.companyMission && (
-                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
-                  <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Notre Mission</span>
-                  <p className="text-xs font-bold text-slate-300 leading-relaxed">{content.companyMission}</p>
-                </div>
-              )}
+              <div className="space-y-4 pt-2">
+                {content.companyMission && (
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <span className="text-[8px] font-black uppercase text-slate-500 block mb-1 tracking-widest">Mission</span>
+                    <p className="text-xs font-bold text-slate-300 leading-relaxed">{content.companyMission}</p>
+                  </div>
+                )}
+                {content.companyVision && (
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <span className="text-[8px] font-black uppercase text-slate-500 block mb-1 tracking-widest">Vision</span>
+                    <p className="text-xs font-bold text-indigo-300 leading-relaxed">{content.companyVision}</p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {(content.companyCatalogueUrl || content.companyPortfolioUrl) && (
+            {(content.companyPresentationPdfUrl || content.companyCatalogueUrl || content.companyPortfolioUrl) && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-3">
-                <SectionHeader title="Documents & Portfolio" icon={FileText} />
-                <InfoRow label="Catalogue PDF" value="Consulter le catalogue" icon={FileCheck2} href={content.companyCatalogueUrl} />
-                <InfoRow label="Portfolio / Projets" value="Voir les réalisations" icon={Layers} href={content.companyPortfolioUrl} />
+                <SectionHeader title="Ressources & Médias" icon={FileText} />
+                {content.companyPresentationPdfUrl && <InfoRow label="Plaquette Institutionnelle" value="Consulter le PDF" icon={FileCheck2} href={content.companyPresentationPdfUrl} />}
+                {content.companyCatalogueUrl && <InfoRow label="Catalogue Produits" value="Voir le catalogue" icon={ShoppingCart} href={content.companyCatalogueUrl} />}
+                {content.companyPortfolioUrl && <InfoRow label="Portfolio / Réalisations" value="Découvrir" icon={Layers} href={content.companyPortfolioUrl} />}
               </div>
             )}
           </div>
@@ -448,12 +542,15 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 <div className="w-full h-72 relative">
                   <img src={content.productMainImageUrl} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
-                  {content.productPricePromo && <div className="absolute top-6 right-6 px-4 py-1.5 bg-rose-600 text-white text-[10px] font-black uppercase rounded-full shadow-2xl animate-pulse">Offre Limitée</div>}
+                  {content.productPricePromo && <div className="absolute top-6 right-6 px-4 py-1.5 bg-rose-600 text-white text-[10px] font-black uppercase rounded-full shadow-2xl animate-pulse">OFFRE SPÉCIALE</div>}
                 </div>
               )}
               <div className="p-8 text-center space-y-4">
                 <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none">{content.productName || item.title}</h1>
-                {content.productBrand && <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">{content.productBrand}</p>}
+                <div className="flex flex-col items-center gap-1">
+                  {content.productBrand && <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">{content.productBrand}</p>}
+                  {content.productModel && <p className="text-[9px] font-bold text-slate-600 uppercase">{content.productModel} {content.productSku ? `• ${content.productSku}` : ''}</p>}
+                </div>
 
                 {sheetType === 'PRODUCT' && (content.productPriceNormal || content.productPricePromo) && (
                   <div className="py-2">
@@ -464,11 +561,18 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 {content.productDescriptionShort && <p className="text-xs font-medium text-slate-400 italic">« {content.productDescriptionShort} »</p>}
 
                 <div className="grid grid-cols-2 gap-3 pt-4">
-                  {(content.whatsappNumber || content.primaryPhone) && <a href={`https://wa.me/${(content.whatsappNumber || content.primaryPhone!).replace(/[^\d]/g,'')}`} className="py-4 bg-emerald-600 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest"><MessageSquare className="w-4 h-4" /> Commander</a>}
-                  {content.productBuyUrl && <a href={content.productBuyUrl} className="py-4 bg-blue-600 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest"><ShoppingCart className="w-4 h-4" /> Acheter</a>}
+                  {(content.productOrderPhone || content.whatsappNumber || content.primaryPhone) && <a href={`https://wa.me/${(content.productOrderPhone || content.whatsappNumber || content.primaryPhone!).replace(/[^\d]/g,'')}`} className="py-4 bg-emerald-600 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><MessageSquare className="w-4 h-4" /> Commander</a>}
+                  {content.productBuyUrl && <a href={content.productBuyUrl} className="py-4 bg-blue-600 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><ShoppingCart className="w-4 h-4" /> Acheter</a>}
                 </div>
               </div>
             </div>
+
+            {sheetType === 'PRODUCT' && content.productCharacteristics && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-3">
+                <SectionHeader title="Fiche Technique" icon={List} />
+                <p className="text-[10px] text-slate-400 leading-relaxed font-bold whitespace-pre-line">{content.productCharacteristics}</p>
+              </div>
+            )}
 
             {sheetType === 'MENU' && content.menuItems && (
               <div className="space-y-8 pt-4">
@@ -492,6 +596,20 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {sheetType === 'SERVICE' && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[40px] p-8 space-y-6 shadow-2xl">
+                 <SectionHeader title="Détails du Service" icon={Activity} colorClass="text-blue-500" />
+                 <div className="space-y-2">
+                   <h2 className="text-xl font-black text-white uppercase">{content.serviceName || content.productName}</h2>
+                   <div className="flex items-center gap-4">
+                     <span className="text-2xl font-black text-blue-500">{content.servicePrice || content.productPriceNormal} <span className="text-[10px] opacity-60">{content.productCurrency || 'FCFA'}</span></span>
+                     {content.serviceDuration && <span className="px-2 py-1 bg-slate-800 text-[8px] font-black text-slate-400 uppercase rounded">{content.serviceDuration}</span>}
+                   </div>
+                 </div>
+                 {content.serviceDescription && <p className="text-xs text-slate-400 leading-relaxed font-medium">{content.serviceDescription}</p>}
               </div>
             )}
           </div>

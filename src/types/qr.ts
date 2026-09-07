@@ -420,8 +420,22 @@ export interface QRContent {
   redirectMode?: RedirectMode;
   customButtonText?: string;
 
-  // --- CUSTOM SPECIFIC ---
+  // --- LOCATION SPECIFIC ---
   locationPlaceName?: string;
+  locationPlaceType?: string;
+  locationDescription?: string;
+  locationStreet?: string;
+  appleMapsUrl?: string;
+  locationItineraryDescription?: string;
+  locationMainEntrance?: string;
+  locationMeetingPoint?: string;
+  locationParkingInfo?: string;
+  locationTransportInfo?: string;
+  locationAccessibilityInfo?: string;
+  locationManagerName?: string;
+  locationOpeningDays?: string; // Optional if we want a text summary
+
+  // --- CUSTOM SPECIFIC ---
   customSections?: CustomSection[];
   customFields?: CustomField[]; // For backward compatibility or simple lists
 

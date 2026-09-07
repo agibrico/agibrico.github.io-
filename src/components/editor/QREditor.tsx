@@ -989,27 +989,110 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
 
                   {/* --- 5. LOCATION --- */}
                   {type === 'LOCATION' && (
-                    <div className="space-y-8">
-                      <div className="space-y-4">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPin className="w-4 h-4 text-cyan-600"/> Identification du Lieu</h4>
-                        <input type="text" placeholder="Nom du lieu (ex: Siège Social, Entrepôt)" value={content.locationPlaceName || ''} onChange={e => updateContentField('locationPlaceName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        <input type="text" placeholder="Adresse complète" value={content.address || ''} onChange={e => updateContentField('address', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                    <div className="space-y-10">
+                      {/* 1. IDENTIFICATION */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPin className="w-4 h-4 text-cyan-600"/> 1. Identification</h4>
+
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
+                              {content.photoUrl ? (
+                                <div className="relative"><img src={content.photoUrl} className="w-full h-24 rounded-xl object-cover shadow-md" /><button onClick={() => updateContentField('photoUrl', '')} className="absolute -top-2 -right-2 p-1 bg-rose-600 text-white rounded-full shadow-lg"><Trash2 className="w-3 h-3"/></button></div>
+                              ) : (
+                                <label className="flex flex-col items-center cursor-pointer"><ImageIcon className="w-5 h-5 text-slate-300 mb-1" /><span className="text-[8px] font-black uppercase text-slate-400">Photo du Lieu</span><input type="file" className="hidden" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if(file) { const r = new FileReader(); r.onload = ev => updateContentField('photoUrl', ev.target?.result as string); r.readAsDataURL(file); } }} /></label>
+                              )}
+                           </div>
+                           <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
+                              {content.logoUrl ? (
+                                <div className="relative"><img src={content.logoUrl} className="w-24 h-24 rounded-xl object-contain shadow-md p-1 bg-white" /><button onClick={() => updateContentField('logoUrl', '')} className="absolute -top-2 -right-2 p-1 bg-rose-600 text-white rounded-full shadow-lg"><Trash2 className="w-3 h-3"/></button></div>
+                              ) : (
+                                <label className="flex flex-col items-center cursor-pointer"><Building2 className="w-5 h-5 text-slate-300 mb-1" /><span className="text-[8px] font-black uppercase text-slate-400">Logo</span><input type="file" className="hidden" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if(file) { const r = new FileReader(); r.onload = ev => updateContentField('logoUrl', ev.target?.result as string); r.readAsDataURL(file); } }} /></label>
+                              )}
+                           </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Nom du lieu (ex: Siège Social)" value={content.locationPlaceName || ''} onChange={e => updateContentField('locationPlaceName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Type de lieu (Hôtel, Bureau...)" value={content.locationPlaceType || ''} onChange={e => updateContentField('locationPlaceType', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                        <textarea placeholder="Brève description du lieu..." value={content.locationDescription || ''} onChange={e => updateContentField('locationDescription', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-4">
-                          <h4 className="text-[11px] font-black uppercase tracking-widest">Coordonnées GPS</h4>
-                          <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Latitude</label><input type="number" step="any" value={content.latitude || ''} onChange={e => updateContentField('latitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" placeholder="5.3085" /></div>
-                          <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Longitude</label><input type="number" step="any" value={content.longitude || ''} onChange={e => updateContentField('longitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" placeholder="-4.0183" /></div>
+                      {/* 2. ADRESSE */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPinned className="w-4 h-4 text-rose-600"/> 2. Adresse Détailée</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Pays" value={content.country || ''} onChange={e => updateContentField('country', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Région" value={content.region || ''} onChange={e => updateContentField('region', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                         </div>
-                        <div className="space-y-4">
-                          <h4 className="text-[11px] font-black uppercase tracking-widest">Liens Directs</h4>
-                          <input type="url" placeholder="Lien Google Maps" value={content.locationLink || ''} onChange={e => updateContentField('locationLink', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <div className="flex flex-col items-center justify-center h-full p-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50">
-                            <LocateFixed className="w-6 h-6 text-blue-500 mb-1" />
-                            <span className="text-[8px] font-black uppercase text-slate-400">Position précise</span>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Ville" value={content.city || ''} onChange={e => updateContentField('city', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Commune" value={content.commune || ''} onChange={e => updateContentField('commune', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Quartier" value={content.neighborhood || ''} onChange={e => updateContentField('neighborhood', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Rue" value={content.locationStreet || ''} onChange={e => updateContentField('locationStreet', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                        <textarea placeholder="Adresse complète / Instructions" value={content.address || ''} onChange={e => updateContentField('address', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Code Postal" value={content.postalCode || ''} onChange={e => updateContentField('postalCode', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Point de repère (Landmark)" value={content.landmark || ''} onChange={e => updateContentField('landmark', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                      </div>
+
+                      {/* 3. GPS */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><LocateFixed className="w-4 h-4 text-blue-600"/> 3. Coordonnées GPS</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Latitude</label>
+                            <input type="number" step="any" value={content.latitude || ''} onChange={e => updateContentField('latitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" placeholder="5.3085" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Longitude</label>
+                            <input type="number" step="any" value={content.longitude || ''} onChange={e => updateContentField('longitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" placeholder="-4.0183" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Altitude</label>
+                            <input type="number" step="any" value={content.altitude || ''} onChange={e => updateContentField('altitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" placeholder="0" />
                           </div>
                         </div>
+                        <div className="space-y-4">
+                          <input type="url" placeholder="Lien Google Maps" value={content.googleMapsUrl || content.locationLink || ''} onChange={e => updateContentField('googleMapsUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-blue-600" />
+                          <input type="url" placeholder="Lien Apple Maps" value={content.appleMapsUrl || ''} onChange={e => updateContentField('appleMapsUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-indigo-600" />
+                        </div>
+                      </div>
+
+                      {/* 4. ACCÈS */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Navigation className="w-4 h-4 text-emerald-600"/> 4. Accès & Commodités</h4>
+                        <textarea placeholder="Description de l'itinéraire..." value={content.locationItineraryDescription || ''} onChange={e => updateContentField('locationItineraryDescription', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Entrée principale" value={content.locationMainEntrance || ''} onChange={e => updateContentField('locationMainEntrance', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Point de rencontre" value={content.locationMeetingPoint || ''} onChange={e => updateContentField('locationMeetingPoint', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Infos Parking" value={content.locationParkingInfo || ''} onChange={e => updateContentField('locationParkingInfo', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Transports disponibles" value={content.locationTransportInfo || ''} onChange={e => updateContentField('locationTransportInfo', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                        <input type="text" placeholder="Accessibilité (PMR, etc.)" value={content.locationAccessibilityInfo || ''} onChange={e => updateContentField('locationAccessibilityInfo', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                      </div>
+
+                      {/* 5. CONTACT */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Phone className="w-4 h-4 text-indigo-600"/> 5. Contact du Responsable</h4>
+                        <input type="text" placeholder="Nom du responsable / gérant" value={content.locationManagerName || ''} onChange={e => updateContentField('locationManagerName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="tel" placeholder="Téléphone" value={content.primaryPhone || ''} onChange={e => updateContentField('primaryPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="tel" placeholder="WhatsApp" value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold border-emerald-200" />
+                        </div>
+                        <input type="email" placeholder="E-mail de contact" value={content.email || ''} onChange={e => updateContentField('email', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                      </div>
+
+                      {/* 6. HORAIRES */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Clock className="w-4 h-4 text-slate-600"/> 6. Horaires d'Ouverture</h4>
+                        <OpeningHoursEditor days={content.openingHours || DEFAULT_DAYS} onChange={days => updateContentField('openingHours', days)} />
                       </div>
                     </div>
                   )}

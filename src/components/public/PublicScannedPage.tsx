@@ -1076,27 +1076,184 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
         );
 
       case 'LOCATION':
+        const mapUrl = content.googleMapsUrl || content.locationLink || (content.latitude && content.longitude ? `https://www.google.com/maps/search/?api=1&query=${content.latitude},${content.longitude}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`);
+        const itineraryUrl = content.latitude && content.longitude ? `https://www.google.com/maps/dir/?api=1&destination=${content.latitude},${content.longitude}` : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(content.address || '')}`;
+
         return (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
-              <div className="w-20 h-20 bg-cyan-500/10 rounded-full mx-auto flex items-center justify-center border border-cyan-500/20 shadow-inner">
-                <MapPin className="w-10 h-10 text-cyan-500" />
+          <div className="space-y-6 pb-20">
+            {/* HERO / MAP HEADER */}
+            <div className="bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl relative group">
+              <div className="w-full h-48 bg-slate-800 relative flex items-center justify-center overflow-hidden">
+                {content.photoUrl ? (
+                  <img src={content.photoUrl} className="w-full h-full object-cover" alt={content.locationPlaceName} />
+                ) : (
+                  <div className="flex flex-col items-center gap-3 text-cyan-500/20">
+                    <MapPinned className="w-20 h-20" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+
+                {/* Logo Overlay */}
+                {registeredLogo && (
+                  <div className="absolute bottom-4 left-6 w-16 h-16 bg-white rounded-2xl p-2 shadow-xl border border-slate-800 overflow-hidden">
+                    <img src={registeredLogo} className="w-full h-full object-contain" />
+                  </div>
+                )}
               </div>
-              <div className="space-y-2">
-                {content.locationPlaceName && <h1 className="text-2xl font-black text-white uppercase">{content.locationPlaceName}</h1>}
-                <p className="text-sm font-bold text-slate-400 leading-tight">{content.address}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <a href={`https://www.google.com/maps/search/?api=1&query=${content.latitude || content.address},${content.longitude || ''}`} className="py-4 bg-blue-600 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest"><Map className="w-4 h-4" /> Google Maps</a>
-                <a href={`https://waze.com/ul?q=${encodeURIComponent(content.address || '')}&navigate=yes`} className="py-4 bg-cyan-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest"><Navigation className="w-4 h-4" /> Waze</a>
+
+              <div className="p-8 space-y-6">
+                <div className="space-y-2 text-center">
+                  {content.locationPlaceType && <span className="px-3 py-1 bg-cyan-600/10 text-cyan-400 border border-cyan-600/20 text-[9px] font-black uppercase tracking-[0.2em] rounded-full">{content.locationPlaceType}</span>}
+                  <h1 className="text-3xl font-black text-white uppercase tracking-tight pt-2">{content.locationPlaceName || item.title}</h1>
+                  {content.locationDescription && <p className="text-xs font-medium text-slate-400 italic">« {content.locationDescription} »</p>}
+                </div>
+
+                {/* MAIN ACTION GRID */}
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="col-span-2 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95">
+                    <Map className="w-4 h-4" /> Ouvrir la carte
+                  </a>
+
+                  <a href={itineraryUrl} target="_blank" rel="noopener noreferrer" className="py-4 bg-white text-slate-950 font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 shadow-lg">
+                    <Navigation className="w-4 h-4" /> Itinéraire
+                  </a>
+
+                  <a href={`https://wa.me/${(content.whatsappNumber || '').replace(/[^\d]/g,'')}?text=Bonjour, je vous contacte à propos de : ${content.locationPlaceName}`} className="py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 shadow-lg">
+                    <MessageSquare className="w-4 h-4" /> WhatsApp
+                  </a>
+
+                  {content.primaryPhone && (
+                    <a href={`tel:${content.primaryPhone}`} className="py-4 bg-slate-800 border border-slate-700 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95">
+                      <Phone className="w-4 h-4 text-emerald-400" /> Appeler
+                    </a>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(content.address || '');
+                      alert("Adresse copiée !");
+                    }}
+                    className="py-4 bg-slate-800 border border-slate-700 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"
+                  >
+                    <Copy className="w-4 h-4 text-blue-400" /> Copier Adresse
+                  </button>
+                </div>
               </div>
             </div>
-            {(content.latitude && content.longitude) && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 grid grid-cols-2 gap-3 shadow-inner">
-                <InfoRow label="Latitude" value={content.latitude} icon={LocateFixed} />
-                <InfoRow label="Longitude" value={content.longitude} icon={LocateFixed} />
+
+            {/* ADDRESS SECTION */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+              <SectionHeader title="Adresse & Localisation" icon={MapPinned} colorClass="text-rose-500" />
+              <div className="space-y-3">
+                <div className="p-5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+                  <p className="text-sm font-black text-white uppercase leading-tight">{content.address}</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
+                    {content.locationStreet && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Rue: {content.locationStreet}</span>}
+                    {content.neighborhood && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Quartier: {content.neighborhood}</span>}
+                    {content.commune && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Commune: {content.commune}</span>}
+                    {content.city && <span className="text-[10px] font-black text-blue-400 uppercase tracking-tight">{content.city}</span>}
+                    {content.country && <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{content.country}</span>}
+                  </div>
+                </div>
+                {content.landmark && <InfoRow label="Point de repère" value={content.landmark} icon={LocateFixed} />}
+                {content.postalCode && <InfoRow label="Code Postal" value={content.postalCode} />}
+              </div>
+            </div>
+
+            {/* GPS & MAP LINKS */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+              <SectionHeader title="Coordonnées GPS" icon={LocateFixed} colorClass="text-blue-500" />
+              <div className="grid grid-cols-2 gap-3">
+                <InfoRow label="Latitude" value={content.latitude} />
+                <InfoRow label="Longitude" value={content.longitude} />
+                {content.altitude && <InfoRow label="Altitude" value={`${content.altitude} m`} />}
+              </div>
+              <div className="space-y-3 pt-2">
+                {content.appleMapsUrl && (
+                  <a href={content.appleMapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-950 border border-slate-800 rounded-2xl group hover:border-indigo-500/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center"><Navigation className="w-4 h-4 text-indigo-500" /></div>
+                      <span className="text-[10px] font-black uppercase text-white">Apple Maps</span>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-700" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* ACCESS & COMMODITIES */}
+            {(content.locationItineraryDescription || content.locationMainEntrance || content.locationMeetingPoint || content.locationParkingInfo || content.locationTransportInfo || content.locationAccessibilityInfo) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Accès & Commodités" icon={Layers} colorClass="text-emerald-500" />
+                {content.locationItineraryDescription && (
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-1">Itinéraire détaillé</span>
+                    <p className="text-xs text-slate-300 leading-relaxed">{content.locationItineraryDescription}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoRow label="Entrée" value={content.locationMainEntrance} />
+                  <InfoRow label="Meeting Point" value={content.locationMeetingPoint} />
+                  <InfoRow label="Parking" value={content.locationParkingInfo} icon={Truck} />
+                  <InfoRow label="Transports" value={content.locationTransportInfo} icon={Activity} />
+                </div>
+                {content.locationAccessibilityInfo && (
+                  <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                    <span className="text-[8px] font-black text-emerald-500 uppercase block mb-1">Accessibilité</span>
+                    <p className="text-[10px] font-bold text-slate-400">{content.locationAccessibilityInfo}</p>
+                  </div>
+                )}
               </div>
             )}
+
+            {/* CONTACT RESPONSIBLE */}
+            {(content.locationManagerName || content.email || content.primaryPhone) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Contact Responsable" icon={User} colorClass="text-indigo-500" />
+                <div className="space-y-3">
+                  {content.locationManagerName && <InfoRow label="Manager / Gérant" value={content.locationManagerName} icon={User} />}
+                  <div className="grid grid-cols-2 gap-3">
+                    <InfoRow label="Téléphone" value={content.primaryPhone} icon={Phone} href={`tel:${content.primaryPhone}`} />
+                    <InfoRow label="E-mail" value={content.email} icon={Mail} href={`mailto:${content.email}`} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* OPENING HOURS */}
+            {content.openingHours && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6">
+                <SectionHeader title="Horaires d'Ouverture" icon={Clock} colorClass="text-slate-400" />
+                <div className="space-y-2">
+                  {content.openingHours.map(d => (
+                    <div key={d.day} className="flex justify-between items-center text-[10px] font-black uppercase">
+                      <span className="text-slate-500">{d.day}</span>
+                      <span className={d.isOpen ? "text-white" : "text-rose-500/70"}>{d.isOpen ? `${d.openTime} - ${d.closeTime}` : 'Fermé'}</span>
+                    </div>
+                  ))}
+                </div>
+                {content.locationOpeningDays && (
+                   <p className="text-[9px] text-slate-500 mt-4 italic text-center font-bold">Notes: {content.locationOpeningDays}</p>
+                )}
+              </div>
+            )}
+
+            {/* SHARE ACTION */}
+            <div className="pt-4">
+               <button
+                 onClick={() => {
+                   if (navigator.share) {
+                     navigator.share({ title: content.locationPlaceName, text: content.locationDescription, url: window.location.href });
+                   } else {
+                     navigator.clipboard.writeText(window.location.href);
+                     alert("Lien copié !");
+                   }
+                 }}
+                 className="w-full py-4 bg-slate-900 border border-slate-800 text-slate-400 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors"
+                >
+                 <Share2 className="w-4 h-4" /> Partager la localisation
+               </button>
+            </div>
           </div>
         );
 

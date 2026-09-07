@@ -75,6 +75,26 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
 
+  // --- COMPATIBILITY LAYER FOR OLD FLUTTER TYPES ---
+  const normalizeItem = (rawItem: any): QRCodeItem => {
+    const typeMap: Record<string, string> = {
+      'vcard': 'BUSINESS_CARD',
+      'business': 'BUSINESS_CARD',
+      'social': 'SOCIAL',
+      'shop': 'SHOP',
+      'event': 'EVENT',
+      'location': 'LOCATION',
+      'book': 'BOOK',
+      'product': 'PRODUCT',
+      'url': 'WEB_LINK'
+    };
+
+    return {
+      ...rawItem,
+      type: typeMap[rawItem.type] || rawItem.type
+    };
+  };
+
   useEffect(() => {
     if (item && item.type === 'WEB_LINK' && item.content.redirectMode === 'DIRECT' && item.content.linkDestinationUrl && !isSimulator) {
       window.location.href = item.content.linkDestinationUrl;
@@ -83,7 +103,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
   useEffect(() => {
     if (propQrItem) {
-      setItem(propQrItem);
+      setItem(normalizeItem(propQrItem));
       setLoading(false);
       return;
     }
@@ -94,9 +114,10 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       if (matchPayload && matchPayload[1]) {
         const decoded = decodeCardPayload(matchPayload[1]);
         if (decoded) {
-          setItem(decoded);
+          const normalized = normalizeItem(decoded);
+          setItem(normalized);
           setLoading(false);
-          if (!isSimulator) recordScanEvent(decoded.publicId || publicId || 'direct_payload');
+          if (!isSimulator) recordScanEvent(normalized.publicId || publicId || 'direct_payload');
           return;
         }
       }
@@ -106,7 +127,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       setLoading(true);
       fetchQRCodeByPublicId(publicId).then(found => {
         if (found) {
-          setItem(found);
+          setItem(normalizeItem(found));
           if (!isSimulator) recordScanEvent(publicId);
         } else {
           setError("Cette fiche est introuvable.");

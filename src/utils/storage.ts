@@ -1,6 +1,8 @@
 import { 
   QRCodeItem, 
-  ScanEvent, 
+  QRContent,
+  QRType,
+  ScanEvent,
   ClientProfile, 
   HistoryLogItem, 
   DesignerProfile, 
@@ -584,12 +586,116 @@ export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeIte
   return null;
 }
 
+/**
+ * Recursively removes all keys with empty string values (""), null, undefined, or empty arrays ([])
+ * from the QR content object before returning it.
+ * Ensures data minimality.
+ */
+export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent {
+  if (!content) return {} as QRContent;
+
+  const deepClean = (obj: any): any => {
+    if (obj === null || obj === undefined) return undefined;
+    if (typeof obj !== 'object') return obj === "" ? undefined : obj;
+
+    if (Array.isArray(obj)) {
+      const arr = obj.map(deepClean).filter(v =>
+        v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : true)
+      );
+      return arr.length > 0 ? arr : undefined;
+    }
+
+    const res: any = {};
+    let hasKeys = false;
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        // Exception: privacy settings are preserved if they are objects
+        if (key === 'privacy') {
+          res[key] = obj[key];
+          hasKeys = true;
+          continue;
+        }
+
+        const val = deepClean(obj[key]);
+        if (val !== undefined) {
+          res[key] = val;
+          hasKeys = true;
+        }
+      }
+    }
+    return hasKeys ? res : undefined;
+  };
+
+  const initialCleaned = deepClean(content) || {};
+  const cleaned: any = {};
+
+  // Field-to-Type mapping for prefix-based filtering
+  const typePrefixMap: Record<string, string> = {
+    'BOOK': 'book',
+    'EVENT': 'event',
+    'SHOP': 'shop',
+    'COMPANY': 'company',
+    'SOCIAL': 'social',
+    'PRODUCT': 'product',
+    'WEB_LINK': 'link',
+    'LOCATION': 'location',
+  };
+
+  const currentPrefix = typePrefixMap[type];
+  const otherPrefixes = Object.values(typePrefixMap).filter(p => p !== currentPrefix);
+
+  for (const key in initialCleaned) {
+    const value = initialCleaned[key];
+
+    // Always keep common fields
+    const commonFields = [
+      'firstName', 'lastName', 'fullName', 'civility', 'middleName', 'jobTitle', 'profession',
+      'company', 'department', 'industry', 'slogan', 'bio', 'photoUrl', 'logoUrl', 'bannerUrl',
+      'primaryPhone', 'secondaryPhone', 'workPhone', 'whatsappNumber', 'email', 'workEmail',
+      'websiteUrl', 'address', 'neighborhood', 'commune', 'city', 'region', 'postalCode', 'country',
+      'latitude', 'longitude', 'privacy', 'customSections', 'customFields', 'openingHours', 'socialLinks'
+    ];
+
+    if (commonFields.includes(key)) {
+      cleaned[key] = value;
+      continue;
+    }
+
+    // Category type check (e.g. productSheetType only for PRODUCT)
+    if (key === 'productSheetType' || key === 'menuItems' || key === 'serviceName') {
+      if (type === 'PRODUCT') cleaned[key] = value;
+      continue;
+    }
+
+    // Keep fields starting with the current prefix
+    if (currentPrefix && key.startsWith(currentPrefix)) {
+      cleaned[key] = value;
+      continue;
+    }
+
+    // If it's a field for another type (prefixed), discard it
+    if (otherPrefixes.some(p => key.startsWith(p))) {
+      continue;
+    }
+
+    // Otherwise keep it
+    cleaned[key] = value;
+  }
+
+  return cleaned as QRContent;
+}
+
 export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): QRCodeItem {
   const items = getStoredQRCodes();
+
+  // Apply cleaning logic to ensure minimalist data
+  const cleanedContent = cleanQRCodeContent(item.content, item.type);
+
   const existingIdx = items.findIndex(q => q.id === item.id);
   
   const updatedItem: QRCodeItem = {
     ...item,
+    content: cleanedContent,
     userId: auth?.currentUser?.uid || item.userId,
     updatedAt: new Date().toISOString()
   };

@@ -3,7 +3,7 @@ import {
   User, Building2, Share2, ShoppingBag, Image as ImageIcon, Calendar, MapPin, Globe, Sparkles, Plus, Trash2, Lock, Check, Palette, Upload, Clock, Shield, Sliders, Layers, ArrowRight, Eye, Save, X, FileCode, Info, BookOpen, Store, Navigation, CheckCircle2, Smartphone, Printer, CalendarDays, Hash, Languages, DollarSign, ShoppingCart, Facebook, Instagram, Truck, Wallet, Package, MapPinned, LocateFixed, Linkedin, Youtube, FileText, Briefcase, Twitter, Send, MessageSquare, Book, Link, Map, UserPlus, List, ImagePlus, FileUp, Star, Tag, Activity, CheckSquare, LayoutList, GripVertical, Phone, BadgeCheck, GraduationCap, Quote, Users, Landmark, TruckIcon, CreditCard, PenTool, BookMarked, Languages as LangIcon, Headphones, Video, Settings, ChevronDown, ChevronUp, Minus, Type, Mail
 } from 'lucide-react';
 import { QRCodeItem, QRType, QRMode, QRStyling, QRContent, CustomField, SocialLink, OpeningHourDay } from '../../types/qr';
-import { generateSecurePublicId, getPublicQRUrl, saveOrUpdateQRCode } from '../../utils/storage';
+import { generateSecurePublicId, getPublicQRUrl, saveOrUpdateQRCode, cleanQRCodeContent } from '../../utils/storage';
 import { generateVCardString } from '../../utils/vcard';
 import { OpeningHoursEditor } from './OpeningHoursEditor';
 
@@ -27,24 +27,14 @@ const DEFAULT_DAYS: OpeningHourDay[] = [
 
 export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCancel, onOpenPrintStudio, onOpenSimulator }) => {
   const isEditing = Boolean(initialItem);
-  const [title, setTitle] = useState(initialItem?.title || 'Nouvelle Fiche');
+  const [title, setTitle] = useState(initialItem?.title || '');
   const [type, setType] = useState<QRType>(initialItem?.type || 'BUSINESS_CARD');
   const [mode, setMode] = useState<QRMode>(initialItem?.mode || 'dynamic');
   const [publicId] = useState<string>(initialItem?.publicId || generateSecurePublicId());
   const [activeStep, setActiveStep] = useState<'content' | 'logo' | 'style' | 'settings'>('content');
 
   const [content, setContent] = useState<QRContent>(initialItem?.content || {
-    firstName: '', lastName: '', fullName: '', company: '', jobTitle: '', industry: '', bio: '',
-    photoUrl: '', logoUrl: '', primaryPhone: '', whatsappNumber: '', email: '', websiteUrl: '',
-    address: '', city: '', country: '', languagesSpoken: [], servicesOffered: [],
-    openingHours: DEFAULT_DAYS, socialLinks: [], customFields: [], customSections: [],
-    privacy: { hideAddress: false, hideCompanyAdminInfo: false }, productSheetType: 'PRODUCT', menuItems: [],
-    socialDisplayName: '', socialNickname: '', socialProfession: '',
-    linkDestinationUrl: '', redirectMode: 'LANDING_PAGE',
-    eventTitle: '', eventStartDate: '', eventStartTime: '',
-    shopIndustry: '', companyLegalForm: '',
-    bookTitle: '', bookAuthor: '',
-    locationPlaceName: ''
+    privacy: { hideAddress: false, hideCompanyAdminInfo: false }
   } as any);
 
   const [styling, setStyling] = useState<QRStyling>(initialItem?.styling || {
@@ -147,7 +137,8 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
     publicId, title, type, mode, status: initialItem?.status || 'active',
     createdAt: initialItem?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(), scanCount: initialItem?.scanCount || 0,
-    content, styling
+    content: cleanQRCodeContent(content, type),
+    styling
   });
 
   useEffect(() => { saveOrUpdateQRCode(getCurrentItem(), true); }, [title, type, mode, content, styling]);

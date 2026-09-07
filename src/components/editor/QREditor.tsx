@@ -632,53 +632,201 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                   {/* --- 3. EVENT --- */}
                   {type === 'EVENT' && (
                     <div className="space-y-10">
+                      {/* IDENTITY */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Calendar className="w-4 h-4 text-rose-600"/> Détails de l'Événement</h4>
-                        <input type="text" placeholder="Titre de l'événement (ex: Mariage de X & Y)" value={content.eventTitle || ''} onChange={e => updateContentField('eventTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        <input type="text" placeholder="Sous-titre / Thème" value={content.eventTheme || ''} onChange={e => updateContentField('eventTheme', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        <textarea placeholder="Description complète de l'événement..." value={content.eventDescription || ''} onChange={e => updateContentField('eventDescription', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Calendar className="w-4 h-4 text-rose-600"/> 1. Identité de l'Événement</h4>
+
+                        <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50 relative group mb-6">
+                          {content.eventPosterUrl ? (
+                            <div className="relative">
+                              <img src={content.eventPosterUrl} className="h-48 w-full rounded-xl object-cover shadow-2xl border-4 border-white" />
+                              <button onClick={() => updateContentField('eventPosterUrl', '')} className="absolute -top-3 -right-3 p-2 bg-rose-600 text-white rounded-full shadow-xl hover:scale-110 transition-all"><Trash2 className="w-4 h-4"/></button>
+                            </div>
+                          ) : (
+                            <label className="flex flex-col items-center cursor-pointer group">
+                              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 group-hover:text-rose-500 shadow-xl border border-slate-100 transition-all mb-3"><ImagePlus className="w-8 h-8" /></div>
+                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Affiche / Poster</span>
+                              <input type="file" className="hidden" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if(file) { const r = new FileReader(); r.onload = ev => updateContentField('eventPosterUrl', ev.target?.result as string); r.readAsDataURL(file); } }} />
+                            </label>
+                          )}
+                        </div>
+
+                        <div className="space-y-4">
+                          <input type="text" placeholder="Titre de l'événement (ex: Mariage de X & Y)" value={content.eventTitle || ''} onChange={e => updateContentField('eventTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-black" />
+                          <div className="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="Sous-titre" value={content.eventSubtitle || ''} onChange={e => updateContentField('eventSubtitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Type (Cérémonie, Gala, Concert...)" value={content.eventType || ''} onChange={e => updateContentField('eventType', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="Thème" value={content.eventTheme || ''} onChange={e => updateContentField('eventTheme', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Slogan / Devise" value={content.eventSlogan || ''} onChange={e => updateContentField('eventSlogan', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <textarea placeholder="Description complète de l'événement..." value={content.eventDescription || ''} onChange={e => updateContentField('eventDescription', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="Hôte / Organisateur" value={content.eventHost || ''} onChange={e => updateContentField('eventHost', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Co-Hôte" value={content.eventCoHost || ''} onChange={e => updateContentField('eventCoHost', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="Parrain (Sponsor)" value={content.eventSponsor || ''} onChange={e => updateContentField('eventSponsor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Marraine" value={content.eventGodmother || ''} onChange={e => updateContentField('eventGodmother', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="grid grid-cols-1">
+                            <input type="text" placeholder="Invité d'Honneur" value={content.eventGuestOfHonor || ''} onChange={e => updateContentField('eventGuestOfHonor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="Invités Spéciaux (virgules)" value={content.eventSpecialGuests?.join(', ') || ''} onChange={e => updateContentField('eventSpecialGuests', e.target.value.split(',').map(s => s.trim()))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Artistes / Performers (virgules)" value={content.eventPerformers?.join(', ') || ''} onChange={e => updateContentField('eventPerformers', e.target.value.split(',').map(s => s.trim()))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
                       </div>
 
+                      {/* DATE & TIME */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Users className="w-4 h-4 text-indigo-600"/> Organisation & Invités</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Hôte / Organisateur" value={content.eventHost || ''} onChange={e => updateContentField('eventHost', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Co-Hôte" value={content.eventCoHost || ''} onChange={e => updateContentField('eventCoHost', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Parrain (Sponsor)" value={content.eventSponsor || ''} onChange={e => updateContentField('eventSponsor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Marraine" value={content.eventGodmother || ''} onChange={e => updateContentField('eventGodmother', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        </div>
-                        <input type="text" placeholder="Invité d'Honneur" value={content.eventGuestOfHonor || ''} onChange={e => updateContentField('eventGuestOfHonor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-6">
-                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Clock className="w-4 h-4 text-slate-500"/> Date & Heure</h4>
-                          <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Date de début</label><input type="date" value={content.eventStartDate || ''} onChange={e => updateContentField('eventStartDate', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
-                          <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Heure de début</label><input type="time" value={content.eventStartTime || ''} onChange={e => updateContentField('eventStartTime', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
-                          <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Ouverture des portes</label><input type="time" value={content.eventDoorsOpenTime || ''} onChange={e => updateContentField('eventDoorsOpenTime', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
-                        </div>
-                        <div className="space-y-6">
-                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPin className="w-4 h-4 text-rose-600"/> Lieu & Accès</h4>
-                          <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Nom du Lieu</label><input type="text" placeholder="Hôtel Ivoire, Salle de Bal..." value={content.eventLocationName || ''} onChange={e => updateContentField('eventLocationName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
-                          <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Adresse</label><input type="text" placeholder="Cocody, Abidjan..." value={content.eventAddress || content.address || ''} onChange={e => updateContentField('eventAddress', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
-                          <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Dress Code</label><input type="text" placeholder="Tenue de Soirée, Blanc..." value={content.eventDressCode || ''} onChange={e => updateContentField('eventDressCode', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Clock className="w-4 h-4 text-amber-600"/> 2. Date & Horaires</h4>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Date de début</label><input type="date" value={content.eventStartDate || ''} onChange={e => updateContentField('eventStartDate', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
+                            <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Heure de début</label><input type="time" value={content.eventStartTime || ''} onChange={e => updateContentField('eventStartTime', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
+                            <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Ouverture des portes</label><input type="time" value={content.eventDoorsOpenTime || ''} onChange={e => updateContentField('eventDoorsOpenTime', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
+                          </div>
+                          <div className="space-y-4">
+                            <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Date de fin</label><input type="date" value={content.eventEndDate || ''} onChange={e => updateContentField('eventEndDate', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
+                            <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Heure de fin</label><input type="time" value={content.eventEndTime || ''} onChange={e => updateContentField('eventEndTime', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
+                            <div className="space-y-1.5"><label className="text-[9px] font-black uppercase text-slate-400">Fuseau Horaire</label><input type="text" placeholder="GMT, UTC+1..." value={content.eventTimezone || ''} onChange={e => updateContentField('eventTimezone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" /></div>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-6">
-                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><CreditCard className="w-4 h-4 text-emerald-600"/> Billetterie & RSVP</h4>
-                          <input type="text" placeholder="Prix du ticket" value={content.eventTicketPrice || ''} onChange={e => updateContentField('eventTicketPrice', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black text-emerald-600" />
-                          <input type="date" value={content.eventRsvpDeadline || ''} onChange={e => updateContentField('eventRsvpDeadline', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-black uppercase" />
-                          <input type="url" placeholder="Lien de réservation" value={content.eventBookingUrl || ''} onChange={e => updateContentField('eventBookingUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                      {/* LOCATION */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPin className="w-4 h-4 text-rose-600"/> 3. Lieu & Localisation</h4>
+                        <div className="space-y-4">
+                          <input type="text" placeholder="Nom du Lieu (Hôtel Ivoire, Salle A...)" value={content.eventLocationName || ''} onChange={e => updateContentField('eventLocationName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Adresse complète" value={content.eventAddress || ''} onChange={e => updateContentField('eventAddress', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <div className="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="Commune" value={content.eventCommune || ''} onChange={e => updateContentField('eventCommune', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Quartier" value={content.eventNeighborhood || ''} onChange={e => updateContentField('eventNeighborhood', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="Ville" value={content.eventCity || ''} onChange={e => updateContentField('eventCity', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Pays" value={content.eventCountry || ''} onChange={e => updateContentField('eventCountry', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <input type="text" placeholder="Point de repère / Landmark" value={content.eventLandmark || ''} onChange={e => updateContentField('eventLandmark', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Latitude</label>
+                              <input type="number" step="any" placeholder="5.3085" value={content.eventLatitude || ''} onChange={e => updateContentField('eventLatitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Longitude</label>
+                              <input type="number" step="any" placeholder="-4.0183" value={content.eventLongitude || ''} onChange={e => updateContentField('eventLongitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            </div>
+                          </div>
+                          <textarea placeholder="Instructions d'accès particulières..." value={content.eventAccessInstructions || ''} onChange={e => updateContentField('eventAccessInstructions', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
                         </div>
-                        <div className="space-y-6">
-                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Phone className="w-4 h-4 text-blue-600"/> Contact & Programme</h4>
-                          <input type="tel" placeholder="Tél. Contact" value={content.primaryPhone || ''} onChange={e => updateContentField('primaryPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="url" placeholder="Lien Programme PDF" value={content.eventProgramPdfUrl || ''} onChange={e => updateContentField('eventProgramPdfUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="number" placeholder="Capacité Max." value={content.eventMaxCapacity || ''} onChange={e => updateContentField('eventMaxCapacity', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                      </div>
+
+                      {/* PROGRAM */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><List className="w-4 h-4 text-indigo-600"/> 4. Programme</h4>
+                        <div className="space-y-4">
+                          <textarea placeholder="Déroulement de l'événement..." value={content.eventProgram || ''} onChange={e => updateContentField('eventProgram', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={4} />
+                          <div className="grid grid-cols-1 gap-4">
+                            <input type="text" placeholder="Activités (Séparez par des points)" value={content.eventActivities || ''} onChange={e => updateContentField('eventActivities', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Intervenants / Speakers" value={content.eventSpeakers || ''} onChange={e => updateContentField('eventSpeakers', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Sessions / Ateliers" value={content.eventSessions || ''} onChange={e => updateContentField('eventSessions', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="url" placeholder="Lien Programme PDF" value={content.eventProgramPdfUrl || ''} onChange={e => updateContentField('eventProgramPdfUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* INVITATION / GUEST */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><User className="w-4 h-4 text-emerald-600"/> 5. Invitation & Invité</h4>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="N° Invitation" value={content.eventInvitationNumber || ''} onChange={e => updateContentField('eventInvitationNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Catégorie (VIP, Standard...)" value={content.eventGuestCategory || ''} onChange={e => updateContentField('eventGuestCategory', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="grid grid-cols-3 gap-4">
+                            <input type="text" placeholder="Table" value={content.eventTable || ''} onChange={e => updateContentField('eventTable', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Siège / Place" value={content.eventSeat || ''} onChange={e => updateContentField('eventSeat', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            <input type="text" placeholder="Zone" value={content.eventZone || ''} onChange={e => updateContentField('eventZone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Nombre de Pax</label>
+                              <input type="number" placeholder="1" value={content.eventGuestPax || ''} onChange={e => updateContentField('eventGuestPax', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Dress Code</label>
+                              <input type="text" placeholder="Tenue de Soirée, Blanc..." value={content.eventDressCode || ''} onChange={e => updateContentField('eventDressCode', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Instructions Invité</label>
+                            <input type="text" placeholder="Munissez-vous de votre invitation..." value={content.eventGuestInstructions || ''} onChange={e => updateContentField('eventGuestInstructions', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* RESERVATION / RSVP */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-600"/> 6. Réservation & RSVP</h4>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                             <div>
+                               <span className="text-[10px] font-black uppercase text-slate-900 block">Activer le RSVP</span>
+                               <p className="text-[8px] font-bold text-slate-400 uppercase">Permet aux invités de confirmer leur présence</p>
+                             </div>
+                             <input type="checkbox" checked={content.eventRsvpEnabled || false} onChange={e => updateContentField('eventRsvpEnabled', e.target.checked)} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Date Limite Confirmation</label>
+                              <input type="date" value={content.eventRsvpDeadline || ''} onChange={e => updateContentField('eventRsvpDeadline', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-black uppercase" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Capacité Totale (Pax)</label>
+                              <input type="number" placeholder="500" value={content.eventMaxCapacity || ''} onChange={e => updateContentField('eventMaxCapacity', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Prix du Ticket</label>
+                              <input type="text" placeholder="Prix du ticket" value={content.eventTicketPrice || ''} onChange={e => updateContentField('eventTicketPrice', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black text-emerald-600" />
+                            </div>
+                            <div className="flex items-center gap-2 mt-5">
+                               <input type="checkbox" checked={content.eventIsPaid || false} onChange={e => updateContentField('eventIsPaid', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                               <span className="text-[10px] font-black uppercase text-slate-700">Événement Payant</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Lien de Billetterie</label>
+                              <input type="url" placeholder="https://..." value={content.eventTicketUrl || content.eventBookingUrl || ''} onChange={e => updateContentField('eventTicketUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-blue-600" />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-4 pt-2">
+                             <div className="space-y-1">
+                               <label className="text-[9px] font-black uppercase text-slate-400">Tél. RSVP</label>
+                               <input type="tel" placeholder="+225..." value={content.eventPhone || content.primaryPhone || ''} onChange={e => updateContentField('eventPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                             </div>
+                             <div className="space-y-1">
+                               <label className="text-[9px] font-black uppercase text-slate-400">WhatsApp RSVP</label>
+                               <input type="tel" placeholder="+225..." value={content.eventWhatsApp || content.whatsappNumber || ''} onChange={e => updateContentField('eventWhatsApp', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold border-emerald-200" />
+                             </div>
+                             <div className="space-y-1">
+                               <label className="text-[9px] font-black uppercase text-slate-400">Email RSVP</label>
+                               <input type="email" placeholder="rsvp@..." value={content.eventEmail || content.email || ''} onChange={e => updateContentField('eventEmail', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                             </div>
+                          </div>
                         </div>
                       </div>
                     </div>

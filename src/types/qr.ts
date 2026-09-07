@@ -239,6 +239,7 @@ export interface QRContent {
   eventSubtitle?: string;
   eventType?: string;
   eventTheme?: string;
+  eventSlogan?: string;
   eventDescription?: string;
   eventHost?: string;
   eventCoHost?: string;
@@ -247,23 +248,51 @@ export interface QRContent {
   eventGuestOfHonor?: string;
   eventSpecialGuests?: string[];
   eventPerformers?: string[];
+  eventPosterUrl?: string;
+
   eventStartDate?: string;
   eventStartTime?: string;
   eventEndDate?: string;
   eventEndTime?: string;
   eventTimezone?: string;
   eventDoorsOpenTime?: string;
+
   eventLocationName?: string;
   eventAddress?: string;
+  eventCommune?: string;
+  eventNeighborhood?: string;
+  eventCity?: string;
+  eventCountry?: string;
+  eventLandmark?: string;
+  eventLatitude?: number;
+  eventLongitude?: number;
   eventAccessInstructions?: string;
+
   eventProgram?: string;
+  eventActivities?: string;
+  eventSpeakers?: string;
+  eventSessions?: string;
   eventProgramPdfUrl?: string;
+
+  eventInvitationNumber?: string;
+  eventTable?: string;
+  eventSeat?: string;
+  eventZone?: string;
+  eventGuestCategory?: string; // VIP/Standard
+  eventGuestPax?: number | string;
+  eventGuestInstructions?: string;
+
   eventDressCode?: string;
+  eventRsvpEnabled?: boolean;
   eventRsvpDeadline?: string;
+  eventMaxCapacity?: number | string;
   eventTicketPrice?: string;
   eventIsPaid?: boolean;
   eventBookingUrl?: string;
-  eventMaxCapacity?: number | string;
+  eventTicketUrl?: string;
+  eventPhone?: string;
+  eventWhatsApp?: string;
+  eventEmail?: string;
 
   // Backward compatibility or alternate names for Event
   invitationTitle?: string;

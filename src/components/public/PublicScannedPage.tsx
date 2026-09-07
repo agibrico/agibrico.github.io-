@@ -162,11 +162,39 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
   const handleAddToCalendar = () => {
     if (!item) return;
-    const { invitationTitle, invitationDate, invitationTime, invitationLocationName, invitationAddress } = item.content;
-    const calTitle = invitationTitle || item.title || 'Événement';
-    const startDateStr = invitationDate ? invitationDate.replace(/-/g, '') : '';
-    const startTimeStr = invitationTime ? invitationTime.replace(/:/g, '') : '0000';
-    const icsContent = ['BEGIN:VCALENDAR','VERSION:2.0','BEGIN:VEVENT',`SUMMARY:${calTitle}`,`DTSTART:${startDateStr}T${startTimeStr}00`,`LOCATION:${invitationLocationName || ''} ${invitationAddress || ''}`,'END:VEVENT','END:VCALENDAR'].join('\n');
+    const {
+      eventTitle, eventStartDate, eventStartTime, eventEndDate, eventEndTime,
+      eventLocationName, eventAddress, eventDescription,
+      invitationTitle, invitationDate, invitationTime, invitationLocationName, invitationAddress
+    } = item.content;
+
+    const calTitle = eventTitle || invitationTitle || item.title || 'Événement';
+    const startDate = eventStartDate || invitationDate;
+    const startTime = eventStartTime || invitationTime;
+    const endDate = eventEndDate || startDate;
+    const endTime = eventEndTime || startTime;
+
+    const startDateStr = startDate ? startDate.replace(/-/g, '') : '';
+    const startTimeStr = startTime ? startTime.replace(/:/g, '') : '0000';
+    const endDateStr = endDate ? endDate.replace(/-/g, '') : startDateStr;
+    const endTimeStr = endTime ? endTime.replace(/:/g, '') : startTimeStr;
+
+    const location = `${eventLocationName || invitationLocationName || ''} ${eventAddress || invitationAddress || ''}`.trim();
+    const description = eventDescription || '';
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VEVENT',
+      `SUMMARY:${calTitle}`,
+      `DTSTART:${startDateStr}T${startTimeStr}00`,
+      `DTEND:${endDateStr}T${endTimeStr}00`,
+      `LOCATION:${location}`,
+      `DESCRIPTION:${description}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\n');
+
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
     const link = document.body.appendChild(document.createElement('a'));
@@ -611,55 +639,259 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
       case 'EVENT':
         return (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-600" />
-              <div className="space-y-2 pt-2">
-                {content.eventTheme && <span className="px-3 py-1 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-full">{content.eventTheme}</span>}
-                {content.eventTitle && <h1 className="text-3xl font-black text-white uppercase tracking-tight pt-2 leading-none">{content.eventTitle}</h1>}
-                <p className="text-sm font-bold text-slate-400">{content.eventHost && `Organisé par ${content.eventHost}`}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3 p-4 bg-slate-950 rounded-[32px] border border-slate-800 shadow-inner">
-                <div className="text-left space-y-1">
-                  <span className="text-[9px] font-black text-slate-500 uppercase block">Date & Heure</span>
-                  <p className="text-xs font-black text-white">{content.eventStartDate}</p>
-                  <p className="text-[10px] font-bold text-rose-500">{content.eventStartTime}</p>
-                  {content.eventDoorsOpenTime && <p className="text-[8px] font-black text-slate-600 uppercase">Portes: {content.eventDoorsOpenTime}</p>}
+          <div className="space-y-6 pb-20">
+            {/* HERO / POSTER */}
+            <div className="bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl relative group">
+              {content.eventPosterUrl ? (
+                <div className="w-full h-80 relative">
+                  <img src={content.eventPosterUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={content.eventTitle} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
                 </div>
-                <div className="text-right space-y-1">
-                  <span className="text-[9px] font-black text-slate-500 uppercase block">Lieu</span>
-                  <p className="text-xs font-black text-white truncate">{content.eventLocationName}</p>
-                  <p className="text-[9px] text-slate-400 font-bold truncate">{content.eventAddress}</p>
-                  {content.eventDressCode && <p className="text-[8px] font-black text-rose-500/60 uppercase">{content.eventDressCode}</p>}
+              ) : (
+                <div className="w-full h-40 bg-gradient-to-br from-rose-600 to-indigo-600 flex items-center justify-center">
+                  <Calendar className="w-16 h-16 text-white/20" />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={handleAddToCalendar} className="col-span-2 py-4 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><Calendar className="w-4 h-4" /> Ajouter au Calendrier</button>
-                {content.eventBookingUrl && <a href={content.eventBookingUrl} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-white font-bold text-[10px]"><ShoppingCart className="w-5 h-5 text-rose-400" /><span>Réserver</span></a>}
-                <button onClick={() => { if(content.whatsappNumber || content.primaryPhone) window.open(`https://wa.me/${(content.whatsappNumber || content.primaryPhone!).replace(/[^\d]/g,'')}?text=Confirmation Presence pour ${content.eventTitle}`, '_blank')}} className="flex flex-col items-center gap-2 p-4 bg-emerald-600 rounded-2xl text-white font-bold text-[10px]"><CheckCircle2 className="w-5 h-5" /><span>RSVP WhatsApp</span></button>
+              )}
+
+              <div className="p-8 text-center space-y-4 relative -mt-20">
+                <div className="space-y-2">
+                  {content.eventTheme && <span className="px-3 py-1 bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">{content.eventTheme}</span>}
+                  <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none pt-2">{content.eventTitle || item.title}</h1>
+                  {content.eventSubtitle && <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">{content.eventSubtitle}</p>}
+                  {content.eventSlogan && <p className="text-[10px] font-bold text-rose-400 italic">« {content.eventSlogan} »</p>}
+                </div>
+
+                <div className="flex flex-col items-center gap-1 text-slate-300">
+                  <p className="text-sm font-bold">{content.eventHost && `Par ${content.eventHost}`}</p>
+                  {content.eventCoHost && <p className="text-[10px] font-medium opacity-60">En collaboration avec {content.eventCoHost}</p>}
+                </div>
+
+                {/* QUICK DATE/PLACE TILE */}
+                <div className="grid grid-cols-2 gap-3 p-5 bg-white/5 backdrop-blur-md rounded-[32px] border border-white/10 shadow-2xl text-left">
+                  <div className="space-y-1 border-r border-white/10 pr-3">
+                    <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest block">Quand</span>
+                    <p className="text-xs font-black text-white">{content.eventStartDate}</p>
+                    <p className="text-[10px] font-bold text-slate-400">{content.eventStartTime} {content.eventTimezone ? `(${content.eventTimezone})` : ''}</p>
+                  </div>
+                  <div className="space-y-1 pl-3">
+                    <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest block">Où</span>
+                    <p className="text-xs font-black text-white truncate">{content.eventLocationName}</p>
+                    <p className="text-[9px] font-bold text-slate-400 truncate">{content.eventCity}, {content.eventCountry}</p>
+                  </div>
+                </div>
+
+                {/* MAIN ACTIONS */}
+                <div className="grid grid-cols-2 gap-3 pt-4">
+                  <button onClick={handleAddToCalendar} className="col-span-2 py-4 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><Calendar className="w-4 h-4" /> Ajouter au Calendrier</button>
+
+                  {(content.eventTicketUrl || content.eventBookingUrl) && (
+                    <a href={content.eventTicketUrl || content.eventBookingUrl} target="_blank" rel="noopener noreferrer" className="col-span-2 py-4 bg-white text-slate-950 font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95">
+                      <ShoppingCart className="w-4 h-4" /> Réserver mon ticket
+                    </a>
+                  )}
+
+                  {content.eventRsvpEnabled && (
+                    <button
+                      onClick={() => {
+                        const message = `Bonjour, je confirme ma présence pour l'événement : ${content.eventTitle}. Nom de l'invité : ${fullName}`;
+                        const whatsapp = content.eventWhatsApp || content.whatsappNumber || content.eventPhone || content.primaryPhone;
+                        if (whatsapp) window.open(`https://wa.me/${whatsapp.replace(/[^\d]/g,'')}?text=${encodeURIComponent(message)}`, '_blank');
+                        else if (content.eventEmail) window.location.href = `mailto:${content.eventEmail}?subject=Confirmation RSVP - ${content.eventTitle}&body=${encodeURIComponent(message)}`;
+                      }}
+                      className="col-span-2 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-900/20"
+                    >
+                      <CheckCircle2 className="w-4 h-4" /> Confirmer ma présence (RSVP)
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            {(content.eventDescription || content.eventSponsor || content.eventGodmother) && (
+            {/* DETAILS & DESCRIPTION */}
+            {(content.eventDescription || content.eventPerformers || content.eventSpecialGuests) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="À Propos de l'Événement" icon={Info} colorClass="text-rose-500" />
+                {content.eventDescription && <p className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-line">{content.eventDescription}</p>}
+
+                {content.eventSpecialGuests && content.eventSpecialGuests.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Invités Spéciaux</span>
+                    <div className="flex flex-wrap gap-2">
+                      {content.eventSpecialGuests.map(g => <span key={g} className="px-2 py-1 bg-slate-800 text-[9px] font-bold text-slate-300 rounded-lg border border-slate-700">{g}</span>)}
+                    </div>
+                  </div>
+                )}
+
+                {content.eventPerformers && content.eventPerformers.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Sur Scène</span>
+                    <div className="flex flex-wrap gap-2">
+                      {content.eventPerformers.map(p => <span key={p} className="px-3 py-1 bg-rose-600/10 text-rose-400 text-[10px] font-black uppercase rounded-lg border border-rose-600/20">{p}</span>)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PROTOCOLE & HONNEUR */}
+            {(content.eventGuestOfHonor || content.eventSponsor || content.eventGodmother) && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
-                <SectionHeader title="Détails & Protocole" icon={Info} colorClass="text-rose-500" />
-                {content.eventDescription && <p className="text-xs text-slate-300 leading-relaxed font-medium">{content.eventDescription}</p>}
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                  {content.eventSponsor && (
-                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                      <span className="text-[8px] font-black text-slate-500 uppercase block">Parrain</span>
-                      <span className="text-[10px] font-bold text-white">{content.eventSponsor}</span>
-                    </div>
-                  )}
-                  {content.eventGodmother && (
-                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                      <span className="text-[8px] font-black text-slate-500 uppercase block">Marraine</span>
-                      <span className="text-[10px] font-bold text-white">{content.eventGodmother}</span>
-                    </div>
-                  )}
+                <SectionHeader title="Comité d'Honneur" icon={Award} colorClass="text-amber-500" />
+                {content.eventGuestOfHonor && <InfoRow label="Invité d'Honneur" value={content.eventGuestOfHonor} icon={Star} />}
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoRow label="Parrain" value={content.eventSponsor} />
+                  <InfoRow label="Marraine" value={content.eventGodmother} />
                 </div>
               </div>
             )}
+
+            {/* PROGRAM & ACTIVITIES */}
+            {(content.eventProgram || content.eventActivities || content.eventSpeakers) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Programme & Déroulement" icon={List} colorClass="text-indigo-500" />
+                {content.eventProgram && (
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{content.eventProgram}</p>
+                  </div>
+                )}
+                {content.eventActivities && (
+                   <div className="space-y-2">
+                     <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Au Programme</span>
+                     <div className="space-y-2">
+                        {content.eventActivities.split('.').filter(Boolean).map((act, i) => (
+                          <div key={i} className="flex items-center gap-3 p-2 bg-slate-800/30 rounded-xl">
+                            <div className="w-1.5 h-1.5 bg-rose-500 rounded-full" />
+                            <span className="text-[10px] font-bold text-slate-300">{act.trim()}</span>
+                          </div>
+                        ))}
+                     </div>
+                   </div>
+                )}
+                {content.eventProgramPdfUrl && (
+                  <a href={content.eventProgramPdfUrl} target="_blank" rel="noopener noreferrer" className="w-full py-3 bg-indigo-600/10 text-indigo-400 text-[10px] font-black uppercase rounded-xl border border-indigo-600/20 flex items-center justify-center gap-2">
+                    <Download className="w-3.5 h-3.5" /> Télécharger le programme (PDF)
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* LOCATION & ACCESS */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+              <SectionHeader title="Accès au Lieu" icon={MapPin} colorClass="text-rose-500" />
+              <div className="space-y-3">
+                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
+                  <h3 className="text-sm font-black text-white uppercase">{content.eventLocationName}</h3>
+                  <p className="text-xs text-slate-400">{content.eventAddress}</p>
+                  <p className="text-[10px] font-bold text-slate-500">{content.eventCommune}, {content.eventCity}</p>
+                </div>
+                {content.eventLandmark && <InfoRow label="Repère" value={content.eventLandmark} icon={LocateFixed} />}
+                {content.eventAccessInstructions && (
+                  <div className="p-4 bg-slate-800/20 rounded-2xl border border-slate-700/50">
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-1">Instructions d'accès</span>
+                    <p className="text-[10px] text-slate-400 font-medium italic">{content.eventAccessInstructions}</p>
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${content.eventLatitude && content.eventLongitude ? `${content.eventLatitude},${content.eventLongitude}` : encodeURIComponent(`${content.eventLocationName} ${content.eventAddress}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-3 bg-slate-800 rounded-xl text-white font-black text-[10px] uppercase flex items-center justify-center gap-2 border border-slate-700"
+                >
+                  <Navigation className="w-3.5 h-3.5 text-blue-400" /> Google Maps
+                </a>
+                <a
+                  href={`https://waze.com/ul?q=${encodeURIComponent(`${content.eventLocationName} ${content.eventAddress}`)}&navigate=yes`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-3 bg-slate-800 rounded-xl text-white font-black text-[10px] uppercase flex items-center justify-center gap-2 border border-slate-700"
+                >
+                  <Map className="w-3.5 h-3.5 text-cyan-400" /> Waze
+                </a>
+              </div>
+            </div>
+
+            {/* GUEST SPECIFIC (PERSONALIZED) */}
+            {(content.eventInvitationNumber || content.eventTable || content.eventSeat || content.eventZone) && (
+              <div className="bg-gradient-to-br from-indigo-900/40 to-slate-900/40 border border-indigo-500/20 rounded-[32px] p-6 space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10"><User className="w-20 h-20" /></div>
+                <SectionHeader title="Votre Invitation" icon={User} colorClass="text-indigo-400" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-950/50 rounded-2xl border border-indigo-500/10">
+                    <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">N° Invitation</span>
+                    <span className="text-sm font-black text-indigo-400">{content.eventInvitationNumber || '#---'}</span>
+                  </div>
+                  <div className="p-4 bg-slate-950/50 rounded-2xl border border-indigo-500/10">
+                    <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Catégorie</span>
+                    <span className="text-sm font-black text-white">{content.eventGuestCategory || 'STANDARD'}</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3 bg-slate-950/30 rounded-xl text-center">
+                    <span className="text-[7px] font-black text-slate-600 uppercase block">Table</span>
+                    <span className="text-xs font-black text-white">{content.eventTable || '--'}</span>
+                  </div>
+                  <div className="p-3 bg-slate-950/30 rounded-xl text-center">
+                    <span className="text-[7px] font-black text-slate-600 uppercase block">Siège</span>
+                    <span className="text-xs font-black text-white">{content.eventSeat || '--'}</span>
+                  </div>
+                  <div className="p-3 bg-slate-950/30 rounded-xl text-center">
+                    <span className="text-[7px] font-black text-slate-600 uppercase block">Zone</span>
+                    <span className="text-xs font-black text-white">{content.eventZone || '--'}</span>
+                  </div>
+                </div>
+                {content.eventGuestInstructions && (
+                  <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl">
+                    <span className="text-[8px] font-black text-amber-500 uppercase block mb-1">À noter</span>
+                    <p className="text-[10px] font-bold text-slate-400">{content.eventGuestInstructions}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TICKETING & RSVP INFO */}
+            {(content.eventIsPaid || content.eventRsvpDeadline || content.eventMaxCapacity) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Infos Pratiques" icon={CreditCard} colorClass="text-emerald-500" />
+                <div className="grid grid-cols-2 gap-4">
+                  {content.eventTicketPrice && (
+                    <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                      <span className="text-[8px] font-black text-emerald-500 uppercase block mb-1">Accès</span>
+                      <span className="text-xs font-black text-white">{content.eventTicketPrice}</span>
+                    </div>
+                  )}
+                  {content.eventRsvpDeadline && (
+                    <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl">
+                      <span className="text-[8px] font-black text-rose-500 uppercase block mb-1">RSVP Avant le</span>
+                      <span className="text-xs font-black text-white">{content.eventRsvpDeadline}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <InfoRow label="WhatsApp" value={content.eventWhatsApp || content.whatsappNumber} icon={MessageSquare} href={`https://wa.me/${(content.eventWhatsApp || content.whatsappNumber || '').replace(/[^\d]/g,'')}`} />
+                  <InfoRow label="Appeler" value={content.eventPhone || content.primaryPhone} icon={Phone} href={`tel:${content.eventPhone || content.primaryPhone}`} />
+                  <InfoRow label="Email" value={content.eventEmail || content.email} icon={Mail} href={`mailto:${content.eventEmail || content.email}`} />
+                </div>
+              </div>
+            )}
+
+            {/* SHARE ACTION */}
+            <div className="pt-4">
+               <button
+                 onClick={() => {
+                   if (navigator.share) {
+                     navigator.share({ title: content.eventTitle, text: content.eventDescription, url: window.location.href });
+                   } else {
+                     navigator.clipboard.writeText(window.location.href);
+                     alert("Lien copié !");
+                   }
+                 }}
+                 className="w-full py-4 bg-slate-900 border border-slate-800 text-slate-400 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors"
+                >
+                 <Share2 className="w-4 h-4" /> Partager l'invitation
+               </button>
+            </div>
           </div>
         );
 

@@ -1,19 +1,17 @@
 export type QRType = 
-  | 'vcard'       // Carte de visite numérique / Contact
-  | 'book'        // Fiche de livre / Auteur / Éditeur
-  | 'invitation'  // Invitation événementielle / Hôte
-  | 'shop'        // Commerce / Boutique / Horaires / Services
-  | 'location'    // Localisation & Itinéraire GPS / Waze / Maps
-  | 'event'       // Événement & Conférence
-  | 'product'     // Fiche Produit & Catalogue
-  | 'menu'        // Menu Restaurant & Carte
-  | 'document'    // Document & Fiche technique
-  | 'url'         // Site Web / Lien sécurisé
-  | 'text'        // Texte libre / Message
-  | 'business'    // Rétrocompatibilité entreprise
-  | 'social'      // Rétrocompatibilité réseaux
-  | 'image'       // Rétrocompatibilité image
-  | 'custom';     // Informations personnalisées structurées
+  | 'BUSINESS_CARD'
+  | 'BOOK'
+  | 'EVENT'
+  | 'SHOP'
+  | 'LOCATION'
+  | 'COMPANY'
+  | 'SOCIAL'
+  | 'PRODUCT'
+  | 'WEB_LINK'
+  | 'CUSTOM';
+
+export type ProductSubType = 'PRODUCT' | 'MENU' | 'SERVICE';
+export type RedirectMode = 'DIRECT' | 'LANDING_PAGE';
 
 export type QRMode = 'dynamic' | 'static';
 
@@ -112,217 +110,282 @@ export interface SocialLink {
 }
 
 export interface QRContent {
-  // Identity
+  // --- COMMON / IDENTITY ---
   firstName?: string;
   lastName?: string;
   fullName?: string;
+  civility?: string;
   jobTitle?: string;
+  profession?: string;
   company?: string;
   commercialName?: string;
+  acronym?: string; // Sigle
   department?: string;
   industry?: string;
+  slogan?: string;
   bio?: string;
+  longBio?: string;
   photoUrl?: string;
   logoUrl?: string;
   bannerUrl?: string;
+  photoAvatarUrl?: string; // For SOCIAL
 
-  // Contact
+  // --- CONTACT ---
   primaryPhone?: string;
   secondaryPhone?: string;
-  whatsappNumber?: string;
   workPhone?: string;
+  whatsappNumber?: string;
   email?: string;
   workEmail?: string;
   websiteUrl?: string;
   address?: string;
-  workAddress?: string;
-  commune?: string;
   neighborhood?: string;
+  commune?: string;
   city?: string;
+  region?: string;
   postalCode?: string;
   country?: string;
-
-  // Location / GPS
   latitude?: number;
   longitude?: number;
-  googleMapsUrl?: string;
-  locationLink?: string; // Lien direct Google Maps / Waze / Apple Plans / Itinéraire
+  altitude?: number;
+  landmark?: string; // Point de repère
+  locationLink?: string; // Google Maps / Waze
 
-  // Other / Special Information in QR
-  otherInformation?: string; // Autres informations personnalisées (disponibilité, notes, etc.)
-  emergencyContactNote?: string; // Précision contact en cas de perte
-  internalNotes?: string; // Notes privées du concepteur
-  freeText?: string; // Texte libre
+  // --- BUSINESS_CARD SPECIFIC ---
+  languagesSpoken?: string[];
+  availabilityHours?: string;
+  servicesOffered?: string[];
+  portfolioUrl?: string;
+  bookingLink?: string;
+  paymentLink?: string;
+  publicNotes?: string;
 
-  // --- LIVRE / BOOK SPECIFIC ---
+  // --- BOOK SPECIFIC ---
   bookTitle?: string;
   bookSubtitle?: string;
+  bookOriginalTitle?: string;
   bookAuthor?: string;
   bookCoAuthor?: string;
+  bookIllustrator?: string;
+  bookTranslator?: string;
+  bookPrefaceAuthor?: string;
   bookPublisher?: string;
-  bookIsbn?: string;
+  bookPublisherCollection?: string;
+  bookEdition?: string;
+  bookEditionNumber?: string;
+  bookIsbn10?: string;
+  bookIsbn13?: string;
+  bookIssn?: string;
   bookYear?: string;
+  bookDate?: string;
+  bookPlace?: string;
+  bookLanguage?: string;
+  bookOriginalLanguage?: string;
   bookGenre?: string;
   bookCategory?: string;
-  bookSummary?: string;
-  bookDescription?: string;
-  bookPrice?: string;
+  bookSubCategory?: string;
+  bookTargetAudience?: string;
+  bookReadingLevel?: string;
   bookPages?: number | string;
-  bookLanguage?: string;
-  bookCoverUrl?: string;
+  bookFormat?: string;
+  bookDimensions?: string;
+  bookWeight?: string;
+  bookCoverType?: string;
+  bookMediumType?: 'paper' | 'digital' | 'audio';
+  bookSummary?: string;
+  bookSynopsis?: string;
+  bookLongDescription?: string;
+  bookAuthorBio?: string;
+  bookTableOfContents?: string;
+  bookKeywords?: string[];
+  bookThemes?: string[];
+  bookExerpt?: string;
+  bookPrice?: string;
+  bookPromoPrice?: string;
+  bookCurrency?: string;
+  bookStockStatus?: string;
+  bookSalePoints?: string;
   bookBuyUrl?: string;
-  bookWebsite?: string;
+  bookEbookUrl?: string;
+  bookAudioUrl?: string;
+  bookTrailerUrl?: string;
+  bookInterviewUrl?: string;
 
-  // --- INVITATION SPECIFIC ---
-  invitationEventType?: string;
-  invitationTitle?: string;
-  invitationHost?: string;
-  invitationGuest?: string;
-  invitationDate?: string;
-  invitationTime?: string;
-  invitationEndDate?: string;
-  invitationEndTime?: string;
-  invitationLocationName?: string;
-  invitationAddress?: string;
-  invitationMessage?: string;
-  invitationPhone?: string;
-  invitationWhatsapp?: string;
-  invitationImageUrl?: string;
-  invitationMapsUrl?: string;
-  invitationDescription?: string;
-  invitationProgram?: string;
-  invitationDressCode?: string;
-  invitationSpecialGuest?: string;
-  invitationBookingUrl?: string;
-  invitationRsvpEnabled?: boolean;
-  invitationRsvpDeadline?: string;
+  // --- EVENT SPECIFIC ---
+  eventTitle?: string;
+  eventSubtitle?: string;
+  eventType?: string;
+  eventTheme?: string;
+  eventDescription?: string;
+  eventHost?: string;
+  eventCoHost?: string;
+  eventSponsor?: string; // Parrain
+  eventGodmother?: string; // Marraine
+  eventGuestOfHonor?: string;
+  eventSpecialGuests?: string[];
+  eventPerformers?: string[];
+  eventStartDate?: string;
+  eventStartTime?: string;
+  eventEndDate?: string;
+  eventEndTime?: string;
+  eventTimezone?: string;
+  eventDoorsOpenTime?: string;
+  eventLocationName?: string;
+  eventAccessInstructions?: string;
+  eventProgram?: string;
+  eventProgramPdfUrl?: string;
+  eventDressCode?: string;
+  eventRsvpDeadline?: string;
+  eventTicketPrice?: string;
+  eventIsPaid?: boolean;
+  eventBookingUrl?: string;
+  eventMaxCapacity?: number | string;
 
-  // --- COMMERCE / SHOP SPECIFIC ---
-  shopName?: string;
+  // --- SHOP SPECIFIC ---
   shopIndustry?: string;
-  shopSlogan?: string;
-  shopDescription?: string;
   shopOpeningHours?: OpeningHourDay[];
-  shopServices?: string[];
-  shopProducts?: string[];
   shopDeliveryAvailable?: boolean;
   shopDeliveryZone?: string;
+  shopDeliveryFees?: string;
+  shopMinOrderAmount?: string;
+  shopInStorePickup?: boolean;
   shopPaymentMethods?: string[];
-  shopWebsiteUrl?: string;
-  shopFacebookUrl?: string;
-  shopInstagramUrl?: string;
-  shopTikTokUrl?: string;
 
-  // --- LOCALISATION / ITINÉRAIRE SPECIFIC ---
-  locationPlaceName?: string;
-  locationPlaceType?: string;
-  locationPhotoUrl?: string;
-  locationCountry?: string;
-  locationCity?: string;
-  locationCommune?: string;
-  locationNeighborhood?: string;
-  locationAddress?: string;
-  locationLatitude?: number;
-  locationLongitude?: number;
-  locationLandmark?: string;
-  locationAccessDescription?: string;
-  locationPhone?: string;
-  locationWhatsapp?: string;
-  locationOpeningHoursText?: string;
-  locationGoogleMapsUrl?: string;
-  locationWazeUrl?: string;
-
-  // --- PRODUCT / MENU / SERVICE SPECIFIC ---
-  productSheetType?: 'product' | 'menu' | 'service';
-  productName?: string;
-  productCategory?: string;
-  productSku?: string;
-  productDescription?: string;
-  productPriceNormal?: string;
-  productPricePromo?: string;
-  productCurrency?: string;
-  productStock?: number | string;
-  productAvailability?: 'available' | 'out_of_stock';
-  productVariants?: string;
-  productOrderPhone?: string;
-  productOrderWhatsapp?: string;
-  productBuyUrl?: string;
-  productMainImageUrl?: string;
-  productExtraImages?: string[];
-
-  menuItems?: Array<{
-    id: string;
-    category: 'Entrées' | 'Plats' | 'Desserts' | 'Boissons' | 'Menus' | 'Promotions';
-    name: string;
-    description?: string;
-    price: string;
-    photoUrl?: string;
-    isAvailable: boolean;
-  }>;
-
-  // --- BUSINESS / SOCIÉTÉ SPECIFIC ---
-  businessType?: string; // SARL, SA, SAS, etc.
-  businessCreationYear?: string;
-  businessCapital?: string;
-  businessMainActivity?: string;
-  brandsRepresented?: string[];
-  businessManagerName?: string;
-  businessManagerPhone?: string;
-  businessManagerEmail?: string;
-  businessCatalogueUrl?: string;
-  businessBrochureUrl?: string;
-  businessPresentationUrl?: string;
-  businessLinkedInUrl?: string;
-  businessYouTubeUrl?: string;
-  businessFacebookUrl?: string;
-  businessInstagramUrl?: string;
-  businessTikTokUrl?: string;
-
-  // Business common
-  slogan?: string;
-  operatingZone?: string;
-  servicesList?: string[];
-  productsList?: string[];
-  businessTaxId?: string;
-  businessRegisterNumber?: string;
-  openingHours?: OpeningHourDay[];
+  // --- COMPANY SPECIFIC ---
+  companyLegalForm?: string;
+  companyCreationDate?: string;
+  companyCapital?: string;
+  companyRccm?: string;
+  companyTaxId?: string;
+  companyFiscalId?: string;
+  companyCnpsId?: string;
+  companyLicenseId?: string;
+  companyAuthorizationNumber?: string;
+  companyMission?: string;
+  companyVision?: string;
+  companyValues?: string;
+  companyPartners?: string[];
+  companyCertifications?: string[];
+  companyManagerName?: string;
+  companyManagerPhone?: string;
+  companyManagerEmail?: string;
+  companyPresentationPdfUrl?: string;
+  companyCatalogueUrl?: string;
+  companyPortfolioUrl?: string;
 
   // --- SOCIAL / BIO SPECIFIC ---
   socialDisplayName?: string;
   socialNickname?: string;
   socialProfession?: string;
-  socialFacebookUrl?: string;
-  socialInstagramUrl?: string;
-  socialTikTokUrl?: string;
-  socialYouTubeUrl?: string;
-  socialLinkedInUrl?: string;
-  socialTwitterUrl?: string;
-  socialSnapchatUrl?: string;
-  socialTelegramUrl?: string;
-  socialPinterestUrl?: string;
-
-  // Product / Event / Image specific
-  productPrice?: string;
-  productCurrency?: string;
-  productBadge?: string;
-  galleryImages?: string[];
-  eventStartDate?: string;
-  eventEndDate?: string;
-  eventLocationName?: string;
-  eventTicketUrl?: string;
-
-  // Social & Custom
   socialLinks: SocialLink[];
-  customFields: CustomField[];
 
-  // Privacy rules (masqué / privé / public)
+  // --- PRODUCT / MENU / SERVICE SPECIFIC ---
+  productSheetType?: ProductSubType;
+  productBrand?: string;
+  productModel?: string;
+  productSku?: string;
+  productReference?: string;
+  productCode?: string;
+  productDescriptionShort?: string;
+  productDescriptionFull?: string;
+  productCharacteristics?: string;
+  productDimensions?: string;
+  productWeight?: string;
+  productMaterial?: string;
+  productColors?: string[];
+  productSizes?: string[];
+  productVariants?: string;
+  productPriceNormal?: string;
+  productPricePromo?: string;
+  productDiscountPercentage?: string;
+  productStockQuantity?: number | string;
+  productIsAvailable?: boolean;
+  productMinQuantity?: number | string;
+  productGuarantee?: string;
+  productConditions?: string;
+  productDeliveryFees?: string;
+  productOrderPhone?: string;
+  productOrderWhatsapp?: string;
+  productBuyUrl?: string;
+  productMainImageUrl?: string;
+  productGallery?: string[];
+  productVideoUrl?: string;
+
+  menuItems?: Array<{
+    id: string;
+    category: string;
+    name: string;
+    description?: string;
+    price: string;
+    photoUrl?: string;
+    isAvailable: boolean;
+    allergens?: string[];
+    sides?: string[]; // Accompagnements
+    options?: string[];
+    extras?: string[];
+  }>;
+
+  serviceName?: string;
+  serviceDescription?: string;
+  servicePrice?: string;
+  serviceDuration?: string;
+  serviceAvailability?: string;
+  serviceProviderName?: string;
+
+  // --- WEB_LINK SPECIFIC ---
+  linkTitle?: string;
+  linkDescription?: string;
+  linkDestinationUrl?: string;
+  linkType?: string; // Website, Shop, Facebook, etc.
+  redirectMode?: RedirectMode;
+  customButtonText?: string;
+
+  // --- CUSTOM SPECIFIC ---
+  customSections: CustomSection[];
+  customFields: CustomField[]; // For backward compatibility or simple lists
+
+  // Privacy & Protection
   privacy: {
     hideAddress?: boolean;
     hideSecondaryPhone?: boolean;
     hideTaxInfo?: boolean;
     requirePassword?: boolean;
     accessPassword?: string;
+    isPublic?: boolean;
   };
+
+  // Internal
+  internalNotes?: string;
+}
+
+export interface CustomSection {
+  id: string;
+  title: string;
+  description?: string;
+  order: number;
+  fields: CustomFieldExtended[];
+  isVisible: boolean;
+}
+
+export interface CustomFieldExtended {
+  id: string;
+  type:
+    | 'text_short' | 'text_long' | 'number' | 'phone' | 'whatsapp' | 'email' | 'url'
+    | 'date' | 'time' | 'datetime' | 'address' | 'gps' | 'boolean' | 'select'
+    | 'radio' | 'multiselect' | 'image' | 'gallery' | 'document' | 'pdf'
+    | 'amount' | 'currency' | 'percentage' | 'rating' | 'matricule' | 'reference'
+    | 'code' | 'number_id' | 'status' | 'button' | 'social' | 'video' | 'audio'
+    | 'separator' | 'section_title';
+  label: string;
+  value: any;
+  placeholder?: string;
+  description?: string;
+  isRequired: boolean;
+  isVisible: boolean;
+  isPublic: boolean;
+  order: number;
+  options?: string[];
+  icon?: string;
 }
 
 export interface ClientProfile {

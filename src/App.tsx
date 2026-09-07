@@ -108,7 +108,7 @@ export default function App() {
       cardNumber: newCardNumber,
       clientId: client.id,
       title: `${client.fullName} — ${client.jobTitle || client.company || 'Carte Pro'}`,
-      type: 'vcard',
+      type: 'BUSINESS_CARD',
       mode: 'dynamic',
       status: 'active',
       modelId: 'model_luxury',
@@ -164,7 +164,7 @@ export default function App() {
     const baseCard: Partial<QRCodeItem> = editingItem ? { ...editingItem } : {
       cardNumber: generateCardNumber(qrItems.length + 1),
       title: `Carte ${tpl.title}`,
-      type: 'vcard',
+      type: 'BUSINESS_CARD',
       mode: 'dynamic',
       status: 'active'
     };

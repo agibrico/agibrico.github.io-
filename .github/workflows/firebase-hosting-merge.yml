@@ -1,10 +1,13 @@
-name: Build Web and Android APK
+name: Build and Deploy
 
 on:
   push:
     branches:
       - main
       - master
+
+permissions:
+  contents: write
 
 jobs:
   build_and_deploy:

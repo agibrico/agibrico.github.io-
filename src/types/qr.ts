@@ -303,6 +303,18 @@ export interface QRContent {
 
   // --- SHOP SPECIFIC ---
   shopIndustry?: string;
+  shopName?: string;
+  shopCommercialName?: string;
+  shopCoverUrl?: string;
+  shopType?: string;
+  shopDescription?: string;
+  shopProducts?: string;
+  shopProductsCategories?: string[];
+  shopServices?: string[];
+  shopBrands?: string[];
+  shopPromotions?: string;
+  shopNewArrivals?: string;
+
   openingHours?: OpeningHourDay[];
   shopDeliveryAvailable?: boolean;
   shopDeliveryZone?: string;
@@ -310,6 +322,11 @@ export interface QRContent {
   shopMinOrderAmount?: string;
   shopInStorePickup?: boolean;
   shopPaymentMethods?: string[];
+
+  shopCatalogUrl?: string;
+  shopPriceListUrl?: string;
+  shopMenuUrl?: string;
+  shopBrochureUrl?: string;
 
   // --- COMPANY SPECIFIC ---
   companyLegalForm?: string;

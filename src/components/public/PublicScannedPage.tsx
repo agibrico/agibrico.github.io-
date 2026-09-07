@@ -896,53 +896,105 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
         );
 
       case 'SHOP':
+        const shopDisplayName = content.shopName || content.shopCommercialName || content.commercialName || content.company || 'Boutique';
         return (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
-               <div className="w-24 h-24 rounded-3xl bg-white p-2 mx-auto shadow-xl flex items-center justify-center overflow-hidden">
-                 {registeredLogo && <img src={registeredLogo} className="w-full h-full object-contain" />}
-               </div>
-               <div className="space-y-2">
-                 <h1 className="text-2xl font-black text-white uppercase leading-none tracking-tight">{content.commercialName || content.company || ''}</h1>
-                 {content.shopIndustry && <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-black uppercase rounded-full">{content.shopIndustry}</span>}
-               </div>
-               <div className="grid grid-cols-4 gap-3">
-                 <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Phone className="w-5 h-5 text-emerald-400" /><span className="text-[7px] font-black uppercase">Appel</span></a>
-                 <a href={`https://wa.me/${(content.whatsappNumber || content.primaryPhone || '').replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><MessageSquare className="w-5 h-5 text-emerald-400" /><span className="text-[7px] font-black uppercase">WhatsApp</span></a>
-                 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Navigation className="w-5 h-5 text-blue-400" /><span className="text-[7px] font-black uppercase">GPS</span></a>
-                 <a href={content.websiteUrl} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Globe className="w-5 h-5 text-indigo-400" /><span className="text-[7px] font-black uppercase">Web</span></a>
-               </div>
+          <div className="space-y-6 pb-20">
+            {/* HERO / COVER */}
+            <div className="bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl relative group">
+              {content.shopCoverUrl ? (
+                <div className="w-full h-56 relative">
+                  <img src={content.shopCoverUrl} className="w-full h-full object-cover" alt={shopDisplayName} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+                </div>
+              ) : (
+                <div className="w-full h-32 bg-gradient-to-br from-emerald-600 to-teal-700" />
+              )}
+
+              <div className="p-8 text-center space-y-4 relative -mt-16">
+                <div className="w-24 h-24 rounded-3xl bg-white p-2 mx-auto shadow-2xl border-4 border-slate-800 flex items-center justify-center overflow-hidden">
+                  {registeredLogo ? <img src={registeredLogo} className="w-full h-full object-contain" alt="Logo" /> : <Store className="w-10 h-10 text-slate-200" />}
+                </div>
+
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-black text-white uppercase tracking-tight leading-none">{shopDisplayName}</h1>
+                  {content.shopType && <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">{content.shopType}</p>}
+                  {content.shopIndustry && <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{content.shopIndustry}</p>}
+                  {content.slogan && <p className="text-[10px] font-bold text-slate-400 italic mt-1">« {content.slogan} »</p>}
+                </div>
+
+                {/* QUICK ACTIONS */}
+                <div className="grid grid-cols-2 gap-3 pt-4">
+                  <a href={`https://wa.me/${(content.whatsappNumber || content.primaryPhone || '').replace(/[^\d]/g,'')}?text=Bonjour, je vous contacte depuis votre fiche QR.`} className="py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-900/20">
+                    <MessageSquare className="w-4 h-4" /> WhatsApp
+                  </a>
+                  <a href={`tel:${content.primaryPhone}`} className="py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 border border-slate-700">
+                    <Phone className="w-4 h-4 text-emerald-400" /> Appeler
+                  </a>
+                  <a href={content.shopCatalogUrl || content.catalogUrl} className="col-span-2 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95">
+                    <ShoppingCart className="w-4 h-4" /> Voir le Catalogue
+                  </a>
+                </div>
+              </div>
             </div>
 
-            {(content.shopDeliveryAvailable || content.shopPaymentMethods) && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
-                <SectionHeader title="Services & Paiements" icon={ShoppingCart} colorClass="text-emerald-500" />
-                {content.shopDeliveryAvailable && (
-                  <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-center gap-3">
-                    <Truck className="w-5 h-5 text-emerald-500" />
-                    <div className="flex-1">
-                      <span className="text-[10px] font-black uppercase text-emerald-500 block">Livraison à domicile</span>
-                      <p className="text-[9px] font-bold text-slate-400">Zone: {content.shopDeliveryZone || 'Locale'} | Min: {content.shopMinOrderAmount || 'Aucun'}</p>
-                    </div>
+            {/* DESCRIPTION & ACTIVITY */}
+            {(content.shopDescription || content.shopProducts || content.shopPromotions || content.shopNewArrivals) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="À Propos" icon={Info} colorClass="text-emerald-500" />
+                {content.shopDescription && <p className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-line">{content.shopDescription}</p>}
+
+                {content.shopProducts && (
+                  <div className="space-y-2">
+                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Nos Produits</span>
+                    <p className="text-xs text-slate-400 font-bold">{content.shopProducts}</p>
                   </div>
                 )}
-                {content.shopPaymentMethods && content.shopPaymentMethods.length > 0 && (
-                  <div className="space-y-2">
-                    <span className="text-[8px] font-black uppercase text-slate-600 block tracking-widest">Modes de paiement</span>
-                    <div className="flex flex-wrap gap-2">
-                      {content.shopPaymentMethods.map(p => <span key={p} className="px-2 py-1 bg-slate-800 text-[8px] font-black text-slate-400 uppercase rounded border border-slate-700">{p}</span>)}
-                    </div>
+
+                {content.shopPromotions && (
+                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl space-y-1">
+                    <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest block">Promotions</span>
+                    <p className="text-xs font-black text-white italic">{content.shopPromotions}</p>
+                  </div>
+                )}
+
+                {content.shopNewArrivals && (
+                  <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl space-y-1">
+                    <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest block">Nouveautés</span>
+                    <p className="text-xs font-black text-white italic">{content.shopNewArrivals}</p>
                   </div>
                 )}
               </div>
             )}
 
+            {/* ADRESSE & ITINÉRAIRE */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+              <SectionHeader title="Où nous trouver" icon={MapPin} colorClass="text-rose-500" />
+              <div className="space-y-3">
+                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
+                  <p className="text-xs font-black text-white uppercase">{content.address}</p>
+                  <p className="text-[10px] font-bold text-slate-500">{content.neighborhood}, {content.commune}</p>
+                  <p className="text-[10px] font-bold text-slate-500">{content.city}, {content.country}</p>
+                </div>
+                {content.landmark && <InfoRow label="Repère" value={content.landmark} icon={LocateFixed} />}
+
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${content.latitude && content.longitude ? `${content.latitude},${content.longitude}` : encodeURIComponent(`${shopDisplayName} ${content.address || ''}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 border border-slate-700"
+                >
+                  <Navigation className="w-4 h-4 text-rose-500" /> Itinéraire GPS
+                </a>
+              </div>
+            </div>
+
+            {/* HORAIRES */}
             {content.openingHours && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6">
-                <SectionHeader title="Horaires d'ouverture" icon={Clock} colorClass="text-slate-500" />
+                <SectionHeader title="Horaires d'Ouverture" icon={Clock} colorClass="text-slate-400" />
                 <div className="space-y-2">
                   {content.openingHours.map(d => (
-                    <div key={d.day} className="flex justify-between items-center text-[10px] font-bold">
+                    <div key={d.day} className="flex justify-between items-center text-[10px] font-black uppercase">
                       <span className="text-slate-500">{d.day}</span>
                       <span className={d.isOpen ? "text-white" : "text-rose-500/70"}>{d.isOpen ? `${d.openTime} - ${d.closeTime}` : 'Fermé'}</span>
                     </div>
@@ -950,6 +1002,76 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 </div>
               </div>
             )}
+
+            {/* LIVRAISON & PAIEMENTS */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+              <SectionHeader title="Services Logistiques" icon={Truck} colorClass="text-blue-500" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center text-center gap-2">
+                   <Truck className={`w-6 h-6 ${content.shopDeliveryAvailable ? 'text-emerald-500' : 'text-slate-700'}`} />
+                   <span className="text-[9px] font-black uppercase text-white">Livraison</span>
+                   <span className="text-[8px] font-bold text-slate-500 uppercase">{content.shopDeliveryAvailable ? 'Disponible' : 'Non disp.'}</span>
+                </div>
+                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center text-center gap-2">
+                   <Package className={`w-6 h-6 ${content.shopInStorePickup ? 'text-blue-500' : 'text-slate-700'}`} />
+                   <span className="text-[9px] font-black uppercase text-white">Retrait</span>
+                   <span className="text-[8px] font-bold text-slate-500 uppercase">{content.shopInStorePickup ? 'En Magasin' : 'Non disp.'}</span>
+                </div>
+              </div>
+
+              {content.shopPaymentMethods && content.shopPaymentMethods.length > 0 && (
+                <div className="space-y-3">
+                  <span className="text-[8px] font-black uppercase text-slate-600 block tracking-widest text-center">Modes de Paiement Acceptés</span>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {content.shopPaymentMethods.map(p => <span key={p} className="px-3 py-1 bg-slate-800 text-[9px] font-black text-slate-300 uppercase rounded-lg border border-slate-700">{p}</span>)}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* DOCUMENTS */}
+            {(content.shopPriceListUrl || content.shopMenuUrl || content.shopBrochureUrl) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Documents & Catalogues" icon={FileText} />
+                <div className="grid grid-cols-1 gap-3">
+                  {content.shopPriceListUrl && <a href={content.shopPriceListUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between group hover:border-emerald-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Liste de Prix</span><Download className="w-4 h-4 text-emerald-500" /></a>}
+                  {content.shopMenuUrl && <a href={content.shopMenuUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between group hover:border-amber-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Consulter le Menu</span><BookOpen className="w-4 h-4 text-amber-500" /></a>}
+                  {content.shopBrochureUrl && <a href={content.shopBrochureUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-800 flex items-center justify-between group hover:border-blue-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Brochure PDF</span><Download className="w-4 h-4 text-blue-500" /></a>}
+                </div>
+              </div>
+            )}
+
+            {/* RÉSEAUX SOCIAUX */}
+            {content.socialLinks && content.socialLinks.length > 0 && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Suivez-nous" icon={Share2} />
+                <div className="grid grid-cols-4 gap-3">
+                  {content.socialLinks.map(link => (
+                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group">
+                      {getSocialIcon(link.platform)}
+                      <span className="text-[7px] font-black uppercase text-slate-500 group-hover:text-slate-200 truncate w-full text-center">{link.platform}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* FOOTER ACTIONS */}
+            <div className="pt-4 grid grid-cols-1 gap-3">
+               <button
+                 onClick={() => {
+                   if (navigator.share) {
+                     navigator.share({ title: shopDisplayName, text: content.shopDescription, url: window.location.href });
+                   } else {
+                     navigator.clipboard.writeText(window.location.href);
+                     alert("Lien copié !");
+                   }
+                 }}
+                 className="w-full py-4 bg-slate-900 border border-slate-800 text-slate-400 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors"
+                >
+                 <Share2 className="w-4 h-4" /> Partager la Boutique
+               </button>
+            </div>
           </div>
         );
 

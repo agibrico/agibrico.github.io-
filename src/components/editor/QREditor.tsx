@@ -1276,51 +1276,323 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
 
                   {/* --- 7. SOCIAL --- */}
                   {type === 'SOCIAL' && (
-                    <div className="space-y-8">
-                       <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-indigo-100 rounded-full w-32 h-32 mx-auto bg-slate-50 relative group">
-                          {content.photoAvatarUrl ? (
-                            <img src={content.photoAvatarUrl} className="w-full h-full rounded-full object-cover" />
-                          ) : (
-                            <div className="flex flex-col items-center text-slate-300"><ImageIcon className="w-8 h-8" /><span className="text-[8px] font-black uppercase mt-1">Avatar</span></div>
-                          )}
-                          <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={e => {
-                            const file = e.target.files?.[0];
-                            if(file) {
-                              const r = new FileReader();
-                              r.onload = ev => updateContentField('photoAvatarUrl', ev.target?.result as string);
-                              r.readAsDataURL(file);
-                            }
-                          }} />
-                       </div>
+                    <div className="space-y-10">
+                      {/* Sub-section 1: Profil */}
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                          <User className="w-5 h-5 text-indigo-600" />
+                          <h3 className="text-sm font-black uppercase tracking-tighter">Profil & Identité</h3>
+                        </div>
 
-                       <div className="space-y-4">
-                          <input type="text" placeholder="Nom d'affichage (ex: @jean_pro)" value={content.socialDisplayName || ''} onChange={e => updateContentField('socialDisplayName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-black text-center" />
-                          <input type="text" placeholder="Profession / Titre" value={content.socialProfession || ''} onChange={e => updateContentField('socialProfession', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-center" />
-                          <textarea placeholder="Petite biographie..." value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-center" rows={3} />
-                       </div>
-
-                       <div className="space-y-4">
-                          <div className="flex items-center justify-between"><h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Link className="w-4 h-4 text-indigo-600"/> Mes Liens Linktree</h4><button onClick={() => updateContentField('socialLinks', [...(content.socialLinks || []), { id: `link_${Date.now()}`, platform: 'website', url: '', label: '', displayOrder: (content.socialLinks?.length || 0) + 1 }])} className="px-3 py-1 bg-indigo-600 text-white text-[9px] font-black uppercase rounded-full shadow-lg">+ Ajouter</button></div>
-                          <div className="space-y-3">
-                            {(content.socialLinks || []).map((link, idx) => (
-                              <div key={link.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3">
-                                <div className="flex-1 space-y-2">
-                                  <input type="text" placeholder="Label (ex: Mon Portfolio)" value={link.label || ''} onChange={e => {
-                                    const newList = [...content.socialLinks!];
-                                    newList[idx].label = e.target.value;
-                                    updateContentField('socialLinks', newList);
-                                  }} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold" />
-                                  <input type="url" placeholder="Lien (https://...)" value={link.url} onChange={e => {
-                                    const newList = [...content.socialLinks!];
-                                    newList[idx].url = e.target.value;
-                                    updateContentField('socialLinks', newList);
-                                  }} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[10px] text-blue-600" />
+                        {/* Images: Banner & Avatar */}
+                        <div className="space-y-4">
+                          <div className="relative group">
+                            <div className="w-full h-32 rounded-2xl bg-slate-100 overflow-hidden border border-slate-200">
+                              {content.photoBannerUrl ? (
+                                <img src={content.photoBannerUrl} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                                  <ImageIcon className="w-8 h-8 opacity-20" />
+                                  <span className="text-[10px] font-black uppercase mt-1">Bannière (16:9)</span>
                                 </div>
-                                <button onClick={() => updateContentField('socialLinks', content.socialLinks!.filter(l => l.id !== link.id))} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                              )}
+                            </div>
+                            <label className="absolute inset-0 cursor-pointer bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                              <div className="bg-white/90 p-2 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform">
+                                <Upload className="w-4 h-4 text-slate-900" />
                               </div>
-                            ))}
+                              <input type="file" className="hidden" accept="image/*" onChange={e => {
+                                const file = e.target.files?.[0];
+                                if(file) {
+                                  const r = new FileReader();
+                                  r.onload = ev => updateContentField('photoBannerUrl', ev.target?.result as string);
+                                  r.readAsDataURL(file);
+                                }
+                              }} />
+                            </label>
+                            {/* Avatar Overlap */}
+                            <div className="absolute -bottom-6 left-6 group/avatar">
+                              <div className="w-20 h-20 rounded-full bg-white p-1 shadow-xl border border-slate-100 overflow-hidden relative">
+                                {content.photoAvatarUrl ? (
+                                  <img src={content.photoAvatarUrl} className="w-full h-full rounded-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                                    <User className="w-8 h-8" />
+                                  </div>
+                                )}
+                                <label className="absolute inset-0 cursor-pointer bg-black/0 group-hover/avatar:bg-black/20 transition-colors flex items-center justify-center">
+                                  <div className="bg-white p-1.5 rounded-full shadow-lg scale-0 group-hover/avatar:scale-100 transition-transform">
+                                    <Upload className="w-3 h-3 text-slate-900" />
+                                  </div>
+                                  <input type="file" className="hidden" accept="image/*" onChange={e => {
+                                    const file = e.target.files?.[0];
+                                    if(file) {
+                                      const r = new FileReader();
+                                      r.onload = ev => updateContentField('photoAvatarUrl', ev.target?.result as string);
+                                      r.readAsDataURL(file);
+                                    }
+                                  }} />
+                                </label>
+                              </div>
+                            </div>
+                            {/* Logo Overlap (Right) */}
+                            <div className="absolute -bottom-6 right-6 group/logo">
+                              <div className="w-16 h-16 rounded-2xl bg-white p-1 shadow-xl border border-slate-100 overflow-hidden relative">
+                                {content.logoUrl ? (
+                                  <img src={content.logoUrl} className="w-full h-full object-contain" />
+                                ) : (
+                                  <div className="w-full h-full rounded-xl bg-slate-50 flex items-center justify-center text-slate-300">
+                                    <Building2 className="w-6 h-6" />
+                                  </div>
+                                )}
+                                <label className="absolute inset-0 cursor-pointer bg-black/0 group-hover/logo:bg-black/20 transition-colors flex items-center justify-center">
+                                  <div className="bg-white p-1.5 rounded-full shadow-lg scale-0 group-hover/logo:scale-100 transition-transform">
+                                    <Upload className="w-3 h-3 text-slate-900" />
+                                  </div>
+                                  <input type="file" className="hidden" accept="image/*" onChange={e => {
+                                    const file = e.target.files?.[0];
+                                    if(file) {
+                                      const r = new FileReader();
+                                      r.onload = ev => updateContentField('logoUrl', ev.target?.result as string);
+                                      r.readAsDataURL(file);
+                                    }
+                                  }} />
+                                </label>
+                              </div>
+                            </div>
                           </div>
-                       </div>
+                        </div>
+
+                        <div className="pt-8 grid grid-cols-2 gap-3">
+                          <div className="col-span-2">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Nom d'affichage (Titre principal)</label>
+                            <input type="text" placeholder="ex: Jean Dupont" value={content.socialDisplayName || ''} onChange={e => updateContentField('socialDisplayName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Prénom</label>
+                            <input type="text" placeholder="Prénom" value={content.firstName || ''} onChange={e => updateContentField('firstName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Nom</label>
+                            <input type="text" placeholder="Nom" value={content.lastName || ''} onChange={e => updateContentField('lastName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Pseudonyme</label>
+                            <input type="text" placeholder="@pseudo" value={content.socialPseudonym || ''} onChange={e => updateContentField('socialPseudonym', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Profession</label>
+                            <input type="text" placeholder="ex: Développeur Senior" value={content.socialProfession || ''} onChange={e => updateContentField('socialProfession', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Activité</label>
+                            <input type="text" placeholder="ex: Digital Nomade" value={content.socialActivity || ''} onChange={e => updateContentField('socialActivity', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Entreprise</label>
+                            <input type="text" placeholder="Nom de l'entreprise" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Fonction / Poste</label>
+                            <input type="text" placeholder="ex: CTO & Co-fondateur" value={content.jobTitle || ''} onChange={e => updateContentField('jobTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Slogan</label>
+                            <input type="text" placeholder="Votre phrase fétiche..." value={content.slogan || ''} onChange={e => updateContentField('slogan', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold italic" />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Bio courte</label>
+                            <textarea placeholder="Présentation rapide..." value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Bio détaillée</label>
+                            <textarea placeholder="Votre parcours, vos passions..." value={content.socialLongBio || ''} onChange={e => updateContentField('socialLongBio', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={4} />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Ville</label>
+                            <input type="text" placeholder="Ville" value={content.city || ''} onChange={e => updateContentField('city', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Pays</label>
+                            <input type="text" placeholder="Pays" value={content.country || ''} onChange={e => updateContentField('country', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sub-section 2: Contact */}
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                          <Phone className="w-5 h-5 text-emerald-600" />
+                          <h3 className="text-sm font-black uppercase tracking-tighter">Coordonnées de Contact</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 block">Téléphone</label>
+                            <div className="relative">
+                              <Phone className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
+                              <input type="tel" placeholder="+33 ..." value={content.primaryPhone || ''} onChange={e => updateContentField('primaryPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-xs font-bold" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 block">WhatsApp</label>
+                            <div className="relative">
+                              <MessageSquare className="absolute left-4 top-3 w-4 h-4 text-emerald-500" />
+                              <input type="tel" placeholder="+33 ..." value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-xs font-bold" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 block">Email</label>
+                            <div className="relative">
+                              <Send className="absolute left-4 top-3 w-4 h-4 text-indigo-500" />
+                              <input type="email" placeholder="email@exemple.com" value={content.email || ''} onChange={e => updateContentField('email', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-xs font-bold" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2 block">Site Web</label>
+                            <div className="relative">
+                              <Globe className="absolute left-4 top-3 w-4 h-4 text-blue-500" />
+                              <input type="url" placeholder="https://..." value={content.websiteUrl || ''} onChange={e => updateContentField('websiteUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-xs font-bold" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sub-section 3: Réseaux Sociaux */}
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                          <div className="flex items-center gap-2">
+                            <Share2 className="w-5 h-5 text-indigo-600" />
+                            <h3 className="text-sm font-black uppercase tracking-tighter">Réseaux Sociaux</h3>
+                          </div>
+                          <button onClick={() => updateContentField('socialLinks', [...(content.socialLinks || []), { id: `sl_${Date.now()}`, platform: 'facebook', url: '', displayOrder: (content.socialLinks?.length || 0) + 1 }])} className="px-3 py-1 bg-indigo-600 text-white text-[9px] font-black uppercase rounded-full shadow-lg hover:bg-indigo-700 transition-colors">+ Ajouter</button>
+                        </div>
+
+                        <div className="space-y-3">
+                          {(content.socialLinks || []).map((link, idx) => (
+                            <div key={link.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 group">
+                              <select
+                                value={link.platform}
+                                onChange={e => {
+                                  const nl = [...content.socialLinks!];
+                                  nl[idx].platform = e.target.value as any;
+                                  updateContentField('socialLinks', nl);
+                                }}
+                                className="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black uppercase w-32"
+                              >
+                                <option value="facebook">Facebook</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="tiktok">TikTok</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="twitter">X / Twitter</option>
+                                <option value="snapchat">Snapchat</option>
+                                <option value="telegram">Telegram</option>
+                                <option value="pinterest">Pinterest</option>
+                                <option value="twitch">Twitch</option>
+                                <option value="discord">Discord</option>
+                                <option value="threads">Threads</option>
+                                <option value="whatsapp_channel">WhatsApp Channel</option>
+                                <option value="other">Autre</option>
+                              </select>
+                              <input
+                                type="text"
+                                placeholder="URL ou Identifiant"
+                                value={link.url}
+                                onChange={e => {
+                                  const nl = [...content.socialLinks!];
+                                  nl[idx].url = e.target.value;
+                                  updateContentField('socialLinks', nl);
+                                }}
+                                className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold"
+                              />
+                              <button onClick={() => updateContentField('socialLinks', content.socialLinks!.filter(l => l.id !== link.id))} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                            </div>
+                          ))}
+                          {(!content.socialLinks || content.socialLinks.length === 0) && (
+                            <p className="text-center text-[10px] text-slate-400 font-medium py-4">Aucun réseau social ajouté.</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Sub-section 4: Liens Personnalisés */}
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                          <div className="flex items-center gap-2">
+                            <Link className="w-5 h-5 text-blue-600" />
+                            <h3 className="text-sm font-black uppercase tracking-tighter">Liens Personnalisés</h3>
+                          </div>
+                          <button onClick={() => updateContentField('socialCustomLinks', [...(content.socialCustomLinks || []), { id: `cl_${Date.now()}`, title: '', url: '', isVisible: true, order: (content.socialCustomLinks?.length || 0) + 1 }])} className="px-3 py-1 bg-blue-600 text-white text-[9px] font-black uppercase rounded-full shadow-lg hover:bg-blue-700 transition-colors">+ Nouveau Lien</button>
+                        </div>
+
+                        <div className="space-y-4">
+                          {(content.socialCustomLinks || []).sort((a,b) => a.order - b.order).map((clink, idx) => (
+                            <div key={clink.id} className={`p-5 rounded-3xl border transition-all ${clink.isVisible ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="flex flex-col gap-1">
+                                  <button onClick={() => {
+                                    if(idx === 0) return;
+                                    const nl = [...content.socialCustomLinks!];
+                                    [nl[idx].order, nl[idx-1].order] = [nl[idx-1].order, nl[idx].order];
+                                    updateContentField('socialCustomLinks', nl);
+                                  }} className="p-1 hover:bg-slate-100 rounded text-slate-400"><Plus className="w-3 h-3 rotate-180" /></button>
+                                  <GripVertical className="w-4 h-4 text-slate-300 mx-auto" />
+                                  <button onClick={() => {
+                                    if(idx === content.socialCustomLinks!.length - 1) return;
+                                    const nl = [...content.socialCustomLinks!];
+                                    [nl[idx].order, nl[idx+1].order] = [nl[idx+1].order, nl[idx].order];
+                                    updateContentField('socialCustomLinks', nl);
+                                  }} className="p-1 hover:bg-slate-100 rounded text-slate-400"><Plus className="w-3 h-3" /></button>
+                                </div>
+                                <div className="flex-1 grid grid-cols-2 gap-3">
+                                  <div className="col-span-2">
+                                    <input type="text" placeholder="Titre du lien (ex: Mon Portfolio)" value={clink.title} onChange={e => {
+                                      const nl = [...content.socialCustomLinks!];
+                                      const i = nl.findIndex(l => l.id === clink.id);
+                                      nl[i].title = e.target.value;
+                                      updateContentField('socialCustomLinks', nl);
+                                    }} className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 text-xs font-black uppercase tracking-tight" />
+                                  </div>
+                                  <div className="col-span-2">
+                                    <input type="url" placeholder="URL (https://...)" value={clink.url} onChange={e => {
+                                      const nl = [...content.socialCustomLinks!];
+                                      const i = nl.findIndex(l => l.id === clink.id);
+                                      nl[i].url = e.target.value;
+                                      updateContentField('socialCustomLinks', nl);
+                                    }} className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 text-[10px] font-bold text-blue-600" />
+                                  </div>
+                                  <div className="col-span-2">
+                                    <input type="text" placeholder="Description courte (optionnel)" value={clink.description || ''} onChange={e => {
+                                      const nl = [...content.socialCustomLinks!];
+                                      const i = nl.findIndex(l => l.id === clink.id);
+                                      nl[i].description = e.target.value;
+                                      updateContentField('socialCustomLinks', nl);
+                                    }} className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 text-[10px] font-medium" />
+                                  </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <button onClick={() => {
+                                    const nl = [...content.socialCustomLinks!];
+                                    const i = nl.findIndex(l => l.id === clink.id);
+                                    nl[i].isVisible = !nl[i].isVisible;
+                                    updateContentField('socialCustomLinks', nl);
+                                  }} className={`p-2 rounded-xl transition-colors ${clink.isVisible ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
+                                    {clink.isVisible ? <Eye className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                                  </button>
+                                  <button onClick={() => updateContentField('socialCustomLinks', content.socialCustomLinks!.filter(l => l.id !== clink.id))} className="p-2 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors">
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          {(!content.socialCustomLinks || content.socialCustomLinks.length === 0) && (
+                            <div className="text-center py-10 bg-slate-50 rounded-[32px] border-2 border-dashed border-slate-200">
+                              <Sparkles className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+                              <p className="text-[10px] font-black text-slate-400 uppercase">Organisez vos liens comme un pro</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
 

@@ -48,7 +48,10 @@ import {
   Truck,
   Activity,
   Landmark,
-  Smartphone
+  Smartphone,
+  BadgeCheck,
+  Pin,
+  AtSign
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
@@ -252,6 +255,12 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       case 'tiktok': return <Activity className="w-5 h-5 text-cyan-400" />;
       case 'telegram': return <Send className="w-5 h-5 text-sky-500" />;
       case 'whatsapp': return <MessageSquare className="w-5 h-5 text-emerald-500" />;
+      case 'snapchat': return <Sparkles className="w-5 h-5 text-yellow-500" />;
+      case 'pinterest': return <Pin className="w-5 h-5 text-rose-700" />;
+      case 'twitch': return <Video className="w-5 h-5 text-purple-600" />;
+      case 'discord': return <MessageSquare className="w-5 h-5 text-indigo-500" />;
+      case 'threads': return <AtSign className="w-5 h-5 text-slate-200" />;
+      case 'whatsapp_channel': return <MessageSquare className="w-5 h-5 text-emerald-600" />;
       default: return <Globe className="w-5 h-5 text-slate-400" />;
     }
   };
@@ -1497,30 +1506,163 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
         );
 
       case 'SOCIAL':
+        const socialPlatforms = (content.socialLinks || []);
+        const customLinks = (content.socialCustomLinks || []).filter(l => l.isVisible).sort((a,b) => a.order - b.order);
+
         return (
-          <div className="space-y-8 pb-10">
-            <div className="flex flex-col items-center text-center space-y-4 pt-4">
-              <div className="w-36 h-36 rounded-full overflow-hidden border-8 border-slate-900 shadow-2xl bg-slate-800 relative">
-                {content.photoAvatarUrl ? <img src={content.photoAvatarUrl} className="w-full h-full object-cover" /> : <User className="w-16 h-16 mt-10 text-slate-700 mx-auto" />}
+          <div className="space-y-0 pb-20 -mx-6 -mt-6">
+            {/* 1. Header: Banner + Avatar */}
+            <div className="relative">
+              <div className="w-full h-56 bg-slate-900 overflow-hidden relative">
+                {content.photoBannerUrl ? (
+                  <img src={content.photoBannerUrl} className="w-full h-full object-cover" alt="Banner" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-indigo-900 via-slate-900 to-black opacity-80" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
               </div>
-              <div className="space-y-1">
-                <h1 className="text-3xl font-black text-white tracking-tight">{content.socialDisplayName || fullName}</h1>
-                <p className="text-indigo-500 font-black text-xs uppercase tracking-[0.2em]">{content.socialProfession || content.jobTitle}</p>
+
+              <div className="absolute -bottom-16 left-0 right-0 flex flex-col items-center">
+                <div className="w-32 h-32 rounded-full border-[6px] border-slate-950 shadow-2xl overflow-hidden bg-slate-800 relative">
+                  {content.photoAvatarUrl ? (
+                    <img src={content.photoAvatarUrl} className="w-full h-full object-cover" alt={content.socialDisplayName} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-700 bg-slate-800">
+                      <User className="w-16 h-16" />
+                    </div>
+                  )}
+                  {content.logoUrl && (
+                    <div className="absolute bottom-0 right-0 w-10 h-10 bg-white rounded-full p-1 shadow-lg border-2 border-slate-950">
+                      <img src={content.logoUrl} className="w-full h-full object-contain" />
+                    </div>
+                  )}
+                </div>
               </div>
-              {content.bio && <p className="text-xs font-medium text-slate-400 leading-relaxed max-w-[280px]">{content.bio}</p>}
             </div>
 
-            <div className="space-y-3">
-              {(content.socialLinks || []).map(link => (
-                <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-5 bg-white text-slate-950 rounded-[28px] font-black text-sm shadow-xl hover:scale-[1.02] transition-transform group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-900 group-hover:bg-indigo-600 group-hover:text-white transition-colors"><Link className="w-5 h-5" /></div>
-                    <span className="uppercase tracking-tight">{link.label || 'Mon Lien'}</span>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
-                </a>
-              ))}
+            {/* 2. Profile Info */}
+            <div className="pt-20 px-8 text-center space-y-4">
+              <div className="space-y-1">
+                <div className="flex items-center justify-center gap-2">
+                  <h1 className="text-3xl font-black text-white tracking-tight">{content.socialDisplayName || fullName}</h1>
+                  {content.socialPseudonym && <BadgeCheck className="w-6 h-6 text-indigo-500" />}
+                </div>
+                {content.socialPseudonym && <p className="text-sm font-black text-indigo-500 uppercase tracking-widest">{content.socialPseudonym}</p>}
+                <div className="flex flex-col items-center gap-1 pt-1">
+                  {content.socialProfession && <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">{content.socialProfession}</p>}
+                  {content.socialActivity && <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">{content.socialActivity}</p>}
+                  {(content.jobTitle || content.company) && (
+                    <p className="text-[10px] font-bold text-slate-500 uppercase">
+                      {content.jobTitle}{content.jobTitle && content.company ? ' @ ' : ''}{content.company}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {content.slogan && <p className="text-sm font-black text-indigo-400 italic">"{content.slogan}"</p>}
+              {content.bio && <p className="text-xs font-medium text-slate-400 leading-relaxed max-w-[300px] mx-auto">{content.bio}</p>}
+
+              {(content.city || content.country) && (
+                <div className="flex items-center justify-center gap-1 text-[9px] font-black text-slate-600 uppercase tracking-tighter">
+                  <MapPin className="w-3 h-3" />
+                  <span>{content.city}{content.city && content.country ? ', ' : ''}{content.country}</span>
+                </div>
+              )}
             </div>
+
+            {/* 3. Social Grid */}
+            {socialPlatforms.length > 0 && (
+              <div className="px-8 pt-10">
+                <div className="grid grid-cols-4 gap-4">
+                  {socialPlatforms.map(link => (
+                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 group">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-white group-hover:scale-110 group-hover:bg-indigo-600 transition-all shadow-lg">
+                        {getSocialIcon(link.platform)}
+                      </div>
+                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">{link.platform}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 4. Action Buttons */}
+            <div className="px-8 pt-8 flex flex-wrap justify-center gap-3">
+              <button onClick={() => {
+                const primary = socialPlatforms[0]?.url || content.websiteUrl || (content.socialLinks && content.socialLinks[0]?.url);
+                if(primary) window.open(primary, '_blank');
+              }} className="flex-1 min-w-[120px] py-3 bg-white text-slate-950 rounded-2xl font-black text-xs uppercase tracking-tighter shadow-xl flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors">
+                <UserPlus className="w-4 h-4" /> Suivre
+              </button>
+              <button onClick={() => {
+                if(navigator.share) {
+                  navigator.share({ title: content.socialDisplayName || fullName, url: window.location.href });
+                }
+              }} className="p-3 bg-slate-900 border border-slate-800 text-white rounded-2xl shadow-xl hover:bg-slate-800 transition-colors">
+                <Share2 className="w-5 h-5" />
+              </button>
+              <button onClick={() => window.location.href = `mailto:${content.email || ''}`} className="flex-1 min-w-[120px] py-3 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-tighter shadow-xl flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors">
+                <Mail className="w-4 h-4" /> Contact
+              </button>
+            </div>
+
+            {/* 5. Custom Links List */}
+            {customLinks.length > 0 && (
+              <div className="px-8 pt-10 space-y-4">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-px flex-1 bg-slate-800" />
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">Mes Liens</span>
+                  <div className="h-px flex-1 bg-slate-800" />
+                </div>
+
+                {customLinks.map(link => (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-5 bg-slate-900 border border-slate-800 text-white rounded-[28px] shadow-2xl group hover:border-indigo-500 transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                        <Link className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <span className="block text-sm font-black uppercase tracking-tight">{link.title}</span>
+                        {link.description && <span className="block text-[10px] font-medium text-slate-500">{link.description}</span>}
+                      </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-slate-700 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+                  </a>
+                ))}
+              </div>
+            )}
+
+            {/* 6. Secondary Actions */}
+            <div className="px-8 pt-12 grid grid-cols-2 gap-4">
+              {content.whatsappNumber && (
+                <button onClick={() => window.open(`https://wa.me/${content.whatsappNumber.replace(/\D/g, '')}`, '_blank')} className="flex items-center justify-center gap-2 p-4 bg-emerald-950/30 border border-emerald-900/50 text-emerald-400 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-900/50 transition-colors">
+                  <MessageSquare className="w-4 h-4" /> WhatsApp
+                </button>
+              )}
+              {content.websiteUrl && (
+                <button onClick={() => window.open(content.websiteUrl, '_blank')} className="flex items-center justify-center gap-2 p-4 bg-blue-950/30 border border-blue-900/50 text-blue-400 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-900/50 transition-colors">
+                  <Globe className="w-4 h-4" /> Visiter
+                </button>
+              )}
+              <button onClick={() => downloadVCard(item)} className="col-span-2 flex items-center justify-center gap-2 p-4 bg-slate-900 border border-slate-800 text-slate-400 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-colors mt-2">
+                <Download className="w-4 h-4" /> Enregistrer le Contact
+              </button>
+            </div>
+
+            {content.socialLongBio && (
+              <div className="px-8 pt-12 pb-10">
+                <div className="p-8 bg-slate-950 border border-slate-900 rounded-[40px] space-y-4">
+                  <h4 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">À propos</h4>
+                  <p className="text-xs font-medium text-slate-400 leading-relaxed whitespace-pre-line">{content.socialLongBio}</p>
+                </div>
+              </div>
+            )}
           </div>
         );
 

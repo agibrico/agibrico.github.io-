@@ -106,6 +106,8 @@ export interface SocialLink {
     | 'threads'
     | 'twitch'
     | 'website'
+    | 'pinterest'
+    | 'whatsapp_channel'
     | 'other';
   url: string;
   label?: string;
@@ -375,9 +377,27 @@ export interface QRContent {
 
   // --- SOCIAL / BIO SPECIFIC ---
   socialDisplayName?: string;
+  socialPseudonym?: string;
   socialNickname?: string;
   socialProfession?: string;
+  socialActivity?: string;
+  socialLongBio?: string;
+  socialWhatsAppChannelUrl?: string;
+  socialPinterestUrl?: string;
+  socialTwitchUrl?: string;
+  socialDiscordUrl?: string;
+  socialThreadsUrl?: string;
+  photoBannerUrl?: string;
   socialLinks: SocialLink[];
+  socialCustomLinks?: Array<{
+    id: string;
+    title: string;
+    url: string;
+    icon?: string;
+    description?: string;
+    order: number;
+    isVisible: boolean;
+  }>;
 
   // --- PRODUCT / MENU / SERVICE SPECIFIC ---
   productSheetType?: ProductSubType;

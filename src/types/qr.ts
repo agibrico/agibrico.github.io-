@@ -404,6 +404,8 @@ export interface QRContent {
   productName?: string;
   productBrand?: string;
   productModel?: string;
+  productCategory?: string;
+  productSubCategory?: string;
   productSku?: string;
   productReference?: string;
   productCode?: string;
@@ -425,17 +427,26 @@ export interface QRContent {
   productMinQuantity?: number | string;
   productGuarantee?: string;
   productConditions?: string;
+  productDeliveryInfo?: string;
   productDeliveryFees?: string;
   productOrderPhone?: string;
   productOrderWhatsapp?: string;
+  productOrderEmail?: string;
   productBuyUrl?: string;
   productMainImageUrl?: string;
   productGallery?: string[];
   productVideoUrl?: string;
 
+  // MENU SPECIFIC
+  menuRestaurantLogoUrl?: string;
+  menuRestaurantName?: string;
+  menuRestaurantAddress?: string;
+  menuRestaurantPhone?: string;
+  menuRestaurantWhatsapp?: string;
+  menuRestaurantHours?: string;
   menuItems?: Array<{
     id: string;
-    category: string;
+    category: 'Entrées' | 'Plats' | 'Grillades' | 'Desserts' | 'Boissons' | 'Menus' | 'Promotions' | 'Autres';
     name: string;
     description?: string;
     price: string;
@@ -444,15 +455,20 @@ export interface QRContent {
     allergens?: string[];
     sides?: string[]; // Accompagnements
     options?: string[];
-    extras?: string[];
+    supplements?: string[];
   }>;
 
+  // SERVICE SPECIFIC
   serviceName?: string;
+  serviceImageUrl?: string;
   serviceDescription?: string;
   servicePrice?: string;
   serviceDuration?: string;
   serviceAvailability?: string;
   serviceProviderName?: string;
+  serviceProviderPhone?: string;
+  serviceProviderWhatsapp?: string;
+  serviceBookingLink?: string;
 
   // --- WEB_LINK SPECIFIC ---
   linkTitle?: string;

@@ -1668,81 +1668,210 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
       case 'PRODUCT':
         const sheetType = content.productSheetType || 'PRODUCT';
+
         return (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl relative">
-              {content.productMainImageUrl && (
-                <div className="w-full h-72 relative">
-                  <img src={content.productMainImageUrl} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
-                  {content.productPricePromo && <div className="absolute top-6 right-6 px-4 py-1.5 bg-rose-600 text-white text-[10px] font-black uppercase rounded-full shadow-2xl animate-pulse">OFFRE SPÉCIALE</div>}
-                </div>
-              )}
-              <div className="p-8 text-center space-y-4">
-                <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none">{content.productName || item.title}</h1>
-                <div className="flex flex-col items-center gap-1">
-                  {content.productBrand && <p className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">{content.productBrand}</p>}
-                  {content.productModel && <p className="text-[9px] font-bold text-slate-600 uppercase">{content.productModel} {content.productSku ? `• ${content.productSku}` : ''}</p>}
-                </div>
-
-                {sheetType === 'PRODUCT' && (content.productPriceNormal || content.productPricePromo) && (
-                  <div className="py-2">
-                    <span className="text-4xl font-black text-emerald-400 tracking-tighter">{content.productPricePromo || content.productPriceNormal} <span className="text-sm font-bold opacity-70 ml-1">{content.productCurrency || 'FCFA'}</span></span>
-                    {content.productPricePromo && <p className="text-xs text-slate-500 line-through font-bold mt-1">{content.productPriceNormal} {content.productCurrency}</p>}
-                  </div>
-                )}
-                {content.productDescriptionShort && <p className="text-xs font-medium text-slate-400 italic">« {content.productDescriptionShort} »</p>}
-
-                <div className="grid grid-cols-2 gap-3 pt-4">
-                  {(content.productOrderPhone || content.whatsappNumber || content.primaryPhone) && <a href={`https://wa.me/${(content.productOrderPhone || content.whatsappNumber || content.primaryPhone!).replace(/[^\d]/g,'')}`} className="py-4 bg-emerald-600 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><MessageSquare className="w-4 h-4" /> Commander</a>}
-                  {content.productBuyUrl && <a href={content.productBuyUrl} className="py-4 bg-blue-600 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><ShoppingCart className="w-4 h-4" /> Acheter</a>}
-                </div>
-              </div>
-            </div>
-
-            {sheetType === 'PRODUCT' && content.productCharacteristics && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-3">
-                <SectionHeader title="Fiche Technique" icon={List} />
-                <p className="text-[10px] text-slate-400 leading-relaxed font-bold whitespace-pre-line">{content.productCharacteristics}</p>
-              </div>
-            )}
-
-            {sheetType === 'MENU' && content.menuItems && (
-              <div className="space-y-8 pt-4">
-                {['Entrées', 'Plats', 'Desserts', 'Boissons'].map(cat => {
-                  const items = content.menuItems?.filter(i => i.category === cat);
-                  if (!items || items.length === 0) return null;
-                  return (
-                    <div key={cat} className="space-y-4">
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 flex items-center gap-3"><span className="w-8 h-px bg-emerald-500/30" />{cat}</h2>
-                      <div className="space-y-3">
-                        {items.map(i => (
-                          <div key={i.id} className="flex justify-between items-start p-5 bg-slate-900 border border-slate-800 rounded-[28px] shadow-lg">
-                            <div className="flex-1 space-y-1">
-                              <h3 className="text-xs font-black text-white uppercase tracking-tight">{i.name}</h3>
-                              {i.description && <p className="text-[10px] text-slate-500 font-medium leading-tight">{i.description}</p>}
-                            </div>
-                            <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">{i.price}</span>
-                          </div>
-                        ))}
+          <div className="space-y-6 pb-20">
+            {/* --- SUBTYPE: PRODUIT --- */}
+            {sheetType === 'PRODUCT' && (
+              <div className="space-y-6 animate-in fade-in duration-500">
+                 {/* HERO / PRODUCT DISPLAY */}
+                 <div className="bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl relative group">
+                    {content.productMainImageUrl ? (
+                      <div className="w-full h-80 relative">
+                        <img src={content.productMainImageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
+                        {content.productPricePromo && (
+                           <div className="absolute top-6 right-6 px-4 py-1.5 bg-rose-600 text-white text-[10px] font-black uppercase rounded-full shadow-2xl animate-bounce">
+                              -{Math.round(((parseFloat(content.productPriceNormal || '0') - parseFloat(content.productPricePromo || '0')) / parseFloat(content.productPriceNormal || '1')) * 100)}%
+                           </div>
+                        )}
                       </div>
+                    ) : (
+                      <div className="w-full h-40 bg-slate-800 flex items-center justify-center"><Package className="w-16 h-16 text-slate-700" /></div>
+                    )}
+
+                    <div className="p-8 text-center space-y-4">
+                       <div className="space-y-1">
+                          {content.productBrand && <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">{content.productBrand}</span>}
+                          <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-tight">{content.productName || item.title}</h1>
+                          {content.productModel && <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{content.productModel}</p>}
+                       </div>
+
+                       {(content.productPriceNormal || content.productPricePromo) && (
+                         <div className="flex flex-col items-center gap-1">
+                            <span className="text-4xl font-black text-emerald-400 tracking-tighter">
+                               {content.productPricePromo || content.productPriceNormal}
+                               <span className="text-sm font-bold opacity-60 ml-1">{content.productCurrency || 'FCFA'}</span>
+                            </span>
+                            {content.productPricePromo && <span className="text-xs text-slate-500 line-through font-bold">{content.productPriceNormal} {content.productCurrency}</span>}
+                         </div>
+                       )}
+
+                       {content.productDescriptionShort && <p className="text-xs font-medium text-slate-400 italic">« {content.productDescriptionShort} »</p>}
+
+                       {/* INVENTORY STATUS */}
+                       <div className="flex items-center justify-center gap-3 pt-2">
+                          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border ${content.productIsAvailable !== false ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+                             {content.productIsAvailable !== false ? <CheckCircle2 className="w-3 h-3" /> : <ShieldAlert className="w-3 h-3" />}
+                             <span className="text-[9px] font-black uppercase">{content.productIsAvailable !== false ? 'En Stock' : 'Épuisé'}</span>
+                          </div>
+                          {content.productStockQuantity && <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{content.productStockQuantity} unités dispo.</span>}
+                       </div>
+
+                       {/* MAIN ACTIONS */}
+                       <div className="grid grid-cols-2 gap-3 pt-6">
+                          <a href={content.productBuyUrl || '#'} className="col-span-2 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95">
+                             <ShoppingCart className="w-4 h-4" /> Acheter Maintenant
+                          </a>
+                          <a href={`https://wa.me/${(content.productOrderWhatsapp || '').replace(/[^\d]/g,'')}?text=Bonjour, je souhaite commander le produit : ${content.productName}`} className="py-4 bg-emerald-600 text-white font-black text-[10px] rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg">
+                             <MessageSquare className="w-4 h-4" /> WhatsApp
+                          </a>
+                          <a href={`tel:${content.productOrderPhone}`} className="py-4 bg-slate-800 border border-slate-700 text-white font-black text-[10px] rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest">
+                             <Phone className="w-4 h-4 text-emerald-400" /> Appeler
+                          </a>
+                       </div>
                     </div>
-                  );
-                })}
+                 </div>
+
+                 {/* SPECS & CHARACTERISTICS */}
+                 {content.productCharacteristics && (
+                    <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                       <SectionHeader title="Fiche Technique" icon={List} colorClass="text-blue-500" />
+                       <p className="text-xs text-slate-400 leading-relaxed font-medium whitespace-pre-line">{content.productCharacteristics}</p>
+                       <div className="grid grid-cols-2 gap-4 pt-2">
+                          <InfoRow label="Référence" value={content.productSku || content.productReference} />
+                          <InfoRow label="Dimensions" value={content.productDimensions} />
+                          <InfoRow label="Poids" value={content.productWeight} />
+                          <InfoRow label="Matière" value={content.productMaterial} />
+                       </div>
+                    </div>
+                 )}
+
+                 {/* LOGISTICS & GUARANTEE */}
+                 <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                    <SectionHeader title="Logistique & Garantie" icon={Truck} colorClass="text-amber-500" />
+                    <InfoRow label="Frais de livraison" value={content.productDeliveryFees || content.productDeliveryInfo} icon={Truck} />
+                    <InfoRow label="Garantie" value={content.productGuarantee} icon={Award} />
+                    {content.productConditions && (
+                       <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                          <span className="text-[8px] font-black text-slate-600 uppercase block mb-1">Conditions de vente</span>
+                          <p className="text-[10px] text-slate-500 font-medium italic">{content.productConditions}</p>
+                       </div>
+                    )}
+                 </div>
               </div>
             )}
 
-            {sheetType === 'SERVICE' && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[40px] p-8 space-y-6 shadow-2xl">
-                 <SectionHeader title="Détails du Service" icon={Activity} colorClass="text-blue-500" />
-                 <div className="space-y-2">
-                   <h2 className="text-xl font-black text-white uppercase">{content.serviceName || content.productName}</h2>
-                   <div className="flex items-center gap-4">
-                     <span className="text-2xl font-black text-blue-500">{content.servicePrice || content.productPriceNormal} <span className="text-[10px] opacity-60">{content.productCurrency || 'FCFA'}</span></span>
-                     {content.serviceDuration && <span className="px-2 py-1 bg-slate-800 text-[8px] font-black text-slate-400 uppercase rounded">{content.serviceDuration}</span>}
-                   </div>
+            {/* --- SUBTYPE: MENU --- */}
+            {sheetType === 'MENU' && (
+              <div className="space-y-8 animate-in fade-in duration-500">
+                 {/* RESTAURANT HEADER */}
+                 <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500" />
+                    <div className="w-24 h-24 rounded-[32px] bg-white p-2 mx-auto shadow-2xl border-4 border-slate-800 overflow-hidden">
+                       {content.menuRestaurantLogoUrl ? <img src={content.menuRestaurantLogoUrl} className="w-full h-full object-contain" /> : <Store className="w-10 h-10 text-slate-200 mt-4" />}
+                    </div>
+                    <div className="space-y-1">
+                       <h1 className="text-2xl font-black text-white uppercase tracking-tight">{content.menuRestaurantName || item.title}</h1>
+                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{content.menuRestaurantAddress}</p>
+                       <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em]">{content.menuRestaurantHours}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                       <a href={`https://wa.me/${(content.menuRestaurantWhatsapp || '').replace(/[^\d]/g,'')}`} className="py-3 bg-emerald-600 text-white font-black text-[10px] rounded-xl flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg">
+                          <MessageSquare className="w-3.5 h-3.5" /> WhatsApp
+                       </a>
+                       <a href={`tel:${content.menuRestaurantPhone}`} className="py-3 bg-slate-800 text-white font-black text-[10px] rounded-xl flex items-center justify-center gap-2 uppercase tracking-widest border border-slate-700">
+                          <Phone className="w-3.5 h-3.5 text-emerald-400" /> Appeler
+                       </a>
+                    </div>
                  </div>
-                 {content.serviceDescription && <p className="text-xs text-slate-400 leading-relaxed font-medium">{content.serviceDescription}</p>}
+
+                 {/* MENU ITEMS CATEGORIZED */}
+                 {['Entrées', 'Plats', 'Grillades', 'Desserts', 'Boissons', 'Menus', 'Promotions', 'Autres'].map(cat => {
+                    const items = content.menuItems?.filter(i => i.category === cat);
+                    if (!items || items.length === 0) return null;
+                    return (
+                      <div key={cat} className="space-y-4">
+                         <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-emerald-500 flex items-center gap-3">
+                            <span className="w-8 h-px bg-emerald-500/30" /> {cat}
+                         </h2>
+                         <div className="space-y-4">
+                            {items.map(i => (
+                              <div key={i.id} className="bg-slate-900/50 border border-slate-800 rounded-[32px] p-4 flex gap-4 hover:border-emerald-500/30 transition-colors shadow-lg">
+                                 {i.photoUrl && <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 border border-slate-800"><img src={i.photoUrl} className="w-full h-full object-cover" /></div>}
+                                 <div className="flex-1 space-y-2">
+                                    <div className="flex justify-between items-start gap-2">
+                                       <h3 className="text-sm font-black text-white uppercase tracking-tight leading-tight">{i.name}</h3>
+                                       <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 whitespace-nowrap">{i.price}</span>
+                                    </div>
+                                    {i.description && <p className="text-[10px] text-slate-500 font-medium leading-tight">{i.description}</p>}
+                                    {(i.allergens?.length || 0) > 0 && (
+                                       <div className="flex flex-wrap gap-1.5 pt-1">
+                                          <ShieldAlert className="w-2.5 h-2.5 text-rose-500" />
+                                          {i.allergens!.map(a => <span key={a} className="text-[7px] font-black uppercase text-rose-500/70">{a}</span>)}
+                                       </div>
+                                    )}
+                                 </div>
+                              </div>
+                            ))}
+                         </div>
+                      </div>
+                    );
+                 })}
+              </div>
+            )}
+
+            {/* --- SUBTYPE: SERVICE --- */}
+            {sheetType === 'SERVICE' && (
+              <div className="space-y-6 animate-in fade-in duration-500">
+                 {/* HERO / SERVICE DISPLAY */}
+                 <div className="bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl relative">
+                    {content.productMainImageUrl && (
+                      <div className="w-full h-64 relative">
+                        <img src={content.productMainImageUrl} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
+                      </div>
+                    )}
+                    <div className="p-8 text-center space-y-4">
+                       <div className="space-y-1">
+                          {content.serviceProviderName && <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em]">{content.serviceProviderName}</span>}
+                          <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-tight">{content.serviceName || item.title}</h1>
+                          <div className="flex items-center justify-center gap-3 pt-2">
+                             <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 rounded-full border border-indigo-500/20 text-indigo-400">
+                                <Clock className="w-3 h-3" />
+                                <span className="text-[9px] font-black uppercase">{content.serviceDuration || 'Non spécifiée'}</span>
+                             </div>
+                             <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-emerald-400">
+                                <DollarSign className="w-3 h-3" />
+                                <span className="text-[9px] font-black uppercase">{content.servicePrice || 'Sur devis'}</span>
+                             </div>
+                          </div>
+                       </div>
+
+                       {content.serviceDescription && <p className="text-xs font-medium text-slate-400 leading-relaxed">{content.serviceDescription}</p>}
+
+                       {/* MAIN ACTIONS */}
+                       <div className="grid grid-cols-2 gap-3 pt-6">
+                          <a href={content.bookingLink || '#'} className="col-span-2 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95">
+                             <Calendar className="w-4 h-4" /> Réserver Maintenant
+                          </a>
+                          <a href={`https://wa.me/${(content.whatsappNumber || '').replace(/[^\d]/g,'')}?text=Bonjour, je souhaite réserver le service : ${content.serviceName}`} className="py-4 bg-emerald-600 text-white font-black text-[10px] rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg">
+                             <MessageSquare className="w-4 h-4" /> WhatsApp
+                          </a>
+                          <a href={`tel:${content.primaryPhone}`} className="py-4 bg-slate-800 border border-slate-700 text-white font-black text-[10px] rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest">
+                             <Phone className="w-4 h-4 text-emerald-400" /> Appeler
+                          </a>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* PROVIDER DETAILS */}
+                 <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                    <SectionHeader title="À Propos du Prestataire" icon={User} colorClass="text-indigo-500" />
+                    <InfoRow label="Prestataire" value={content.serviceProviderName} icon={BadgeCheck} />
+                    <InfoRow label="Disponibilité" value={content.serviceAvailability} icon={Clock} />
+                 </div>
               </div>
             )}
           </div>

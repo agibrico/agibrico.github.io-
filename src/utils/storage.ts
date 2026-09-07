@@ -494,10 +494,15 @@ export function getStoredQRCodes(): QRCodeItem[] {
     const data = localStorage.getItem(CARDS_STORAGE_KEY);
     let items: QRCodeItem[] = data ? JSON.parse(data) : [];
 
+    // Robustness: ensure items is an array
+    if (!Array.isArray(items)) {
+      items = [];
+    }
+
     // Ensure initial items are present
     let changed = false;
     INITIAL_QR_ITEMS.forEach(initItem => {
-      if (!items.find(i => i.id === initItem.id)) {
+      if (!items.find(i => i && i.id === initItem.id)) {
         items.push(initItem);
         changed = true;
       }
@@ -693,10 +698,15 @@ export function getStoredClients(): ClientProfile[] {
     const data = localStorage.getItem(CLIENTS_STORAGE_KEY);
     let clients: ClientProfile[] = data ? JSON.parse(data) : [];
 
+    // Robustness: ensure clients is an array
+    if (!Array.isArray(clients)) {
+      clients = [];
+    }
+
     // Ensure initial clients are present
     let changed = false;
     INITIAL_CLIENTS.forEach(initClient => {
-      if (!clients.find(c => c.id === initClient.id)) {
+      if (!clients.find(c => c && c.id === initClient.id)) {
         clients.push(initClient);
         changed = true;
       }

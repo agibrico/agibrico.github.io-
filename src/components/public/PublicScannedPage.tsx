@@ -77,6 +77,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
   // --- COMPATIBILITY LAYER FOR OLD FLUTTER TYPES ---
   const normalizeItem = (rawItem: any): QRCodeItem => {
+    if (!rawItem) return {} as QRCodeItem;
     const typeMap: Record<string, string> = {
       'vcard': 'BUSINESS_CARD',
       'business': 'BUSINESS_CARD',

@@ -150,6 +150,7 @@ export interface QRContent {
   altitude?: number;
   landmark?: string; // Point de repère
   locationLink?: string; // Google Maps / Waze
+  googleMapsUrl?: string;
 
   // --- BUSINESS_CARD SPECIFIC ---
   languagesSpoken?: string[];
@@ -159,6 +160,10 @@ export interface QRContent {
   bookingLink?: string;
   paymentLink?: string;
   publicNotes?: string;
+  servicesList?: string[];
+  operatingZone?: string;
+  businessRegisterNumber?: string;
+  businessTaxId?: string;
 
   // --- BOOK SPECIFIC ---
   bookTitle?: string;
@@ -231,6 +236,7 @@ export interface QRContent {
   eventTimezone?: string;
   eventDoorsOpenTime?: string;
   eventLocationName?: string;
+  eventAddress?: string;
   eventAccessInstructions?: string;
   eventProgram?: string;
   eventProgramPdfUrl?: string;
@@ -241,9 +247,16 @@ export interface QRContent {
   eventBookingUrl?: string;
   eventMaxCapacity?: number | string;
 
+  // Backward compatibility or alternate names for Event
+  invitationTitle?: string;
+  invitationDate?: string;
+  invitationTime?: string;
+  invitationLocationName?: string;
+  invitationAddress?: string;
+
   // --- SHOP SPECIFIC ---
   shopIndustry?: string;
-  shopOpeningHours?: OpeningHourDay[];
+  openingHours?: OpeningHourDay[];
   shopDeliveryAvailable?: boolean;
   shopDeliveryZone?: string;
   shopDeliveryFees?: string;
@@ -281,6 +294,7 @@ export interface QRContent {
 
   // --- PRODUCT / MENU / SERVICE SPECIFIC ---
   productSheetType?: ProductSubType;
+  productName?: string;
   productBrand?: string;
   productModel?: string;
   productSku?: string;
@@ -297,6 +311,7 @@ export interface QRContent {
   productVariants?: string;
   productPriceNormal?: string;
   productPricePromo?: string;
+  productCurrency?: string;
   productDiscountPercentage?: string;
   productStockQuantity?: number | string;
   productIsAvailable?: boolean;
@@ -341,8 +356,9 @@ export interface QRContent {
   customButtonText?: string;
 
   // --- CUSTOM SPECIFIC ---
-  customSections: CustomSection[];
-  customFields: CustomField[]; // For backward compatibility or simple lists
+  locationPlaceName?: string;
+  customSections?: CustomSection[];
+  customFields?: CustomField[]; // For backward compatibility or simple lists
 
   // Privacy & Protection
   privacy: {
@@ -356,6 +372,7 @@ export interface QRContent {
 
   // Internal
   internalNotes?: string;
+  otherInformation?: string;
 }
 
 export interface CustomSection {

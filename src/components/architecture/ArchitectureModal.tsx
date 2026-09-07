@@ -431,7 +431,7 @@ CREATE TABLE qr_codes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     public_id VARCHAR(16) UNIQUE NOT NULL, -- Identifiant court ex: 7F8A9K2P
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    type VARCHAR(30) NOT NULL CHECK (type IN ('vcard', 'business', 'social', 'product', 'image', 'event', 'location', 'url', 'custom')),
+    type VARCHAR(30) NOT NULL CHECK (type IN ('BUSINESS_CARD', 'BOOK', 'EVENT', 'SHOP', 'LOCATION', 'COMPANY', 'SOCIAL', 'PRODUCT', 'WEB_LINK', 'CUSTOM')),
     mode VARCHAR(10) NOT NULL DEFAULT 'dynamic' CHECK (mode IN ('dynamic', 'static')),
     title VARCHAR(200) NOT NULL,
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'archived')),

@@ -482,3 +482,37 @@ export const CANONICAL_GITHUB_PAGES_URL = 'https://agibrico.github.io/agibrico.g
 export function getPublicQRUrl(publicId: string, card?: QRCodeItem): string {
   return `${CANONICAL_GITHUB_PAGES_URL}#q/${publicId}`;
 }
+
+export function getClientById(id: string): ClientProfile | undefined {
+  return getStoredClients().find(c => c.id === id);
+}
+
+export function exportFullDatabaseJSON(): string {
+  const db = {
+    cards: getStoredQRCodes(),
+    clients: getStoredClients(),
+    scans: getStoredScans(),
+    history: getStoredHistory(),
+    designer: getDesignerProfile(),
+    exportDate: new Date().toISOString(),
+    version: '2.0'
+  };
+  return JSON.stringify(db, null, 2);
+}
+
+export function importFullDatabaseJSON(jsonStr: string): boolean {
+  try {
+    const data = JSON.parse(jsonStr);
+    if (!data.cards || !data.clients) return false;
+
+    saveQRCodes(data.cards);
+    saveClients(data.clients);
+    if (data.scans) localStorage.setItem(SCANS_STORAGE_KEY, JSON.stringify(data.scans));
+    if (data.history) localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(data.history));
+    if (data.designer) saveDesignerProfile(data.designer);
+
+    return true;
+  } catch (e) {
+    return false;
+  }
+}

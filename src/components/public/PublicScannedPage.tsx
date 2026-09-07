@@ -38,7 +38,10 @@ import {
   Map,
   Link,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  FileText,
+  Store,
+  LocateFixed
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';

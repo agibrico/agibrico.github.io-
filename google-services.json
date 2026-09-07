@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "745747813194",
+    "project_id": "agb-vcard-studio",
+    "storage_bucket": "agb-vcard-studio.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745747813194:android:ced0da8e7e33610d3827b3",
+        "android_client_info": {
+          "package_name": "QR.ODE01"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDU79Dd8IYQf245MELSf6cR7lXLEI_ukic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

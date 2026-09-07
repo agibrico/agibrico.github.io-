@@ -53,7 +53,6 @@ import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
 import { downloadVCard } from '../../utils/vcard';
 import { recordScanEvent, fetchQRCodeByPublicId, getClientById, getStoredClients, decodeCardPayload } from '../../utils/storage';
-import { getCompanyDefaultLogo } from '../../utils/defaultLogos';
 
 interface PublicScannedPageProps {
   publicId?: string;
@@ -184,17 +183,9 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   const linkedClient = item.clientId ? getClientById(item.clientId) : null;
   const content: QRContent = linkedClient ? { ...item.content, ...linkedClient } : item.content;
   const { styling } = item;
-  const fullName = content.fullName || `${content.firstName || ''} ${content.middleName ? content.middleName + ' ' : ''}${content.lastName || ''}`.trim() || 'Fiche Professionnelle';
+  const fullName = content.fullName || `${content.firstName || ''} ${content.middleName ? content.middleName + ' ' : ''}${content.lastName || ''}`.trim() || item.publicId;
 
-  const registeredLogo = (content.logoUrl && !content.logoUrl.includes('unsplash.com')) ? content.logoUrl : (styling?.logoUrl && !styling.logoUrl.includes('unsplash.com')) ? styling.logoUrl : getCompanyDefaultLogo(content.company || content.commercialName || fullName);
-
-  const getCompanyInitials = (comp?: string, name?: string) => {
-    const src = (comp && comp.trim()) ? comp : name;
-    if (!src) return 'QR';
-    const words = src.trim().split(/\s+/).filter(Boolean);
-    if (words.length >= 2) return `${words[0][0]}${words[1][0]}`.toUpperCase();
-    return src.slice(0, 2).toUpperCase();
-  };
+  const registeredLogo = (content.logoUrl && !content.logoUrl.includes('unsplash.com')) ? content.logoUrl : (styling?.logoUrl && !styling.logoUrl.includes('unsplash.com')) ? styling.logoUrl : null;
 
   // -------------------------------------------------------------------------
   // RENDER HELPERS
@@ -231,16 +222,18 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
-              <div className="w-32 h-32 rounded-3xl bg-white p-2 mx-auto border-4 border-slate-800 shadow-xl overflow-hidden">
-                {registeredLogo ? <img src={registeredLogo} className="w-full h-full object-contain" /> : <span className="text-slate-950 text-4xl font-black">{getCompanyInitials(content.company, fullName)}</span>}
-              </div>
+              {registeredLogo && (
+                <div className="w-32 h-32 rounded-3xl bg-white p-2 mx-auto border-4 border-slate-800 shadow-xl overflow-hidden">
+                  <img src={registeredLogo} className="w-full h-full object-contain" />
+                </div>
+              )}
               <div className="space-y-2">
                 <div className="flex items-center justify-center gap-2">
                   {content.civility && <span className="text-xs font-bold text-slate-500">{content.civility}</span>}
                   <h1 className="text-2xl font-black text-white leading-tight uppercase tracking-tight">{fullName}</h1>
                 </div>
                 {content.professionalTitle && <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{content.professionalTitle}</p>}
-                <p className="text-xs font-black text-blue-500 uppercase tracking-[0.3em]">{content.jobTitle}</p>
+                {content.jobTitle && <p className="text-xs font-black text-blue-500 uppercase tracking-[0.3em]">{content.jobTitle}</p>}
                 {content.company && (
                   <div className="flex flex-col items-center gap-1">
                     <p className="text-sm font-bold text-slate-300">{content.company}</p>
@@ -293,9 +286,9 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 {content.bookMediumType === 'audio' && <div className="absolute top-2 right-2 p-2 bg-slate-900/80 rounded-full"><Headphones className="w-4 h-4 text-indigo-400" /></div>}
               </div>
               <div className="space-y-2">
-                <h1 className="text-2xl font-black text-white uppercase">{content.bookTitle || 'Sans Titre'}</h1>
+                <h1 className="text-2xl font-black text-white uppercase">{content.bookTitle || ''}</h1>
                 {content.bookSubtitle && <p className="text-xs font-bold text-slate-500 uppercase">{content.bookSubtitle}</p>}
-                <p className="text-sm font-bold text-slate-400">Par <span className="text-indigo-400 uppercase">{content.bookAuthor || 'Auteur Inconnu'}</span></p>
+                {content.bookAuthor && <p className="text-sm font-bold text-slate-400">Par <span className="text-indigo-400 uppercase">{content.bookAuthor}</span></p>}
                 {content.bookIllustrator && <p className="text-[9px] font-bold text-slate-500">Illustré par {content.bookIllustrator}</p>}
                 {content.bookPrice && <div className="inline-block px-4 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-sm font-black mt-2">{content.bookPrice} {content.bookCurrency || 'FCFA'}</div>}
               </div>
@@ -340,8 +333,8 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-600" />
               <div className="space-y-2 pt-2">
-                <span className="px-3 py-1 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-full">{content.eventTheme || 'Événement Spécial'}</span>
-                <h1 className="text-3xl font-black text-white uppercase tracking-tight pt-2 leading-none">{content.eventTitle || 'Événement'}</h1>
+                {content.eventTheme && <span className="px-3 py-1 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-full">{content.eventTheme}</span>}
+                {content.eventTitle && <h1 className="text-3xl font-black text-white uppercase tracking-tight pt-2 leading-none">{content.eventTitle}</h1>}
                 <p className="text-sm font-bold text-slate-400">{content.eventHost && `Organisé par ${content.eventHost}`}</p>
               </div>
               <div className="grid grid-cols-2 gap-3 p-4 bg-slate-950 rounded-[32px] border border-slate-800 shadow-inner">
@@ -393,10 +386,10 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
                <div className="w-24 h-24 rounded-3xl bg-white p-2 mx-auto shadow-xl flex items-center justify-center overflow-hidden">
-                 {registeredLogo ? <img src={registeredLogo} className="w-full h-full object-contain" /> : <Store className="w-12 h-12 text-emerald-600" />}
+                 {registeredLogo && <img src={registeredLogo} className="w-full h-full object-contain" />}
                </div>
                <div className="space-y-2">
-                 <h1 className="text-2xl font-black text-white uppercase leading-none tracking-tight">{content.commercialName || content.company || 'Boutique'}</h1>
+                 <h1 className="text-2xl font-black text-white uppercase leading-none tracking-tight">{content.commercialName || content.company || ''}</h1>
                  {content.shopIndustry && <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-black uppercase rounded-full">{content.shopIndustry}</span>}
                </div>
                <div className="grid grid-cols-4 gap-3">
@@ -454,7 +447,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 <MapPin className="w-10 h-10 text-cyan-500" />
               </div>
               <div className="space-y-2">
-                <h1 className="text-2xl font-black text-white uppercase">{content.locationPlaceName || 'Localisation'}</h1>
+                {content.locationPlaceName && <h1 className="text-2xl font-black text-white uppercase">{content.locationPlaceName}</h1>}
                 <p className="text-sm font-bold text-slate-400 leading-tight">{content.address}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -477,7 +470,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
                <div className="absolute top-0 left-0 w-full h-1 bg-blue-700" />
                <div className="w-28 h-28 rounded-3xl bg-white p-2 mx-auto border-4 border-slate-800 shadow-xl flex items-center justify-center overflow-hidden">
-                 {registeredLogo ? <img src={registeredLogo} className="w-full h-full object-contain" /> : <span className="text-slate-950 text-3xl font-black">{getCompanyInitials(content.company, fullName)}</span>}
+                 {registeredLogo && <img src={registeredLogo} className="w-full h-full object-contain" />}
                </div>
                <div className="space-y-2">
                  <h1 className="text-2xl font-black text-white uppercase tracking-tight">{content.company || fullName}</h1>
@@ -485,8 +478,8 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                  {content.slogan && <p className="text-xs font-bold text-slate-400 italic mt-2">« {content.slogan} »</p>}
                </div>
                <div className="grid grid-cols-2 gap-3">
-                 <a href={`tel:${content.primaryPhone}`} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>
-                 <a href={content.websiteUrl} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><Globe className="w-4 h-4 text-indigo-400" /> Visiter</a>
+                 {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>}
+                 {content.websiteUrl && <a href={content.websiteUrl} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><Globe className="w-4 h-4 text-indigo-400" /> Visiter</a>}
                </div>
             </div>
 
@@ -644,7 +637,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               <Globe className="w-10 h-10 text-blue-600" />
             </div>
             <div className="space-y-3">
-              <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none">{content.linkTitle || 'Lien Web'}</h1>
+              <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none">{content.linkTitle || ''}</h1>
               {content.linkDescription && <p className="text-xs font-medium text-slate-400 max-w-xs">{content.linkDescription}</p>}
             </div>
             <a href={content.linkDestinationUrl} className="group relative">
@@ -699,23 +692,14 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between antialiased selection:bg-blue-600 selection:text-white">
-      {/* Background Ambience */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full" />
-      </div>
-
       <div className="w-full max-w-md mx-auto px-6 pt-10 pb-4 flex-1 relative z-10">
         {renderContent()}
       </div>
 
       <footer className="py-12 text-center relative z-10">
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-1 h-8 bg-gradient-to-b from-blue-600 to-transparent rounded-full opacity-50" />
-          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-600">Smart QR Intelligent</p>
-          <div className="px-4 py-1.5 bg-slate-900 border border-slate-800 rounded-full">
-             <p className="text-[8px] font-bold text-slate-500 uppercase">Fiche Officielle Certifiée • ID: {item.publicId}</p>
-          </div>
+          <div className="w-1 h-px bg-slate-800 rounded-full" />
+          <p className="text-[7px] font-bold uppercase tracking-[0.4em] text-slate-800">ID: {item.publicId}</p>
         </div>
       </footer>
     </div>

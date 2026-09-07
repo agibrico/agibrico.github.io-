@@ -325,78 +325,306 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                   {/* --- 2. BOOK --- */}
                   {type === 'BOOK' && (
                     <div className="space-y-10">
+                      {/* 1. Identification */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><BookOpen className="w-4 h-4 text-indigo-600"/> Identification du Livre</h4>
-                        <input type="text" placeholder="Titre principal de l'ouvrage" value={content.bookTitle || ''} onChange={e => updateContentField('bookTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        <input type="text" placeholder="Sous-titre (facultatif)" value={content.bookSubtitle || ''} onChange={e => updateContentField('bookSubtitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Auteur principal" value={content.bookAuthor || ''} onChange={e => updateContentField('bookAuthor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Co-auteur / Contributeur" value={content.bookCoAuthor || ''} onChange={e => updateContentField('bookCoAuthor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><BookOpen className="w-4 h-4 text-indigo-600"/> 1. Identification</h4>
+
+                        <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50 relative group mb-6">
+                          {content.photoUrl ? (
+                            <div className="relative">
+                              <img src={content.photoUrl} className="h-48 w-32 rounded-xl object-cover shadow-2xl border-4 border-white" />
+                              <button onClick={() => updateContentField('photoUrl', '')} className="absolute -top-3 -right-3 p-2 bg-rose-600 text-white rounded-full shadow-xl hover:scale-110 transition-all"><Trash2 className="w-4 h-4"/></button>
+                            </div>
+                          ) : (
+                            <label className="flex flex-col items-center cursor-pointer group">
+                              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 group-hover:text-indigo-500 shadow-xl border border-slate-100 transition-all mb-3"><ImageIcon className="w-8 h-8" /></div>
+                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Couverture du livre</span>
+                              <input type="file" className="hidden" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if(file) { const r = new FileReader(); r.onload = ev => updateContentField('photoUrl', ev.target?.result as string); r.readAsDataURL(file); } }} />
+                            </label>
+                          )}
                         </div>
+
+                        <div className="space-y-4">
+                          <input type="text" placeholder="Titre principal de l'ouvrage" value={content.bookTitle || ''} onChange={e => updateContentField('bookTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Sous-titre (facultatif)" value={content.bookSubtitle || ''} onChange={e => updateContentField('bookSubtitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Titre Original (si traduction)" value={content.bookOriginalTitle || ''} onChange={e => updateContentField('bookOriginalTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Auteur Principal</label>
+                            <input type="text" placeholder="Nom de l'auteur" value={content.bookAuthor || ''} onChange={e => updateContentField('bookAuthor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Co-auteur(s)</label>
+                            <input type="text" placeholder="Contributeurs" value={content.bookCoAuthor || ''} onChange={e => updateContentField('bookCoAuthor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+
                         <div className="grid grid-cols-3 gap-4">
-                          <input type="text" placeholder="Illustrateur" value={content.bookIllustrator || ''} onChange={e => updateContentField('bookIllustrator', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
-                          <input type="text" placeholder="Traducteur" value={content.bookTranslator || ''} onChange={e => updateContentField('bookTranslator', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
-                          <input type="text" placeholder="Auteur Préface" value={content.bookPrefaceAuthor || ''} onChange={e => updateContentField('bookPrefaceAuthor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Illustrateur</label>
+                            <input type="text" placeholder="..." value={content.bookIllustrator || ''} onChange={e => updateContentField('bookIllustrator', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Traducteur</label>
+                            <input type="text" placeholder="..." value={content.bookTranslator || ''} onChange={e => updateContentField('bookTranslator', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Préface par</label>
+                            <input type="text" placeholder="..." value={content.bookPrefaceAuthor || ''} onChange={e => updateContentField('bookPrefaceAuthor', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Maison d'Édition</label>
+                            <input type="text" placeholder="Éditeur" value={content.bookPublisher || ''} onChange={e => updateContentField('bookPublisher', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Collection / Édition</label>
+                            <input type="text" placeholder="ex: Folio, 2026..." value={content.bookPublisherCollection || content.bookEdition || ''} onChange={e => updateContentField('bookPublisherCollection', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
                         </div>
                       </div>
 
+                      {/* 2. Edition & Publication */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><PenTool className="w-4 h-4 text-slate-600"/> Édition & Références</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Maison d'Édition" value={content.bookPublisher || ''} onChange={e => updateContentField('bookPublisher', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Collection" value={content.bookPublisherCollection || ''} onChange={e => updateContentField('bookPublisherCollection', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><PenTool className="w-4 h-4 text-slate-600"/> 2. Édition & Publication</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">ISBN-13</label>
+                            <input type="text" placeholder="978-..." value={content.bookIsbn13 || ''} onChange={e => updateContentField('bookIsbn13', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">ISBN-10</label>
+                            <input type="text" placeholder="..." value={content.bookIsbn10 || ''} onChange={e => updateContentField('bookIsbn10', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">ISSN</label>
+                            <input type="text" placeholder="..." value={content.bookIssn || ''} onChange={e => updateContentField('bookIssn', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
+                          </div>
                         </div>
                         <div className="grid grid-cols-4 gap-4">
-                          <input type="text" placeholder="ISBN 13" value={content.bookIsbn13 || ''} onChange={e => updateContentField('bookIsbn13', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
-                          <input type="text" placeholder="ISBN 10" value={content.bookIsbn10 || ''} onChange={e => updateContentField('bookIsbn10', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
-                          <input type="text" placeholder="N° Édition" value={content.bookEditionNumber || ''} onChange={e => updateContentField('bookEditionNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
-                          <input type="text" placeholder="Année / Date" value={content.bookYear || ''} onChange={e => updateContentField('bookYear', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          <input type="text" placeholder="Lieu de parution" value={content.bookPlace || ''} onChange={e => updateContentField('bookPlace', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
-                          <input type="text" placeholder="Langue" value={content.bookLanguage || ''} onChange={e => updateContentField('bookLanguage', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
-                          <input type="text" placeholder="Langue Originale" value={content.bookOriginalLanguage || ''} onChange={e => updateContentField('bookOriginalLanguage', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Activity className="w-4 h-4 text-emerald-600"/> Caractéristiques Techniques</h4>
-                        <div className="grid grid-cols-3 gap-4">
-                          <select value={content.bookMediumType || 'paper'} onChange={e => updateContentField('bookMediumType', e.target.value as any)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-[10px] font-black uppercase">
-                            <option value="paper">Papier / Physique</option>
-                            <option value="digital">Numérique / Ebook</option>
-                            <option value="audio">Livre Audio</option>
-                          </select>
-                          <input type="text" placeholder="Nb. de Pages" value={content.bookPages || ''} onChange={e => updateContentField('bookPages', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Format (ex: A5, Poche)" value={content.bookFormat || ''} onChange={e => updateContentField('bookFormat', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Public Cible" value={content.bookTargetAudience || ''} onChange={e => updateContentField('bookTargetAudience', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Niveau de lecture" value={content.bookReadingLevel || ''} onChange={e => updateContentField('bookReadingLevel', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><DollarSign className="w-4 h-4 text-amber-600"/> Vente & Liens Externes</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="flex gap-2">
-                            <input type="text" placeholder="Prix" value={content.bookPrice || ''} onChange={e => updateContentField('bookPrice', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black text-emerald-600 flex-1" />
-                            <input type="text" placeholder="Devise" value={content.bookCurrency || 'FCFA'} onChange={e => updateContentField('bookCurrency', e.target.value)} className="w-20 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">N° Édition</label>
+                            <input type="text" placeholder="1" value={content.bookEditionNumber || ''} onChange={e => updateContentField('bookEditionNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
                           </div>
-                          <input type="text" placeholder="État du stock" value={content.bookStockStatus || ''} onChange={e => updateContentField('bookStockStatus', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Année</label>
+                            <input type="text" placeholder="2026" value={content.bookYear || ''} onChange={e => updateContentField('bookYear', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold" />
+                          </div>
+                          <div className="col-span-2 space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Date de parution</label>
+                            <input type="date" value={content.bookDate || ''} onChange={e => updateContentField('bookDate', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[9px] font-bold uppercase" />
+                          </div>
                         </div>
-                        <input type="url" placeholder="Lien d'achat Direct (Amazon, Fnac...)" value={content.bookBuyUrl || ''} onChange={e => updateContentField('bookBuyUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-blue-600" />
                         <div className="grid grid-cols-3 gap-4">
-                          <input type="url" placeholder="Lien Trailer Vidéo" value={content.bookTrailerUrl || ''} onChange={e => updateContentField('bookTrailerUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-[9px] font-bold" />
-                          <input type="url" placeholder="Lien Audio / Podcast" value={content.bookAudioUrl || ''} onChange={e => updateContentField('bookAudioUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-[9px] font-bold" />
-                          <input type="url" placeholder="Extrait (Lien PDF/Web)" value={content.bookExerpt || ''} onChange={e => updateContentField('bookExerpt', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-[9px] font-bold" />
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Lieu</label>
+                            <input type="text" placeholder="Ville, Pays" value={content.bookPlace || ''} onChange={e => updateContentField('bookPlace', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Langue</label>
+                            <input type="text" placeholder="Français" value={content.bookLanguage || ''} onChange={e => updateContentField('bookLanguage', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Langue Orig.</label>
+                            <input type="text" placeholder="Anglais" value={content.bookOriginalLanguage || ''} onChange={e => updateContentField('bookOriginalLanguage', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
                         </div>
                       </div>
 
+                      {/* 3. Characteristics */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><List className="w-4 h-4 text-slate-500"/> Contenu & Résumés</h4>
-                        <textarea placeholder="Résumé de l'ouvrage (Description courte)" value={content.bookSummary || ''} onChange={e => updateContentField('bookSummary', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={4} />
-                        <textarea placeholder="Table des matières..." value={content.bookTableOfContents || ''} onChange={e => updateContentField('bookTableOfContents', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={4} />
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Activity className="w-4 h-4 text-emerald-600"/> 3. Caractéristiques</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Genre</label>
+                            <input type="text" placeholder="Roman, Essai..." value={content.bookGenre || ''} onChange={e => updateContentField('bookGenre', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Catégorie</label>
+                            <input type="text" placeholder="Fiction, Droit..." value={content.bookCategory || ''} onChange={e => updateContentField('bookCategory', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Sous-cat.</label>
+                            <input type="text" placeholder="..." value={content.bookSubCategory || ''} onChange={e => updateContentField('bookSubCategory', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Public Cible</label>
+                            <input type="text" placeholder="Adulte, Jeunesse..." value={content.bookTargetAudience || ''} onChange={e => updateContentField('bookTargetAudience', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Niveau de lecture</label>
+                            <input type="text" placeholder="Intermédiaire..." value={content.bookReadingLevel || ''} onChange={e => updateContentField('bookReadingLevel', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Pages</label>
+                            <input type="text" placeholder="320" value={content.bookPages || ''} onChange={e => updateContentField('bookPages', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Format</label>
+                            <input type="text" placeholder="Poche, A5..." value={content.bookFormat || ''} onChange={e => updateContentField('bookFormat', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Type Couverture</label>
+                            <input type="text" placeholder="Souple, Rigide..." value={content.bookCoverType || ''} onChange={e => updateContentField('bookCoverType', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Dimensions</label>
+                            <input type="text" placeholder="15x21 cm" value={content.bookDimensions || ''} onChange={e => updateContentField('bookDimensions', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Poids (g)</label>
+                            <input type="text" placeholder="450g" value={content.bookWeight || ''} onChange={e => updateContentField('bookWeight', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Version / Support</label>
+                            <select value={content.bookMediumType || 'paper'} onChange={e => updateContentField('bookMediumType', e.target.value as any)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-[9px] font-black uppercase">
+                              <option value="paper">Papier</option>
+                              <option value="digital">Numérique</option>
+                              <option value="audio">Audio</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 4. Presentation */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><LayoutList className="w-4 h-4 text-slate-500"/> 4. Présentation</h4>
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Résumé (Court)</label>
+                            <textarea placeholder="Brève présentation..." value={content.bookSummary || ''} onChange={e => updateContentField('bookSummary', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Synopsis / Description Longue</label>
+                            <textarea placeholder="L'histoire ou le sujet en détail..." value={content.bookSynopsis || content.bookLongDescription || ''} onChange={e => updateContentField('bookSynopsis', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={4} />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Bio de l'Auteur</label>
+                            <textarea placeholder="À propos de l'auteur..." value={content.bookAuthorBio || ''} onChange={e => updateContentField('bookAuthorBio', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Table des Matières</label>
+                            <textarea placeholder="Sommaire..." value={content.bookTableOfContents || ''} onChange={e => updateContentField('bookTableOfContents', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Mots-clés (virgules)</label>
+                            <input type="text" placeholder="Aventure, Histoire..." value={content.bookKeywords?.join(', ') || ''} onChange={e => updateContentField('bookKeywords', e.target.value.split(',').map(s => s.trim()))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Thèmes (virgules)</label>
+                            <input type="text" placeholder="Famille, Guerre..." value={content.bookThemes?.join(', ') || ''} onChange={e => updateContentField('bookThemes', e.target.value.split(',').map(s => s.trim()))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-slate-400">Extrait Public (Lien ou Texte)</label>
+                          <textarea placeholder="Quelques lignes ou lien vers un PDF..." value={content.bookExerpt || ''} onChange={e => updateContentField('bookExerpt', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
+                        </div>
+                      </div>
+
+                      {/* 5. Sales */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><DollarSign className="w-4 h-4 text-amber-600"/> 5. Vente & Commandes</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Prix Public</label>
+                            <input type="text" placeholder="Prix" value={content.bookPrice || ''} onChange={e => updateContentField('bookPrice', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black text-emerald-600" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Prix Promo</label>
+                            <input type="text" placeholder="Promo" value={content.bookPromoPrice || ''} onChange={e => updateContentField('bookPromoPrice', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black text-rose-500" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Devise</label>
+                            <input type="text" placeholder="FCFA" value={content.bookCurrency || 'FCFA'} onChange={e => updateContentField('bookCurrency', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Disponibilité</label>
+                            <input type="text" placeholder="En stock, Sur commande..." value={content.bookStockStatus || ''} onChange={e => updateContentField('bookStockStatus', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Points de Vente</label>
+                            <input type="text" placeholder="Librairies..." value={content.bookSalePoints || ''} onChange={e => updateContentField('bookSalePoints', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Tél. Commande</label>
+                            <input type="tel" placeholder="+225..." value={content.bookOrderPhone || ''} onChange={e => updateContentField('bookOrderPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">WhatsApp</label>
+                            <input type="tel" placeholder="+225..." value={content.bookOrderWhatsapp || ''} onChange={e => updateContentField('bookOrderWhatsapp', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold border-emerald-200" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Email Commande</label>
+                            <input type="email" placeholder="sales@..." value={content.bookOrderEmail || ''} onChange={e => updateContentField('bookOrderEmail', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Lien Boutique en ligne</label>
+                            <input type="url" placeholder="https://..." value={content.bookBuyUrl || content.bookOnlineStoreUrl || ''} onChange={e => updateContentField('bookBuyUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-blue-600" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Lien E-book (Téléchargement)</label>
+                              <input type="url" placeholder="https://..." value={content.bookEbookUrl || content.bookDownloadUrl || ''} onChange={e => updateContentField('bookEbookUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Lien Livre Audio</label>
+                              <input type="url" placeholder="https://..." value={content.bookAudioUrl || ''} onChange={e => updateContentField('bookAudioUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 6. Medias */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><ImageIcon className="w-4 h-4 text-purple-600"/> 6. Médias & Promotion</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Lien Trailer Vidéo</label>
+                            <input type="url" placeholder="YouTube, Vimeo..." value={content.bookTrailerUrl || ''} onChange={e => updateContentField('bookTrailerUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Vidéo de Présentation</label>
+                            <input type="url" placeholder="Lien vidéo..." value={content.bookPresentationVideoUrl || ''} onChange={e => updateContentField('bookPresentationVideoUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Interview Auteur</label>
+                            <input type="url" placeholder="Lien interview..." value={content.bookInterviewUrl || ''} onChange={e => updateContentField('bookInterviewUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Dossier de Presse (PDF)</label>
+                            <input type="url" placeholder="Lien PDF..." value={content.bookPresentationPdfUrl || ''} onChange={e => updateContentField('bookPresentationPdfUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-slate-400">Lien Site Web Auteur</label>
+                          <input type="url" placeholder="https://..." value={content.bookAuthorWebsite || ''} onChange={e => updateContentField('bookAuthorWebsite', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold text-blue-600" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-slate-400">Lien Extrait Web (Alternative)</label>
+                          <input type="url" placeholder="Lien vers chapitre 1..." value={content.bookExerptUrl || ''} onChange={e => updateContentField('bookExerptUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                        </div>
                       </div>
                     </div>
                   )}

@@ -47,7 +47,8 @@ import {
   List,
   Truck,
   Activity,
-  Landmark
+  Landmark,
+  Smartphone
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
@@ -380,51 +381,231 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
       case 'BOOK':
         return (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl">
-              <div className="mx-auto w-44 h-64 rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-800 relative">
-                {content.photoUrl ? <img src={content.photoUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex flex-col items-center justify-center text-indigo-500"><BookOpen className="w-12 h-12 mb-3" /><span className="text-[10px] font-black uppercase tracking-widest">Couverture</span></div>}
-                {content.bookMediumType === 'audio' && <div className="absolute top-2 right-2 p-2 bg-slate-900/80 rounded-full"><Headphones className="w-4 h-4 text-indigo-400" /></div>}
-              </div>
-              <div className="space-y-2">
-                <h1 className="text-2xl font-black text-white uppercase">{content.bookTitle || ''}</h1>
-                {content.bookSubtitle && <p className="text-xs font-bold text-slate-500 uppercase">{content.bookSubtitle}</p>}
-                {content.bookAuthor && <p className="text-sm font-bold text-slate-400">Par <span className="text-indigo-400 uppercase">{content.bookAuthor}</span></p>}
-                {content.bookIllustrator && <p className="text-[9px] font-bold text-slate-500">Illustré par {content.bookIllustrator}</p>}
-                {content.bookPrice && <div className="inline-block px-4 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-sm font-black mt-2">{content.bookPrice} {content.bookCurrency || 'FCFA'}</div>}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {content.bookBuyUrl && <a href={content.bookBuyUrl} className="col-span-2 py-4 bg-indigo-600 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><ShoppingCart className="w-4 h-4" /> Acheter l'ouvrage</a>}
-                {content.bookTrailerUrl && <a href={content.bookTrailerUrl} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200"><Video className="w-5 h-5 text-indigo-400" /><span className="text-[8px] font-black uppercase">Trailer</span></a>}
-                {content.bookAudioUrl && <a href={content.bookAudioUrl} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200"><Headphones className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">Audio</span></a>}
-              </div>
-            </div>
-            {(content.bookSummary || content.bookTableOfContents) && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
-                {content.bookSummary && (
-                  <div className="space-y-3">
-                    <SectionHeader title="Résumé de l'œuvre" icon={FileText} />
-                    <p className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-line">{content.bookSummary}</p>
+          <div className="space-y-6 pb-20">
+            {/* --- HERO / COVER --- */}
+            <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-600" />
+
+              <div className="mx-auto w-48 h-72 rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-slate-800 relative group">
+                {content.photoUrl ? (
+                  <img src={content.photoUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={content.bookTitle} />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-indigo-500/30">
+                    <BookOpen className="w-16 h-16 mb-3" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Couverture</span>
                   </div>
                 )}
+                {content.bookMediumType === 'audio' && <div className="absolute top-3 right-3 p-2 bg-indigo-600 text-white rounded-full shadow-lg"><Headphones className="w-5 h-5" /></div>}
+                {content.bookMediumType === 'digital' && <div className="absolute top-3 right-3 p-2 bg-blue-600 text-white rounded-full shadow-lg"><Smartphone className="w-5 h-5" /></div>}
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  {content.bookGenre && <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-black uppercase tracking-widest rounded-full">{content.bookGenre}</span>}
+                  <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none pt-2">{content.bookTitle || item.title}</h1>
+                  {content.bookSubtitle && <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{content.bookSubtitle}</p>}
+                </div>
+
+                <div className="space-y-1">
+                  {content.bookAuthor && <p className="text-base font-bold text-slate-300">Par <span className="text-indigo-400 uppercase font-black">{content.bookAuthor}</span></p>}
+                  {content.bookCoAuthor && <p className="text-[10px] font-bold text-slate-500">Avec {content.bookCoAuthor}</p>}
+                </div>
+
+                {(content.bookPrice || content.bookPromoPrice) && (
+                  <div className="flex flex-col items-center gap-1 pt-2">
+                    <span className="text-3xl font-black text-emerald-400 tracking-tighter">
+                      {content.bookPromoPrice || content.bookPrice}
+                      <span className="text-sm font-bold opacity-60 ml-1">{content.bookCurrency || 'FCFA'}</span>
+                    </span>
+                    {content.bookPromoPrice && <span className="text-xs text-slate-500 line-through font-bold">{content.bookPrice} {content.bookCurrency}</span>}
+                    {content.bookStockStatus && <span className="text-[8px] font-black uppercase text-slate-500 tracking-widest mt-1">{content.bookStockStatus}</span>}
+                  </div>
+                )}
+              </div>
+
+              {/* ACTIONS QUICK ACCESS */}
+              <div className="grid grid-cols-2 gap-3 pt-4">
+                {(content.bookBuyUrl || content.bookOnlineStoreUrl) && (
+                  <a href={content.bookBuyUrl || content.bookOnlineStoreUrl} className="col-span-2 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95">
+                    <ShoppingCart className="w-4 h-4" /> Acheter en ligne
+                  </a>
+                )}
+
+                {content.bookOrderWhatsapp && (
+                  <a href={`https://wa.me/${content.bookOrderWhatsapp.replace(/[^\d]/g,'')}?text=Bonjour, je souhaite commander le livre : ${content.bookTitle}`} className="py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-900/20">
+                    <MessageSquare className="w-4 h-4" /> Commander
+                  </a>
+                )}
+
+                {content.bookOrderPhone && (
+                  <a href={`tel:${content.bookOrderPhone}`} className="py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 border border-slate-700">
+                    <Phone className="w-4 h-4 text-emerald-400" /> Appeler
+                  </a>
+                )}
+
+                {content.bookExerptUrl && (
+                  <a href={content.bookExerptUrl} className="py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 border border-slate-700">
+                    <BookOpen className="w-4 h-4 text-indigo-400" /> Lire Extrait
+                  </a>
+                )}
+
+                {(content.bookDownloadUrl || content.bookPresentationPdfUrl) && (
+                  <a href={content.bookDownloadUrl || content.bookPresentationPdfUrl} download className="py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 border border-slate-700">
+                    <Download className="w-4 h-4 text-blue-400" /> Télécharger
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* --- PRESENTATION SECTIONS --- */}
+            {(content.bookSummary || content.bookSynopsis || content.bookTableOfContents) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-8">
+                {content.bookSummary && (
+                  <div className="space-y-3">
+                    <SectionHeader title="Résumé de l'ouvrage" icon={Info} colorClass="text-indigo-500" />
+                    <p className="text-xs text-slate-300 leading-relaxed font-medium italic">« {content.bookSummary} »</p>
+                  </div>
+                )}
+
+                {content.bookSynopsis && (
+                  <div className="space-y-3">
+                    <SectionHeader title="Synopsis & Détails" icon={FileText} colorClass="text-slate-400" />
+                    <p className="text-xs text-slate-400 leading-relaxed font-medium whitespace-pre-line">{content.bookSynopsis}</p>
+                  </div>
+                )}
+
                 {content.bookTableOfContents && (
                   <div className="space-y-3">
-                    <SectionHeader title="Table des matières" icon={List} />
-                    <p className="text-[10px] text-slate-500 font-bold whitespace-pre-line">{content.bookTableOfContents}</p>
+                    <SectionHeader title="Sommaire" icon={List} colorClass="text-slate-500" />
+                    <p className="text-[10px] text-slate-500 font-bold whitespace-pre-line leading-relaxed">{content.bookTableOfContents}</p>
                   </div>
                 )}
               </div>
             )}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 grid grid-cols-2 gap-3">
-              <InfoRow label="ISBN 13" value={content.bookIsbn13} />
-              <InfoRow label="Maison d'Édition" value={content.bookPublisher} />
-              <InfoRow label="Édition" value={content.bookEditionNumber} />
-              <InfoRow label="Langue" value={content.bookLanguage} />
-              <InfoRow label="Année" value={content.bookYear} />
-              <InfoRow label="Nb. Pages" value={content.bookPages} />
-              <InfoRow label="Format" value={content.bookFormat} />
-              <InfoRow label="Public" value={content.bookTargetAudience} />
+
+            {/* --- AUTHOR BIO --- */}
+            {content.bookAuthorBio && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="À propos de l'auteur" icon={User} colorClass="text-blue-500" />
+                <div className="flex gap-4 items-start">
+                   <div className="flex-1 space-y-3">
+                      <p className="text-xs text-slate-400 leading-relaxed font-medium">{content.bookAuthorBio}</p>
+                      {content.bookAuthorWebsite && (
+                        <a href={content.bookAuthorWebsite} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 text-blue-400 rounded-xl text-[10px] font-black uppercase border border-blue-600/20">
+                          <Globe className="w-3 h-3" /> Voir le site de l'auteur
+                        </a>
+                      )}
+                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* --- SPECIFICATIONS / EDITION --- */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+              <SectionHeader title="Fiche Technique" icon={Activity} colorClass="text-emerald-500" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <InfoRow label="ISBN-13" value={content.bookIsbn13} />
+                  <InfoRow label="Éditeur" value={content.bookPublisher} />
+                  <InfoRow label="Année" value={content.bookYear} />
+                  <InfoRow label="Langue" value={content.bookLanguage} />
+                </div>
+                <div className="space-y-4">
+                  <InfoRow label="Format" value={content.bookFormat} />
+                  <InfoRow label="Pages" value={content.bookPages} />
+                  <InfoRow label="Poids" value={content.bookWeight} />
+                  <InfoRow label="Dimensions" value={content.bookDimensions} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 pt-2">
+                 <div className="p-3 bg-slate-950/50 border border-slate-800 rounded-2xl">
+                    <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Mots-clés & Thèmes</span>
+                    <div className="flex flex-wrap gap-2">
+                      {[...(content.bookKeywords || []), ...(content.bookThemes || [])].filter(Boolean).map((tag, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-slate-800 text-[8px] font-bold text-slate-400 uppercase rounded-md border border-slate-700">#{tag}</span>
+                      ))}
+                    </div>
+                 </div>
+              </div>
             </div>
+
+            {/* --- MEDIA SECTION --- */}
+            {(content.bookTrailerUrl || content.bookPresentationVideoUrl || content.bookInterviewUrl || content.bookGallery) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Médias & Interviews" icon={Video} colorClass="text-purple-500" />
+
+                <div className="space-y-4">
+                  {content.bookTrailerUrl && (
+                    <a href={content.bookTrailerUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 bg-slate-950 border border-slate-800 rounded-2xl hover:border-purple-500/50 transition-colors group">
+                      <div className="w-12 h-12 bg-purple-600/10 rounded-xl flex items-center justify-center group-hover:bg-purple-600/20 transition-colors">
+                        <Video className="w-6 h-6 text-purple-500" />
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-[10px] font-black uppercase text-white block">Trailer Officiel</span>
+                        <span className="text-[8px] font-bold text-slate-500 uppercase">Voir sur YouTube / Vimeo</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-slate-700" />
+                    </a>
+                  )}
+
+                  {content.bookPresentationVideoUrl && (
+                    <a href={content.bookPresentationVideoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 bg-slate-950 border border-slate-800 rounded-2xl hover:border-blue-500/50 transition-colors group">
+                      <div className="w-12 h-12 bg-blue-600/10 rounded-xl flex items-center justify-center group-hover:bg-blue-600/20 transition-colors">
+                        <Video className="w-6 h-6 text-blue-500" />
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-[10px] font-black uppercase text-white block">Présentation de l'ouvrage</span>
+                        <span className="text-[8px] font-bold text-slate-500 uppercase">Regarder la vidéo</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-slate-700" />
+                    </a>
+                  )}
+
+                  {content.bookInterviewUrl && (
+                    <a href={content.bookInterviewUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 bg-slate-950 border border-slate-800 rounded-2xl hover:border-emerald-500/50 transition-colors group">
+                      <div className="w-12 h-12 bg-emerald-600/10 rounded-xl flex items-center justify-center group-hover:bg-emerald-600/20 transition-colors">
+                        <Headphones className="w-6 h-6 text-emerald-500" />
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-[10px] font-black uppercase text-white block">Interview Auteur</span>
+                        <span className="text-[8px] font-bold text-slate-500 uppercase">Écouter ou Regarder</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-slate-700" />
+                    </a>
+                  )}
+                </div>
+
+                {content.bookGallery && content.bookGallery.length > 0 && (
+                  <div className="pt-4 space-y-3">
+                    <span className="text-[8px] font-black uppercase text-slate-600 block tracking-widest">Galerie d'images</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {content.bookGallery.map((img, idx) => (
+                        <div key={idx} className="aspect-square rounded-xl overflow-hidden bg-slate-800 border border-slate-700">
+                          <img src={img} className="w-full h-full object-cover" alt={`Gallery ${idx}`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* --- CONTACT / SALES SUPPORT --- */}
+            {(content.bookOrderEmail || content.bookSalePoints) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Support & Vente" icon={ShoppingCart} colorClass="text-emerald-500" />
+                <div className="space-y-3">
+                   {content.bookOrderEmail && <InfoRow label="Email de commande" value={content.bookOrderEmail} icon={Mail} href={`mailto:${content.bookOrderEmail}`} />}
+                   {content.bookSalePoints && (
+                     <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                        <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Points de vente physiques</span>
+                        <p className="text-[10px] font-bold text-slate-400 leading-relaxed">{content.bookSalePoints}</p>
+                     </div>
+                   )}
+                </div>
+              </div>
+            )}
           </div>
         );
 

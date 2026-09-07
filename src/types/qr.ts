@@ -221,8 +221,18 @@ export interface QRContent {
   bookBuyUrl?: string;
   bookEbookUrl?: string;
   bookAudioUrl?: string;
+  bookDownloadUrl?: string;
+  bookExerptUrl?: string;
+  bookAuthorWebsite?: string;
   bookTrailerUrl?: string;
+  bookPresentationVideoUrl?: string;
   bookInterviewUrl?: string;
+  bookPresentationPdfUrl?: string;
+  bookGallery?: string[];
+  bookOrderPhone?: string;
+  bookOrderWhatsapp?: string;
+  bookOrderEmail?: string;
+  bookOnlineStoreUrl?: string;
 
   // --- EVENT SPECIFIC ---
   eventTitle?: string;

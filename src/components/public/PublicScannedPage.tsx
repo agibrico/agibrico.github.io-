@@ -1258,58 +1258,241 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
         );
 
       case 'COMPANY':
+        const companyName = content.company || fullName;
+        const managerFullName = content.companyManagerName || `${content.companyManagerFirstName || ''} ${content.companyManagerLastName || ''}`.trim();
+        const isAdminHidden = content.privacy?.hideCompanyAdminInfo;
+
         return (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
-               <div className="absolute top-0 left-0 w-full h-1 bg-blue-700" />
-               <div className="w-28 h-28 rounded-3xl bg-white p-2 mx-auto border-4 border-slate-800 shadow-xl flex items-center justify-center overflow-hidden">
-                 {registeredLogo && <img src={registeredLogo} className="w-full h-full object-contain" />}
-               </div>
-               <div className="space-y-2">
-                 <h1 className="text-2xl font-black text-white uppercase tracking-tight">{content.company || fullName}</h1>
-                 {content.companyLegalForm && <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">{content.companyLegalForm}</p>}
-                 {content.slogan && <p className="text-xs font-bold text-slate-400 italic mt-2">« {content.slogan} »</p>}
-               </div>
-               <div className="grid grid-cols-2 gap-3">
-                 {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><Phone className="w-4 h-4 text-emerald-400" /> Appeler</a>}
-                 {content.websiteUrl && <a href={content.websiteUrl} className="py-3 bg-slate-800 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><Globe className="w-4 h-4 text-indigo-400" /> Visiter</a>}
-               </div>
+          <div className="space-y-6 pb-20">
+            {/* HERO / IDENTIFICATION */}
+            <div className="bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl relative group">
+              {content.companyCoverUrl ? (
+                <div className="w-full h-48 relative">
+                  <img src={content.companyCoverUrl} className="w-full h-full object-cover" alt={companyName} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+                </div>
+              ) : (
+                <div className="w-full h-24 bg-gradient-to-br from-blue-700 to-indigo-800" />
+              )}
+
+              <div className="p-8 text-center space-y-4 relative -mt-16">
+                <div className="w-28 h-28 rounded-3xl bg-white p-2 mx-auto shadow-2xl border-4 border-slate-800 flex items-center justify-center overflow-hidden">
+                  {registeredLogo ? <img src={registeredLogo} className="w-full h-full object-contain" alt="Logo" /> : <Building2 className="w-12 h-12 text-slate-200" />}
+                </div>
+
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-black text-white uppercase tracking-tight leading-none">{companyName}</h1>
+                  {(content.companySigle || content.acronym) && (
+                    <p className="text-xs font-black text-blue-500 uppercase tracking-[0.3em]">
+                      {content.companySigle || content.acronym}
+                    </p>
+                  )}
+                  {content.companyLegalForm && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{content.companyLegalForm} {content.companyCapital ? `• Capital: ${content.companyCapital}` : ''}</p>}
+                  {content.slogan && <p className="text-[10px] font-bold text-slate-400 italic mt-2">« {content.slogan} »</p>}
+                </div>
+
+                {/* QUICK ACTIONS */}
+                <div className="grid grid-cols-4 gap-3 pt-4">
+                  {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Phone className="w-4 h-4 text-emerald-400" /><span className="text-[7px] font-black uppercase">Appel</span></a>}
+                  {content.whatsappNumber && <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><MessageSquare className="w-4 h-4 text-emerald-400" /><span className="text-[7px] font-black uppercase">WhatsApp</span></a>}
+                  {content.email && <a href={`mailto:${content.email}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Mail className="w-4 h-4 text-blue-400" /><span className="text-[7px] font-black uppercase">Email</span></a>}
+                  {content.websiteUrl && <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Globe className="w-4 h-4 text-indigo-400" /><span className="text-[7px] font-black uppercase">Site</span></a>}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {content.companyCatalogueUrl && (
+                    <a href={content.companyCatalogueUrl} target="_blank" rel="noopener noreferrer" className="py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] rounded-xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95">
+                      <ShoppingCart className="w-3.5 h-3.5" /> Catalogue
+                    </a>
+                  )}
+                  {((content.latitude && content.longitude) || content.address) && (
+                    <a
+                      href={content.latitude && content.longitude ? `https://www.google.com/maps/dir/?api=1&destination=${content.latitude},${content.longitude}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="py-3.5 bg-white text-slate-950 font-black text-[10px] rounded-xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"
+                    >
+                      <Navigation className="w-3.5 h-3.5" /> Itinéraire
+                    </a>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6 shadow-xl">
-              <SectionHeader title="Profil Institutionnel" icon={Building2} />
-              <div className="grid grid-cols-2 gap-3">
-                <InfoRow label="RCCM" value={content.companyRccm} />
-                <InfoRow label="ID Fiscal / IFU" value={content.companyTaxId} />
-                <InfoRow label="Dirigeant / Gérant" value={content.companyManagerName} icon={User} />
-                {content.companyManagerPhone && <InfoRow label="Tél. Direct" value={content.companyManagerPhone} icon={Phone} href={`tel:${content.companyManagerPhone}`} />}
-                <InfoRow label="Activité Principale" value={content.companyMainActivity} icon={Activity} />
-                <InfoRow label="Capital Social" value={content.companyCapital} icon={Landmark} />
-              </div>
-              <div className="space-y-4 pt-2">
-                {content.companyMission && (
-                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
-                    <span className="text-[8px] font-black uppercase text-slate-500 block mb-1 tracking-widest">Mission</span>
-                    <p className="text-xs font-bold text-slate-300 leading-relaxed">{content.companyMission}</p>
-                  </div>
-                )}
-                {content.companyVision && (
-                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
-                    <span className="text-[8px] font-black uppercase text-slate-500 block mb-1 tracking-widest">Vision</span>
-                    <p className="text-xs font-bold text-indigo-300 leading-relaxed">{content.companyVision}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {(content.companyPresentationPdfUrl || content.companyCatalogueUrl || content.companyPortfolioUrl) && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-3">
-                <SectionHeader title="Ressources & Médias" icon={FileText} />
-                {content.companyPresentationPdfUrl && <InfoRow label="Plaquette Institutionnelle" value="Consulter le PDF" icon={FileCheck2} href={content.companyPresentationPdfUrl} />}
-                {content.companyCatalogueUrl && <InfoRow label="Catalogue Produits" value="Voir le catalogue" icon={ShoppingCart} href={content.companyCatalogueUrl} />}
-                {content.companyPortfolioUrl && <InfoRow label="Portfolio / Réalisations" value="Découvrir" icon={Layers} href={content.companyPortfolioUrl} />}
+            {/* ADMINISTRATIVE INFO */}
+            {!isAdminHidden && (content.companyRccm || content.companyTaxId || content.companyFiscalId || content.companyCnpsId || content.companyAgreement || content.companyLicense || content.companyAuthNumber) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4 shadow-xl">
+                <SectionHeader title="Informations Administratives" icon={Shield} colorClass="text-rose-500" />
+                <div className="grid grid-cols-2 gap-3">
+                  <InfoRow label="RCCM" value={content.companyRccm} />
+                  <InfoRow label="ID Fiscal (IFU)" value={content.companyTaxId} />
+                  <InfoRow label="N° Fiscal (NIF)" value={content.companyFiscalId} />
+                  <InfoRow label="N° CNPS" value={content.companyCnpsId} />
+                  <InfoRow label="Agrément" value={content.companyAgreement} />
+                  <InfoRow label="Licence" value={content.companyLicense} />
+                  <InfoRow label="N° Autorisation" value={content.companyAuthNumber} />
+                </div>
               </div>
             )}
+
+            {/* ACTIVITY */}
+            {(content.companySector || content.companyDomain || content.companyMainActivity || content.companySecondaryActivities) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Domaine d'Activité" icon={Activity} colorClass="text-emerald-500" />
+                <div className="grid grid-cols-2 gap-3">
+                  <InfoRow label="Secteur" value={content.companySector || content.industry} />
+                  <InfoRow label="Domaine" value={content.companyDomain} />
+                </div>
+                {content.companyMainActivity && <InfoRow label="Activité Principale" value={content.companyMainActivity} />}
+                {content.companySecondaryActivities && content.companySecondaryActivities.length > 0 && (
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <span className="text-[8px] font-black uppercase text-slate-500 block mb-2 tracking-widest">Autres Activités</span>
+                    <div className="flex flex-wrap gap-2">
+                      {content.companySecondaryActivities.map(a => <span key={a} className="px-2 py-1 bg-slate-800 text-[9px] font-bold text-slate-300 rounded-lg border border-slate-700">{a}</span>)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PRESENTATION */}
+            {(content.companyMission || content.companyVision || content.companyValues || content.servicesList || content.companyBrands || content.companyPartners || content.companyCertifications) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Vision & Engagement" icon={Quote} colorClass="text-indigo-500" />
+                <div className="space-y-4">
+                  {content.companyMission && (
+                    <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                      <span className="text-[8px] font-black uppercase text-slate-500 block mb-1 tracking-widest">Mission</span>
+                      <p className="text-xs font-bold text-slate-300 leading-relaxed italic">« {content.companyMission} »</p>
+                    </div>
+                  )}
+                  {content.companyVision && (
+                    <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                      <span className="text-[8px] font-black uppercase text-slate-500 block mb-1 tracking-widest">Vision</span>
+                      <p className="text-xs font-bold text-indigo-300 leading-relaxed">{content.companyVision}</p>
+                    </div>
+                  )}
+                  {content.companyValues && (
+                    <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                      <span className="text-[8px] font-black uppercase text-slate-500 block mb-1 tracking-widest">Nos Valeurs</span>
+                      <p className="text-xs font-bold text-slate-400">{content.companyValues}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  {content.servicesList && content.servicesList.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Produits & Services</span>
+                      <div className="flex flex-wrap gap-2">
+                        {content.servicesList.map(s => <span key={s} className="px-2 py-1 bg-slate-800 text-[9px] font-black uppercase text-slate-300 rounded-lg border border-slate-700">{s}</span>)}
+                      </div>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    {content.companyBrands && content.companyBrands.length > 0 && (
+                      <div className="space-y-2">
+                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Marques</span>
+                        <p className="text-[10px] font-bold text-slate-400">{content.companyBrands.join(', ')}</p>
+                      </div>
+                    )}
+                    {content.companyPartners && content.companyPartners.length > 0 && (
+                      <div className="space-y-2">
+                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Partenaires</span>
+                        <p className="text-[10px] font-bold text-slate-400">{content.companyPartners.join(', ')}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MANAGER */}
+            {(managerFullName || content.companyManagerFunction || content.companyManagerPhone || content.companyManagerEmail) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Direction / Responsable" icon={User} colorClass="text-purple-500" />
+                <div className="p-5 bg-slate-950 rounded-2xl border border-slate-800 flex items-center gap-4">
+                   <div className="w-12 h-12 bg-purple-600/10 rounded-xl flex items-center justify-center border border-purple-500/20"><User className="w-6 h-6 text-purple-500" /></div>
+                   <div className="flex-1">
+                      <h3 className="text-sm font-black text-white uppercase">{managerFullName}</h3>
+                      <p className="text-[9px] font-black text-purple-500 uppercase tracking-widest">{content.companyManagerFunction || content.jobTitle}</p>
+                   </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                   {content.companyManagerPhone && <a href={`tel:${content.companyManagerPhone}`} className="p-3 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center gap-1"><Phone className="w-4 h-4 text-emerald-400" /><span className="text-[7px] font-black uppercase">Appel</span></a>}
+                   {content.companyManagerWhatsapp && <a href={`https://wa.me/${content.companyManagerWhatsapp.replace(/[^\d]/g,'')}`} className="p-3 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center gap-1"><MessageSquare className="w-4 h-4 text-emerald-400" /><span className="text-[7px] font-black uppercase">WhatsApp</span></a>}
+                   {content.companyManagerEmail && <a href={`mailto:${content.companyManagerEmail}`} className="p-3 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center gap-1"><Mail className="w-4 h-4 text-blue-400" /><span className="text-[7px] font-black uppercase">Email</span></a>}
+                </div>
+              </div>
+            )}
+
+            {/* COORDINATES & SIEGE */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+              <SectionHeader title="Coordonnées & Siège" icon={MapPin} colorClass="text-rose-500" />
+              <div className="space-y-3">
+                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Siège Social</span>
+                      <p className="text-xs font-black text-white uppercase">{content.companyHeadquarters}</p>
+                    </div>
+                    {content.companyAgency && (
+                      <div className="text-right">
+                        <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Agence</span>
+                        <p className="text-[10px] font-bold text-slate-400">{content.companyAgency}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="h-px bg-slate-800 w-full my-2" />
+                  <p className="text-xs font-bold text-slate-300">{content.address}</p>
+                  <p className="text-[10px] font-bold text-slate-500">{content.commune}, {content.city}, {content.country}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* SOCIAL NETWORKS */}
+            {content.socialLinks && content.socialLinks.length > 0 && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Suivez-nous" icon={Share2} />
+                <div className="grid grid-cols-4 gap-3">
+                  {content.socialLinks.map(link => (
+                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group">
+                      {getSocialIcon(link.platform)}
+                      <span className="text-[7px] font-black uppercase text-slate-500 group-hover:text-slate-200 truncate w-full text-center">{link.platform}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* DOCUMENTS & CATALOGUES */}
+            {(content.companyPresentationPdfUrl || content.companyCatalogueUrl || content.companyBrochureUrl || content.companyPlaquetteUrl || content.companyCertPublicUrl || content.companyRatesUrl || content.companyPortfolioUrl) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-3">
+                <SectionHeader title="Ressources & Catalogues" icon={FileText} colorClass="text-slate-400" />
+                {content.companyPresentationPdfUrl && <a href={content.companyPresentationPdfUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between group hover:border-blue-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Présentation PDF</span><Download className="w-4 h-4 text-blue-500" /></a>}
+                {content.companyCatalogueUrl && <a href={content.companyCatalogueUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between group hover:border-emerald-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Catalogue Produits</span><ShoppingCart className="w-4 h-4 text-emerald-500" /></a>}
+                {content.companyPlaquetteUrl && <a href={content.companyPlaquetteUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between group hover:border-indigo-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Plaquette</span><FileCheck2 className="w-4 h-4 text-indigo-500" /></a>}
+                {content.companyCertPublicUrl && <a href={content.companyCertPublicUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between group hover:border-amber-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Certificat Public</span><Award className="w-4 h-4 text-amber-500" /></a>}
+                {content.companyRatesUrl && <a href={content.companyRatesUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between group hover:border-rose-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Grille Tarifaire</span><Download className="w-4 h-4 text-rose-500" /></a>}
+                {content.companyPortfolioUrl && <a href={content.companyPortfolioUrl} className="p-4 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-between group hover:border-purple-500/50 transition-colors"><span className="text-[10px] font-black uppercase text-white">Portfolio / Réalisations</span><Layers className="w-4 h-4 text-purple-500" /></a>}
+              </div>
+            )}
+
+            {/* SHARE ACTION */}
+            <div className="pt-4">
+               <button
+                 onClick={() => {
+                   if (navigator.share) {
+                     navigator.share({ title: companyName, text: content.companyMission, url: window.location.href });
+                   } else {
+                     navigator.clipboard.writeText(window.location.href);
+                     alert("Lien copié !");
+                   }
+                 }}
+                 className="w-full py-4 bg-slate-900 border border-slate-800 text-slate-400 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors"
+                >
+                 <Share2 className="w-4 h-4" /> Partager la fiche entreprise
+               </button>
+            </div>
           </div>
         );
 

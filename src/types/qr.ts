@@ -345,11 +345,33 @@ export interface QRContent {
   companyPartners?: string[];
   companyCertifications?: string[];
   companyManagerName?: string;
+  companyManagerFirstName?: string;
+  companyManagerLastName?: string;
+  companyManagerFunction?: string;
   companyManagerPhone?: string;
+  companyManagerWhatsapp?: string;
   companyManagerEmail?: string;
   companyPresentationPdfUrl?: string;
   companyCatalogueUrl?: string;
   companyPortfolioUrl?: string;
+  companyPlaquetteUrl?: string;
+  companyCertPublicUrl?: string;
+  companyRatesUrl?: string;
+  companyBrochureUrl?: string;
+
+  // Additional Company Fields
+  companyCoverUrl?: string;
+  companySigle?: string;
+  companyCnpsId?: string;
+  companyAgreement?: string;
+  companyLicense?: string;
+  companyAuthNumber?: string;
+  companySector?: string;
+  companyDomain?: string;
+  companySecondaryActivities?: string[];
+  companyBrands?: string[];
+  companyHeadquarters?: string;
+  companyAgency?: string;
 
   // --- SOCIAL / BIO SPECIFIC ---
   socialDisplayName?: string;
@@ -444,6 +466,7 @@ export interface QRContent {
     hideAddress?: boolean;
     hideSecondaryPhone?: boolean;
     hideTaxInfo?: boolean;
+    hideCompanyAdminInfo?: boolean;
     requirePassword?: boolean;
     accessPassword?: string;
     isPublic?: boolean;

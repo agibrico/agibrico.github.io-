@@ -118,6 +118,42 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250664416515', displayOrder: 1 }],
     createdAt: '2026-08-13T11:00:00.000Z',
     updatedAt: '2026-08-24T11:00:00.000Z'
+  },
+  {
+    id: 'client_005',
+    clientNumber: 'CLT-2026-0005',
+    firstName: 'Christophe',
+    lastName: 'FODJO',
+    fullName: 'Christophe FODJO',
+    company: 'FODJO Consulting',
+    jobTitle: 'Consultant',
+    industry: 'Business Services',
+    primaryPhone: '+225 00 00 00 00 00',
+    email: 'c.fodjo@example.com',
+    city: 'Abidjan',
+    country: 'Côte d\'Ivoire',
+    createdAt: '2026-09-07T18:00:00.000Z',
+    updatedAt: '2026-09-07T18:00:00.000Z'
+  },
+  {
+    id: 'client_006',
+    clientNumber: 'CLT-2026-0006',
+    firstName: 'Eric Thierry',
+    lastName: 'OHOUEU',
+    fullName: 'Eric Thierry OHOUEU',
+    company: 'MINISTÈRE DE L\'EMPLOI, DE LA PROTECTION SOCIALE ET DE LA FORMATION PROFESSIONNELLE',
+    jobTitle: 'Administrateur du Travail et des Lois Sociales',
+    industry: 'Administration Publique',
+    primaryPhone: '+225 05 05 09 36 76',
+    email: 'eric.ohoueu@travail.gouv.ci',
+    city: 'Abidjan',
+    country: 'Côte d\'Ivoire',
+    socialLinks: [
+      { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505093676', displayOrder: 1 },
+      { id: 's2', platform: 'phone', url: 'tel:+2250101202909', displayOrder: 2 }
+    ],
+    createdAt: '2026-09-07T18:00:00.000Z',
+    updatedAt: '2026-09-07T18:00:00.000Z'
   }
 ];
 
@@ -337,6 +373,76 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       privacy: { isPublic: true }
     },
     styling: { fgColor: '#475569', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
+  },
+  {
+    id: 'qr_demo_09',
+    cardNumber: 'CARD-2026-0009',
+    publicId: 'EV6MKMQU',
+    clientId: 'client_005',
+    title: 'Christophe FODJO — Business Card',
+    type: 'BUSINESS_CARD',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-09-07T18:00:00.000Z',
+    updatedAt: '2026-09-07T18:00:00.000Z',
+    scanCount: 0,
+    content: {
+      fullName: 'Christophe FODJO',
+      jobTitle: 'Consultant',
+      company: 'FODJO Consulting',
+      primaryPhone: '+225 00 00 00 00 00',
+      email: 'c.fodjo@example.com',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#0f172a',
+      bgColor: '#ffffff',
+      moduleStyle: 'rounded',
+      eyeStyle: 'rounded',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      cardBackgroundTheme: 'matte_dark'
+    }
+  },
+  {
+    id: 'qr_demo_10',
+    cardNumber: 'CARD-2026-0010',
+    publicId: 'ERIC2026',
+    clientId: 'client_006',
+    title: 'Eric Thierry OHOUEU — Administrateur du Travail',
+    type: 'BUSINESS_CARD',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-09-07T18:00:00.000Z',
+    updatedAt: '2026-09-07T18:00:00.000Z',
+    scanCount: 0,
+    content: {
+      fullName: 'Eric Thierry OHOUEU',
+      jobTitle: 'Administrateur du Travail et des Lois Sociales',
+      company: 'MINISTÈRE DE L\'EMPLOI, DE LA PROTECTION SOCIALE ET DE LA FORMATION PROFESSIONNELLE',
+      primaryPhone: '+225 05 05 09 36 76',
+      email: 'eric.ohoueu@travail.gouv.ci',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      socialLinks: [
+        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505093676', displayOrder: 1 },
+        { id: 's2', platform: 'phone', url: 'tel:+2250101202909', displayOrder: 2 }
+      ],
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#1e293b',
+      bgColor: '#ffffff',
+      moduleStyle: 'rounded',
+      eyeStyle: 'rounded',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      cardBackgroundTheme: 'navy_prestige'
+    }
   }
 ];
 

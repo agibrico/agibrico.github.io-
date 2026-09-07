@@ -6,7 +6,7 @@ import { apiServerPlugin } from './src/server/apiPlugin';
 
 export default defineConfig(() => {
   return {
-    base: '/agibrico.github.io-/',
+    base: '',
     plugins: [react(), tailwindcss(), apiServerPlugin()],
     resolve: {
       alias: {

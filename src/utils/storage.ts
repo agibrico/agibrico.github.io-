@@ -53,51 +53,71 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     firstName: 'Gilles Brice',
     lastName: 'ATSÉ',
     fullName: 'Gilles Brice ATSÉ',
-    company: 'AGB',
-    commercialName: 'AGB Digital Engineering',
+    company: 'AGB Digital Engineering',
     jobTitle: 'Concepteur d\'applications mobiles & Web',
-    industry: 'Technologies & Ingénierie Logicielle',
-    photoUrl: '',
+    industry: 'Technologies',
     logoUrl: AGB_ENGINEERING_LOGO,
     primaryPhone: '+225 01 04 00 00 00',
-    secondaryPhone: '+225 07 97 00 00 00',
-    whatsappNumber: '+225 01 04 00 00 00',
-    workPhone: '+225 27 22 00 00 00',
     email: 'atsegillesbrice@gmail.com',
-    workEmail: 'contact@agb-solutions.ci',
-    websiteUrl: 'https://agb-solutions.ci',
-    address: 'Cocody Riviera 3',
-    commune: 'Cocody',
-    neighborhood: 'Riviera Bonoumin',
     city: 'Abidjan',
     country: 'Côte d\'Ivoire',
-    locationLink: 'https://maps.google.com/?q=5.3599,-3.9870',
-    slogan: 'L\'innovation technologique et le développement sur mesure au service de vos projets',
-    bio: 'Conception et ingénierie d\'applications mobiles iOS & Android, architectures Web performantes, logiciels de gestion d\'entreprise et solutions SaaS scalables.',
-    servicesList: [
-      'Applications mobiles (iOS & Android)',
-      'Applications Web & SaaS sur mesure',
-      'Logiciels de gestion ERP & CRM',
-      'Cartes de visite connectées vCard',
-      'Intégration d\'API & Systèmes Cloud'
-    ],
-    productsList: [
-      'Pack Carte Connectée Pro AGB',
-      'Audit & Architecture Applicative'
-    ],
-    businessTaxId: 'CC-2409817-A',
-    businessRegisterNumber: 'CI-ABJ-2024-B-12849',
-    socialLinks: [
-      { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250104000000', displayOrder: 1 },
-      { id: 's2', platform: 'linkedin', url: 'https://linkedin.com/in/gilles-brice-atse', displayOrder: 2 },
-      { id: 's3', platform: 'github', url: 'https://github.com/atsegillesbrice', displayOrder: 3 },
-      { id: 's4', platform: 'website', url: 'https://agb-solutions.ci', displayOrder: 4 },
-      { id: 's5', platform: 'facebook', url: 'https://facebook.com', displayOrder: 5 }
-    ],
-    internalNotes: 'Client VIP et Fondateur. Carte imprimée sur support PVC Noir Carbone Mat 85x55mm.',
-    associatedCardIds: ['qr_demo_01'],
+    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250104000000', displayOrder: 1 }],
     createdAt: '2026-08-10T08:00:00.000Z',
     updatedAt: '2026-08-21T08:00:00.000Z'
+  },
+  {
+    id: 'client_002',
+    clientNumber: 'CLT-2026-0002',
+    firstName: 'Sarah',
+    lastName: 'KOUASSI',
+    fullName: 'Sarah KOUASSI',
+    company: 'ICG Africa',
+    jobTitle: 'Consultante en Stratégie & Finance',
+    industry: 'Finance',
+    logoUrl: ICG_AFRICA_LOGO,
+    primaryPhone: '+225 07 07 00 00 00',
+    email: 's.kouassi@icg-africa.com',
+    city: 'Abidjan',
+    country: 'Côte d\'Ivoire',
+    socialLinks: [{ id: 's1', platform: 'linkedin', url: 'https://linkedin.com', displayOrder: 1 }],
+    createdAt: '2026-08-11T09:00:00.000Z',
+    updatedAt: '2026-08-22T09:00:00.000Z'
+  },
+  {
+    id: 'client_003',
+    clientNumber: 'CLT-2026-0003',
+    firstName: 'Marc',
+    lastName: 'BAMBA',
+    fullName: 'Dr. Marc BAMBA',
+    company: 'Centre Médical Sainte-Victoire',
+    jobTitle: 'Médecin Cardiologue',
+    industry: 'Santé',
+    logoUrl: SAINTE_VICTOIRE_LOGO,
+    primaryPhone: '+225 05 05 00 00 00',
+    email: 'dr.bamba@sainte-victoire.ci',
+    city: 'Abidjan',
+    country: 'Côte d\'Ivoire',
+    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505000000', displayOrder: 1 }],
+    createdAt: '2026-08-12T10:00:00.000Z',
+    updatedAt: '2026-08-23T10:00:00.000Z'
+  },
+  {
+    id: 'client_004',
+    clientNumber: 'CLT-2026-0004',
+    firstName: 'Richmond',
+    lastName: 'DONGO',
+    fullName: 'Richmond DONGO',
+    company: 'Canaan Services',
+    jobTitle: 'Responsable Imprimerie & Gadgets',
+    industry: 'Imprimerie',
+    logoUrl: CANAAN_SERVICES_LOGO,
+    primaryPhone: '+225 06 64 41 65 15',
+    email: 'richmond.dongo@canaan.ci',
+    city: 'Abidjan',
+    country: 'Côte d\'Ivoire',
+    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250664416515', displayOrder: 1 }],
+    createdAt: '2026-08-13T11:00:00.000Z',
+    updatedAt: '2026-08-24T11:00:00.000Z'
   }
 ];
 
@@ -111,83 +131,212 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     type: 'BUSINESS_CARD',
     mode: 'dynamic',
     status: 'active',
-    modelId: 'model_luxury',
-    cardFormat: '85x55',
     createdAt: '2026-08-10T08:00:00.000Z',
     updatedAt: '2026-08-21T08:00:00.000Z',
     scanCount: 184,
-    lastScannedAt: '2026-08-21T05:30:00.000Z',
-    tags: ['Carte Pro', 'Développeur', 'AGB', 'VIP'],
     content: {
-      firstName: 'Gilles Brice',
-      lastName: 'ATSÉ',
       fullName: 'Gilles Brice ATSÉ',
-      jobTitle: 'Concepteur d\'applications mobiles & solutions Web sur mesure',
-      company: 'AGB',
-      commercialName: 'AGB Digital Engineering',
-      department: 'Ingénierie Logicielle & Conseil',
-      industry: 'Technologies de l\'Information & Digital',
-      slogan: 'L\'innovation technologique et le développement sur mesure au service de vos projets',
-      bio: 'Conception et ingénierie d\'applications mobiles iOS & Android, architectures Web performantes, logiciels de gestion d\'entreprise et solutions SaaS scalables.',
-      photoUrl: '',
+      jobTitle: 'Concepteur d\'applications mobiles & Web',
+      company: 'AGB Digital Engineering',
       logoUrl: AGB_ENGINEERING_LOGO,
       primaryPhone: '+225 01 04 00 00 00',
-      secondaryPhone: '+225 07 97 00 00 00',
-      whatsappNumber: '+225 01 04 00 00 00',
-      workPhone: '+225 27 22 00 00 00',
       email: 'atsegillesbrice@gmail.com',
-      workEmail: 'contact@agb-solutions.ci',
-      websiteUrl: 'https://agb-solutions.ci',
-      address: 'Cocody Riviera 3',
-      commune: 'Cocody',
-      neighborhood: 'Riviera Bonoumin',
       city: 'Abidjan',
       country: 'Côte d\'Ivoire',
-      latitude: 5.3599,
-      longitude: -3.9870,
-      locationLink: 'https://maps.google.com/?q=5.3599,-3.9870',
-      googleMapsUrl: 'https://maps.google.com/?q=5.3599,-3.9870',
-      businessRegisterNumber: 'CI-ABJ-2024-B-12849',
-      businessTaxId: 'CC-2409817-A',
-      servicesList: [
-        'Applications mobiles (iOS & Android)',
-        'Applications Web sur mesure',
-        'Logiciels de gestion & ERP/CRM',
-        'Cartes de visite connectées vCard',
-        'Solutions SaaS & Cloud'
-      ],
-      socialLinks: [
-        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250104000000', displayOrder: 1 },
-        { id: 's2', platform: 'linkedin', url: 'https://linkedin.com/in/gilles-brice-atse', displayOrder: 2 },
-        { id: 's3', platform: 'github', url: 'https://github.com/atsegillesbrice', displayOrder: 3 },
-        { id: 's4', platform: 'website', url: 'https://agb-solutions.ci', displayOrder: 4 },
-        { id: 's5', platform: 'facebook', url: 'https://facebook.com', displayOrder: 5 }
-      ],
-      customFields: [],
-      customSections: [],
+      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250104000000', displayOrder: 1 }],
       privacy: { hideAddress: false }
     },
     styling: {
       fgColor: '#0f172a',
       bgColor: '#ffffff',
-      transparentBg: false,
       moduleStyle: 'rounded',
       eyeStyle: 'rounded',
-      eyeColor: '#2563eb',
       errorCorrectionLevel: 'H',
       margin: 3,
       size: 320,
       cardBackgroundTheme: 'matte_dark',
-      logoUrl: AGB_ENGINEERING_LOGO,
-      logoSizeRatio: 0.22,
-      logoBackground: true,
-      logoBgColor: '#ffffff',
-      logoBorderRadius: 8,
-      bottomText: 'SCANNEZ POUR MA FICHE COMPLÈTE',
-      bottomTextColor: '#0f172a',
-      bottomTextBg: '#f1f5f9',
-      cardFormat: '85x55'
+      logoUrl: AGB_ENGINEERING_LOGO
     }
+  },
+  {
+    id: 'qr_demo_02',
+    cardNumber: 'CARD-2026-0002',
+    publicId: 'ICG2026S',
+    clientId: 'client_002',
+    title: 'Sarah KOUASSI — Consultante Finance',
+    type: 'BUSINESS_CARD',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-08-11T09:00:00.000Z',
+    updatedAt: '2026-08-22T09:00:00.000Z',
+    scanCount: 45,
+    content: {
+      fullName: 'Sarah KOUASSI',
+      jobTitle: 'Consultante en Stratégie & Finance',
+      company: 'ICG Africa',
+      logoUrl: ICG_AFRICA_LOGO,
+      primaryPhone: '+225 07 07 00 00 00',
+      email: 's.kouassi@icg-africa.com',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      socialLinks: [{ id: 's1', platform: 'linkedin', url: 'https://linkedin.com', displayOrder: 1 }],
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#1e293b',
+      bgColor: '#ffffff',
+      moduleStyle: 'classy',
+      eyeStyle: 'square',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      cardBackgroundTheme: 'navy_prestige',
+      logoUrl: ICG_AFRICA_LOGO
+    }
+  },
+  {
+    id: 'qr_demo_03',
+    cardNumber: 'CARD-2026-0003',
+    publicId: 'MED2026M',
+    clientId: 'client_003',
+    title: 'Dr. Marc BAMBA — Cardiologie',
+    type: 'BUSINESS_CARD',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-08-12T10:00:00.000Z',
+    updatedAt: '2026-08-23T10:00:00.000Z',
+    scanCount: 120,
+    content: {
+      fullName: 'Dr. Marc BAMBA',
+      jobTitle: 'Médecin Cardiologue',
+      company: 'Centre Médical Sainte-Victoire',
+      logoUrl: SAINTE_VICTOIRE_LOGO,
+      primaryPhone: '+225 05 05 00 00 00',
+      email: 'dr.bamba@sainte-victoire.ci',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505000000', displayOrder: 1 }],
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#0f766e',
+      bgColor: '#ffffff',
+      moduleStyle: 'rounded',
+      eyeStyle: 'rounded',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      cardBackgroundTheme: 'emerald_luxe',
+      logoUrl: SAINTE_VICTOIRE_LOGO
+    }
+  },
+  {
+    id: 'qr_demo_04',
+    cardNumber: 'CARD-2026-0004',
+    publicId: 'CAN2026R',
+    clientId: 'client_004',
+    title: 'Richmond DONGO — Canaan Services',
+    type: 'BUSINESS_CARD',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-08-13T11:00:00.000Z',
+    updatedAt: '2026-08-24T11:00:00.000Z',
+    scanCount: 68,
+    content: {
+      fullName: 'Richmond DONGO',
+      jobTitle: 'Responsable Imprimerie & Gadgets',
+      company: 'Canaan Services',
+      logoUrl: CANAAN_SERVICES_LOGO,
+      primaryPhone: '+225 06 64 41 65 15',
+      email: 'richmond.dongo@canaan.ci',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250664416515', displayOrder: 1 }],
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#dc2626',
+      bgColor: '#ffffff',
+      moduleStyle: 'dots',
+      eyeStyle: 'circle',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      cardBackgroundTheme: 'white_classic',
+      logoUrl: CANAAN_SERVICES_LOGO
+    }
+  },
+  {
+    id: 'qr_demo_05',
+    publicId: 'BOOK2026',
+    title: 'Livre Démo — L\'Art du Digital',
+    type: 'BOOK',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-08-14T12:00:00.000Z',
+    updatedAt: '2026-08-25T12:00:00.000Z',
+    scanCount: 12,
+    content: {
+      bookTitle: 'L\'Art du Digital',
+      bookAuthor: 'Gilles Brice ATSÉ',
+      bookSummary: 'Un guide complet sur la transformation digitale en Afrique.',
+      privacy: { isPublic: true }
+    },
+    styling: { fgColor: '#2563eb', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
+  },
+  {
+    id: 'qr_demo_06',
+    publicId: 'EVENT2026',
+    title: 'Invitation — Gala AGB 2026',
+    type: 'EVENT',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-08-15T13:00:00.000Z',
+    updatedAt: '2026-08-26T13:00:00.000Z',
+    scanCount: 89,
+    content: {
+      eventTitle: 'Gala Annuel AGB Digital',
+      eventDate: '2026-12-20',
+      eventLocationName: 'Hôtel Ivoire, Abidjan',
+      privacy: { isPublic: true }
+    },
+    styling: { fgColor: '#7c3aed', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
+  },
+  {
+    id: 'qr_demo_07',
+    publicId: 'SHOP2026',
+    title: 'Boutique — Canaan Gadgets',
+    type: 'SHOP',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-08-16T14:00:00.000Z',
+    updatedAt: '2026-08-27T14:00:00.000Z',
+    scanCount: 156,
+    content: {
+      commercialName: 'Canaan Gadgets',
+      shopIndustry: 'E-commerce & Personnalisation',
+      privacy: { isPublic: true }
+    },
+    styling: { fgColor: '#059669', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
+  },
+  {
+    id: 'qr_demo_08',
+    publicId: 'LOC2026',
+    title: 'Localisation — Siège AGB',
+    type: 'LOCATION',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-08-17T15:00:00.000Z',
+    updatedAt: '2026-08-28T15:00:00.000Z',
+    scanCount: 34,
+    content: {
+      locationPlaceName: 'AGB Digital Headquarters',
+      address: 'Riviera 3, Abidjan',
+      latitude: 5.3599,
+      longitude: -3.9870,
+      privacy: { isPublic: true }
+    },
+    styling: { fgColor: '#475569', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
   }
 ];
 
@@ -237,11 +386,22 @@ function generateSampleScans(): ScanEvent[] {
 export function getStoredQRCodes(): QRCodeItem[] {
   try {
     const data = localStorage.getItem(CARDS_STORAGE_KEY);
-    if (!data) {
-      localStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(INITIAL_QR_ITEMS));
-      return INITIAL_QR_ITEMS;
+    let items: QRCodeItem[] = data ? JSON.parse(data) : [];
+
+    // Ensure initial items are present
+    let changed = false;
+    INITIAL_QR_ITEMS.forEach(initItem => {
+      if (!items.find(i => i.id === initItem.id)) {
+        items.push(initItem);
+        changed = true;
+      }
+    });
+
+    if (changed || !data) {
+      saveQRCodes(items);
     }
-    return JSON.parse(data);
+
+    return items;
   } catch (e) {
     return INITIAL_QR_ITEMS;
   }
@@ -372,13 +532,75 @@ export function duplicateQRCode(id: string): QRCodeItem | null {
 }
 
 export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
-  return getStoredQRCodes();
+  if (!db || !auth.currentUser) return getStoredQRCodes();
+
+  try {
+    const userId = auth.currentUser.uid;
+
+    // 1. Sync Cards
+    const qCards = query(collection(db, 'cards'), where('userId', '==', userId));
+    const cardSnaps = await getDocs(qCards);
+    const serverCards = cardSnaps.docs.map(doc => doc.data() as QRCodeItem);
+
+    const localCards = getStoredQRCodes();
+    const mergedCards = [...localCards];
+
+    serverCards.forEach(sCard => {
+      const idx = mergedCards.findIndex(lc => lc.id === sCard.id || lc.publicId === sCard.publicId);
+      if (idx >= 0) {
+        mergedCards[idx] = { ...mergedCards[idx], ...sCard };
+      } else {
+        mergedCards.push(sCard);
+      }
+    });
+
+    saveQRCodes(mergedCards);
+
+    // 2. Sync Clients
+    const qClients = query(collection(db, 'clients'), where('userId', '==', userId));
+    const clientSnaps = await getDocs(qClients);
+    const serverClients = clientSnaps.docs.map(doc => doc.data() as ClientProfile);
+
+    const localClients = getStoredClients();
+    const mergedClients = [...localClients];
+
+    serverClients.forEach(sClient => {
+      const idx = mergedClients.findIndex(lc => lc.id === sClient.id);
+      if (idx >= 0) {
+        mergedClients[idx] = { ...mergedClients[idx], ...sClient };
+      } else {
+        mergedClients.push(sClient);
+      }
+    });
+
+    saveClients(mergedClients);
+
+    return mergedCards;
+  } catch (err) {
+    console.error('Sync error:', err);
+    return getStoredQRCodes();
+  }
 }
 
 export function getStoredClients(): ClientProfile[] {
   try {
     const data = localStorage.getItem(CLIENTS_STORAGE_KEY);
-    return data ? JSON.parse(data) : INITIAL_CLIENTS;
+    let clients: ClientProfile[] = data ? JSON.parse(data) : [];
+
+    // Ensure initial clients are present
+    let changed = false;
+    INITIAL_CLIENTS.forEach(initClient => {
+      if (!clients.find(c => c.id === initClient.id)) {
+        clients.push(initClient);
+        changed = true;
+      }
+    });
+
+    if (changed || !data) {
+      saveClients(clients);
+    }
+
+    return clients;
   } catch (e) {
     return INITIAL_CLIENTS;
   }

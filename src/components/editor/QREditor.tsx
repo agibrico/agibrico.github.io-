@@ -116,8 +116,27 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                   {/* --- 1. BUSINESS CARD --- */}
                   {type === 'BUSINESS_CARD' && (
                     <div className="space-y-10">
+                      {/* IDENTITY */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><User className="w-4 h-4 text-blue-600"/> Identité Complète</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><User className="w-4 h-4 text-slate-600"/> Identité</h4>
+
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
+                              {content.photoUrl ? (
+                                <div className="relative"><img src={content.photoUrl} className="w-16 h-16 rounded-xl object-cover shadow-md" /><button onClick={() => updateContentField('photoUrl', '')} className="absolute -top-2 -right-2 p-1 bg-rose-600 text-white rounded-full shadow-lg"><Trash2 className="w-3 h-3"/></button></div>
+                              ) : (
+                                <label className="flex flex-col items-center cursor-pointer"><ImageIcon className="w-5 h-5 text-slate-300 mb-1" /><span className="text-[8px] font-black uppercase text-slate-400">Photo Profil</span><input type="file" className="hidden" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if(file) { const r = new FileReader(); r.onload = ev => updateContentField('photoUrl', ev.target?.result as string); r.readAsDataURL(file); } }} /></label>
+                              )}
+                           </div>
+                           <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
+                              {content.logoUrl ? (
+                                <div className="relative"><img src={content.logoUrl} className="w-16 h-16 rounded-xl object-contain shadow-md p-1 bg-white" /><button onClick={() => updateContentField('logoUrl', '')} className="absolute -top-2 -right-2 p-1 bg-rose-600 text-white rounded-full shadow-lg"><Trash2 className="w-3 h-3"/></button></div>
+                              ) : (
+                                <label className="flex flex-col items-center cursor-pointer"><Building2 className="w-5 h-5 text-slate-300 mb-1" /><span className="text-[8px] font-black uppercase text-slate-400">Logo Entreprise</span><input type="file" className="hidden" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if(file) { const r = new FileReader(); r.onload = ev => updateContentField('logoUrl', ev.target?.result as string); r.readAsDataURL(file); } }} /></label>
+                              )}
+                           </div>
+                        </div>
+
                         <div className="grid grid-cols-6 gap-4">
                           <div className="col-span-1">
                             <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Civilité</label>
@@ -125,12 +144,13 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                               <option value="">—</option>
                               <option value="M.">M.</option>
                               <option value="Mme">Mme</option>
+                              <option value="Mlle">Mlle</option>
                               <option value="Dr.">Dr.</option>
                               <option value="Prof.">Prof.</option>
                             </select>
                           </div>
                           <div className="col-span-2">
-                            <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Prénom</label>
+                            <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Prénom(s)</label>
                             <input type="text" placeholder="Gilles Brice" value={content.firstName || ''} onChange={e => updateContentField('firstName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                           </div>
                           <div className="col-span-1">
@@ -142,72 +162,162 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                             <input type="text" placeholder="ATSÉ" value={content.lastName || ''} onChange={e => updateContentField('lastName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Titre Professionnel (ex: Ingénieur EMR)" value={content.professionalTitle || ''} onChange={e => updateContentField('professionalTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Poste actuel" value={content.jobTitle || ''} onChange={e => updateContentField('jobTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        </div>
+                        <input type="text" placeholder="Nom Complet d'affichage (ex: Gilles Brice ATSÉ)" value={content.fullName || ''} onChange={e => updateContentField('fullName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                       </div>
 
+                      {/* PROFESSIONAL */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Building2 className="w-4 h-4 text-slate-600"/> Entreprise & Département</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Briefcase className="w-4 h-4 text-purple-600"/> Professionnel</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Poste actuel / Titre (ex: Ingénieur)" value={content.jobTitle || ''} onChange={e => updateContentField('jobTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Profession" value={content.profession || ''} onChange={e => updateContentField('profession', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Entreprise" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Département" value={content.department || ''} onChange={e => updateContentField('department', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                        <input type="text" placeholder="Slogan / Devise" value={content.slogan || ''} onChange={e => updateContentField('slogan', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        <textarea placeholder="Biographie professionnelle..." value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
+                      </div>
+
+                      {/* CONTACT */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Phone className="w-4 h-4 text-emerald-600"/> Coordonnées</h4>
                         <div className="grid grid-cols-3 gap-4">
-                          <div className="col-span-2">
-                            <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Nom de l'entreprise</label>
-                            <input type="text" placeholder="AGB Digital Engineering" value={content.company || ''} onChange={e => updateContentField('company', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Tél. Principal</label>
+                            <input type="tel" placeholder="+225..." value={content.primaryPhone || ''} onChange={e => updateContentField('primaryPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                           </div>
-                          <div className="col-span-1">
-                            <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Sigle / Acronyme</label>
-                            <input type="text" placeholder="AGB" value={content.acronym || ''} onChange={e => updateContentField('acronym', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Tél. Secondaire</label>
+                            <input type="tel" placeholder="+225..." value={content.secondaryPhone || ''} onChange={e => updateContentField('secondaryPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                           </div>
-                        </div>
-                        <input type="text" placeholder="Signification du sigle" value={content.acronymDesc || ''} onChange={e => updateContentField('acronymDesc', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Département / Service" value={content.department || ''} onChange={e => updateContentField('department', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Slogan / Devise" value={content.slogan || ''} onChange={e => updateContentField('slogan', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Phone className="w-4 h-4 text-emerald-600"/> Coordonnées de Contact</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase text-slate-400">Tél. Personnel</label>
-                            <input type="tel" placeholder="+225 01..." value={content.primaryPhone || ''} onChange={e => updateContentField('primaryPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase text-slate-400">Tél. Professionnel</label>
-                            <input type="tel" placeholder="+225 27..." value={content.workPhone || ''} onChange={e => updateContentField('workPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Tél. Travail</label>
+                            <input type="tel" placeholder="+225..." value={content.workPhone || ''} onChange={e => updateContentField('workPhone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-slate-400">WhatsApp</label>
-                            <input type="tel" placeholder="+225 07..." value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold border-emerald-200 focus:ring-emerald-500" />
+                            <input type="tel" placeholder="+225..." value={content.whatsappNumber || ''} onChange={e => updateContentField('whatsappNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold border-emerald-200 focus:ring-emerald-500" />
                           </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase text-slate-400">E-mail</label>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">E-mail Principal</label>
                             <input type="email" placeholder="contact@domaine.com" value={content.email || ''} onChange={e => updateContentField('email', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                           </div>
                         </div>
-                        <input type="url" placeholder="Lien Portfolio / LinkedIn" value={content.websiteUrl || ''} onChange={e => updateContentField('websiteUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-blue-600" />
-                      </div>
-
-                      <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPinned className="w-4 h-4 text-rose-600"/> Localisation & Zone</h4>
-                        <textarea placeholder="Adresse géographique complète" value={content.address || ''} onChange={e => updateContentField('address', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
                         <div className="grid grid-cols-2 gap-4">
-                          <input type="text" placeholder="Ville" value={content.city || ''} onChange={e => updateContentField('city', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                          <input type="text" placeholder="Zone d'intervention" value={content.operatingZone || ''} onChange={e => updateContentField('operatingZone', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">E-mail Travail</label>
+                            <input type="email" placeholder="work@company.com" value={content.workEmail || ''} onChange={e => updateContentField('workEmail', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Site Web</label>
+                            <input type="url" placeholder="https://..." value={content.websiteUrl || ''} onChange={e => updateContentField('websiteUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-blue-600" />
+                          </div>
                         </div>
                       </div>
 
+                      {/* ADDRESS */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Briefcase className="w-4 h-4 text-purple-600"/> Services & Bio</h4>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase text-slate-500">Services offerts (séparés par des virgules)</label>
-                          <input type="text" placeholder="Audit, Développement, Formation..." value={content.servicesOffered?.join(', ') || ''} onChange={e => updateContentField('servicesOffered', e.target.value.split(',').map(s => s.trim()))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPinned className="w-4 h-4 text-rose-600"/> Adresse & Localisation</h4>
+                        <textarea placeholder="Adresse complète / Rue" value={content.address || ''} onChange={e => updateContentField('address', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Commune / Quartier" value={content.commune || content.neighborhood || ''} onChange={e => updateContentField('commune', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Ville" value={content.city || ''} onChange={e => updateContentField('city', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                         </div>
-                        <textarea placeholder="Biographie professionnelle courte..." value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={4} />
+                        <div className="grid grid-cols-3 gap-4">
+                          <input type="text" placeholder="Région / État" value={content.region || ''} onChange={e => updateContentField('region', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Code Postal" value={content.postalCode || ''} onChange={e => updateContentField('postalCode', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Pays" value={content.country || ''} onChange={e => updateContentField('country', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Latitude</label>
+                            <input type="number" step="any" placeholder="0.000000" value={content.latitude || ''} onChange={e => updateContentField('latitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Longitude</label>
+                            <input type="number" step="any" placeholder="0.000000" value={content.longitude || ''} onChange={e => updateContentField('longitude', parseFloat(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SOCIAL */}
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Share2 className="w-4 h-4 text-indigo-600"/> Réseaux Sociaux</h4>
+                          <button onClick={() => updateContentField('socialLinks', [...(content.socialLinks || []), { id: `link_${Date.now()}`, platform: 'website', url: '', label: '', displayOrder: (content.socialLinks?.length || 0) + 1 }])} className="px-3 py-1 bg-indigo-600 text-white text-[9px] font-black uppercase rounded-full shadow-lg">+ Ajouter</button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {(content.socialLinks || []).map((link, idx) => (
+                            <div key={link.id} className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3">
+                              <select
+                                value={link.platform}
+                                onChange={e => {
+                                  const newList = [...content.socialLinks!];
+                                  newList[idx].platform = e.target.value as any;
+                                  updateContentField('socialLinks', newList);
+                                }}
+                                className="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-black uppercase"
+                              >
+                                <option value="facebook">Facebook</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="twitter">X (Twitter)</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="tiktok">TikTok</option>
+                                <option value="snapchat">Snapchat</option>
+                                <option value="telegram">Telegram</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="website">Site Web</option>
+                              </select>
+                              <input type="url" placeholder="Lien ou @username" value={link.url} onChange={e => {
+                                const newList = [...content.socialLinks!];
+                                newList[idx].url = e.target.value;
+                                updateContentField('socialLinks', newList);
+                              }} className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[10px] text-blue-600 font-bold" />
+                              <button onClick={() => updateContentField('socialLinks', content.socialLinks!.filter(l => l.id !== link.id))} className="text-rose-500 p-1.5"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* ADDITIONAL */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Activity className="w-4 h-4 text-amber-600"/> Informations Complémentaires</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Disponibilité</label>
+                            <input type="text" placeholder="ex: Lun-Ven, 8h-18h" value={content.availabilityHours || ''} onChange={e => updateContentField('availabilityHours', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Langues (virgules)</label>
+                            <input type="text" placeholder="Français, Anglais..." value={content.languagesSpoken?.join(', ') || ''} onChange={e => updateContentField('languagesSpoken', e.target.value.split(',').map(s => s.trim()))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-slate-400">Services Offerts (virgules)</label>
+                          <input type="text" placeholder="Audit, Conseil, Développement..." value={content.servicesOffered?.join(', ') || ''} onChange={e => updateContentField('servicesOffered', e.target.value.split(',').map(s => s.trim()))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+                      </div>
+
+                      {/* LINKS & DOCS */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Link className="w-4 h-4 text-slate-500"/> Liens & Documents</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="url" placeholder="Lien Catalogue" value={content.catalogUrl || ''} onChange={e => updateContentField('catalogUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          <input type="url" placeholder="Lien Brochure PDF" value={content.brochurePdfUrl || ''} onChange={e => updateContentField('brochurePdfUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="url" placeholder="Lien Portfolio" value={content.portfolioUrl || ''} onChange={e => updateContentField('portfolioUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          <input type="url" placeholder="Lien Réservation / Booking" value={content.bookingLink || ''} onChange={e => updateContentField('bookingLink', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="url" placeholder="Lien Paiement" value={content.paymentLink || ''} onChange={e => updateContentField('paymentLink', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                          <input type="text" placeholder="Notes Publiques" value={content.publicNotes || ''} onChange={e => updateContentField('publicNotes', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold" />
+                        </div>
                       </div>
                     </div>
                   )}

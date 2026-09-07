@@ -13,11 +13,15 @@ export function generateVCardString(content: QRContent): string {
     'BEGIN:VCARD',
     'VERSION:3.0',
     `FN:${escapeVCardText(fullName)}`,
-    `N:${escapeVCardText(lastName)};${escapeVCardText(firstName)};;;`,
+    `N:${escapeVCardText(lastName)};${escapeVCardText(firstName)};${escapeVCardText(content.middleName || '')};${escapeVCardText(content.civility || '')};`,
   ];
 
   if (content.company) {
     lines.push(`ORG:${escapeVCardText(content.company)}`);
+  }
+
+  if (content.department) {
+    lines.push(`DEPT:${escapeVCardText(content.department)}`);
   }
 
   if (content.jobTitle) {
@@ -29,7 +33,11 @@ export function generateVCardString(content: QRContent): string {
   }
 
   if (content.secondaryPhone && !content.privacy?.hideSecondaryPhone) {
-    lines.push(`TEL;TYPE=WORK,VOICE:${sanitizePhone(content.secondaryPhone)}`);
+    lines.push(`TEL;TYPE=HOME,VOICE:${sanitizePhone(content.secondaryPhone)}`);
+  }
+
+  if (content.workPhone) {
+    lines.push(`TEL;TYPE=WORK,VOICE:${sanitizePhone(content.workPhone)}`);
   }
 
   if (content.whatsappNumber) {
@@ -42,17 +50,22 @@ export function generateVCardString(content: QRContent): string {
     lines.push(`EMAIL;TYPE=INTERNET,pref:${content.email.trim()}`);
   }
 
+  if (content.workEmail) {
+    lines.push(`EMAIL;TYPE=INTERNET,WORK:${content.workEmail.trim()}`);
+  }
+
   if (content.websiteUrl) {
     lines.push(`URL:${content.websiteUrl.trim()}`);
   }
 
   // Address
-  if ((content.address || content.city || content.country) && !content.privacy?.hideAddress) {
+  if ((content.address || content.city || content.region || content.postalCode || content.country) && !content.privacy?.hideAddress) {
     const street = escapeVCardText(content.address || '');
     const city = escapeVCardText(content.city || '');
+    const region = escapeVCardText(content.region || '');
     const postCode = escapeVCardText(content.postalCode || '');
     const country = escapeVCardText(content.country || '');
-    lines.push(`ADR;TYPE=WORK,pref:;;${street};${city};;${postCode};${country}`);
+    lines.push(`ADR;TYPE=WORK,pref:;;${street};${city};${region};${postCode};${country}`);
   }
 
   // Geo GPS
@@ -82,11 +95,32 @@ export function generateVCardString(content: QRContent): string {
   if (content.bio) {
     noteParts.push(content.bio);
   }
-  if (content.servicesList && content.servicesList.length > 0) {
-    noteParts.push(`Services offerts : ${content.servicesList.join(', ')}`);
+  if (content.languagesSpoken && content.languagesSpoken.length > 0) {
+    noteParts.push(`Langues : ${content.languagesSpoken.join(', ')}`);
+  }
+  if (content.availabilityHours) {
+    noteParts.push(`Disponibilité : ${content.availabilityHours}`);
+  }
+  if (content.servicesOffered && content.servicesOffered.length > 0) {
+    noteParts.push(`Services offerts : ${content.servicesOffered.join(', ')}`);
+  }
+  if (content.publicNotes) {
+    noteParts.push(`Notes : ${content.publicNotes}`);
   }
   if (content.internalNotes) {
-    noteParts.push(`Notes : ${content.internalNotes}`);
+    noteParts.push(`Notes internes : ${content.internalNotes}`);
+  }
+  if (content.catalogUrl) {
+    noteParts.push(`Catalogue : ${content.catalogUrl}`);
+  }
+  if (content.brochurePdfUrl) {
+    noteParts.push(`Brochure : ${content.brochurePdfUrl}`);
+  }
+  if (content.bookingLink) {
+    noteParts.push(`Réservation : ${content.bookingLink}`);
+  }
+  if (content.paymentLink) {
+    noteParts.push(`Paiement : ${content.paymentLink}`);
   }
   if (content.locationLink) {
     noteParts.push(`Lien de localisation : ${content.locationLink.trim()}`);

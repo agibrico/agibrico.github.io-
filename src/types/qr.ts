@@ -163,6 +163,8 @@ export interface QRContent {
   availabilityHours?: string;
   servicesOffered?: string[];
   portfolioUrl?: string;
+  catalogUrl?: string;
+  brochurePdfUrl?: string;
   bookingLink?: string;
   paymentLink?: string;
   publicNotes?: string;

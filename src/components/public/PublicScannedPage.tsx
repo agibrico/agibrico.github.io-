@@ -212,35 +212,53 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     return href ? <a href={href} target="_blank" rel="noopener noreferrer">{content}</a> : content;
   };
 
+  const getSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'facebook': return <Facebook className="w-5 h-5 text-blue-500" />;
+      case 'instagram': return <Instagram className="w-5 h-5 text-rose-500" />;
+      case 'linkedin': return <Linkedin className="w-5 h-5 text-blue-700" />;
+      case 'twitter':
+      case 'x': return <Twitter className="w-5 h-5 text-slate-200" />;
+      case 'youtube': return <Youtube className="w-5 h-5 text-red-600" />;
+      case 'tiktok': return <Activity className="w-5 h-5 text-cyan-400" />;
+      case 'telegram': return <Send className="w-5 h-5 text-sky-500" />;
+      case 'whatsapp': return <MessageSquare className="w-5 h-5 text-emerald-500" />;
+      default: return <Globe className="w-5 h-5 text-slate-400" />;
+    }
+  };
+
   // -------------------------------------------------------------------------
   // MAIN RENDERING
   // -------------------------------------------------------------------------
   const renderContent = () => {
     switch (item.type) {
       case 'BUSINESS_CARD':
+        const displayPhoto = content.photoUrl || registeredLogo;
         return (
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
-              {registeredLogo && (
+              {displayPhoto && (
                 <div className="w-32 h-32 rounded-3xl bg-white p-2 mx-auto border-4 border-slate-800 shadow-xl overflow-hidden">
-                  <img src={registeredLogo} className="w-full h-full object-contain" />
+                  <img src={displayPhoto} className="w-full h-full object-cover rounded-2xl" alt={fullName} />
                 </div>
               )}
               <div className="space-y-2">
                 <div className="flex items-center justify-center gap-2">
                   {content.civility && <span className="text-xs font-bold text-slate-500">{content.civility}</span>}
-                  <h1 className="text-2xl font-black text-white leading-tight uppercase tracking-tight">{fullName}</h1>
+                  <h1 className="text-2xl font-black text-white leading-tight uppercase tracking-tight">{content.fullName || fullName}</h1>
                 </div>
-                {content.professionalTitle && <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{content.professionalTitle}</p>}
                 {content.jobTitle && <p className="text-xs font-black text-blue-500 uppercase tracking-[0.3em]">{content.jobTitle}</p>}
+                {content.profession && <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{content.profession}</p>}
                 {content.company && (
                   <div className="flex flex-col items-center gap-1">
                     <p className="text-sm font-bold text-slate-300">{content.company}</p>
-                    {content.acronym && <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">{content.acronym} — {content.acronymDesc}</p>}
+                    {content.department && <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">{content.department}</p>}
                   </div>
                 )}
+                {content.slogan && <p className="text-[10px] font-bold text-slate-500 italic mt-2">« {content.slogan} »</p>}
               </div>
+
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button onClick={handleDownloadContact} className="col-span-2 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><UserPlus className="w-4 h-4" /> {savedContact ? 'Fiche Enregistrée' : 'Ajouter aux contacts'}</button>
                 {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Phone className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">Appel</span></a>}
@@ -248,30 +266,113 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               </div>
             </div>
 
-            {(content.email || content.workEmail || content.websiteUrl || content.address) && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-3">
-                <SectionHeader title="Informations de contact" icon={Info} />
+            {/* CONTACT & ADDRESS */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+              <SectionHeader title="Coordonnées & Localisation" icon={Info} />
+              <div className="space-y-3">
                 <InfoRow label="Email Personnel" value={content.email} icon={Mail} href={`mailto:${content.email}`} />
-                <InfoRow label="Email Professionnel" value={content.workEmail} icon={Mail} href={`mailto:${content.workEmail}`} />
-                <InfoRow label="Site Web / Portfolio" value={content.websiteUrl} icon={Globe} href={content.websiteUrl} />
+                <InfoRow label="Email Travail" value={content.workEmail} icon={Mail} href={`mailto:${content.workEmail}`} />
+                <InfoRow label="Tél. Travail" value={content.workPhone} icon={Phone} href={`tel:${content.workPhone}`} />
+                <InfoRow label="Site Web" value={content.websiteUrl} icon={Globe} href={content.websiteUrl} />
                 <InfoRow label="Adresse" value={content.address} icon={MapPin} />
-                {content.city && <InfoRow label="Ville / Zone" value={`${content.city}${content.operatingZone ? ` — ${content.operatingZone}` : ''}`} icon={Navigation} />}
+                {(content.city || content.commune || content.region) && (
+                  <InfoRow
+                    label="Zone"
+                    value={[content.commune, content.city, content.region, content.country].filter(Boolean).join(', ')}
+                    icon={Navigation}
+                  />
+                )}
+                {content.postalCode && <InfoRow label="Code Postal" value={content.postalCode} icon={Hash} />}
               </div>
-            )}
 
-            {content.servicesList && content.servicesList.length > 0 && (
+              {((content.latitude && content.longitude) || content.address) && (
+                <a
+                  href={content.latitude && content.longitude
+                    ? `https://www.google.com/maps/search/?api=1&query=${content.latitude},${content.longitude}`
+                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-black uppercase rounded-xl flex items-center justify-center gap-2 transition-colors border border-slate-700"
+                >
+                  <Map className="w-4 h-4 text-rose-500" /> Itinéraire GPS
+                </a>
+              )}
+            </div>
+
+            {/* SOCIAL NETWORKS */}
+            {content.socialLinks && content.socialLinks.length > 0 && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
-                <SectionHeader title="Expertises & Services" icon={Briefcase} />
-                <div className="flex flex-wrap gap-2">
-                  {content.servicesList.map(s => <span key={s} className="px-3 py-1 bg-slate-800 text-slate-300 text-[9px] font-black uppercase rounded-lg border border-slate-700">{s}</span>)}
+                <SectionHeader title="Réseaux Sociaux" icon={Share2} />
+                <div className="grid grid-cols-4 gap-3">
+                  {content.socialLinks.map(link => (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group"
+                    >
+                      {getSocialIcon(link.platform)}
+                      <span className="text-[7px] font-black uppercase text-slate-500 group-hover:text-slate-200 truncate w-full text-center">
+                        {link.platform}
+                      </span>
+                    </a>
+                  ))}
                 </div>
               </div>
             )}
 
-            {content.bio && (
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6">
-                <SectionHeader title="Profil" icon={User} />
-                <p className="text-xs font-medium text-slate-400 leading-relaxed italic">« {content.bio} »</p>
+            {/* ADDITIONAL INFO */}
+            {(content.bio || content.servicesOffered || content.languagesSpoken || content.availabilityHours) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                {content.bio && (
+                  <div className="space-y-2">
+                    <SectionHeader title="Bio" icon={User} />
+                    <p className="text-xs font-medium text-slate-400 leading-relaxed italic">« {content.bio} »</p>
+                  </div>
+                )}
+                {content.servicesOffered && content.servicesOffered.length > 0 && (
+                  <div className="space-y-3">
+                    <SectionHeader title="Services" icon={Briefcase} />
+                    <div className="flex flex-wrap gap-2">
+                      {content.servicesOffered.map(s => <span key={s} className="px-3 py-1 bg-slate-800 text-slate-300 text-[9px] font-black uppercase rounded-lg border border-slate-700">{s}</span>)}
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  {content.languagesSpoken && content.languagesSpoken.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Langues</span>
+                      <p className="text-[10px] font-bold text-slate-300">{content.languagesSpoken.join(', ')}</p>
+                    </div>
+                  )}
+                  {content.availabilityHours && (
+                    <div className="space-y-1">
+                      <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Disponibilité</span>
+                      <p className="text-[10px] font-bold text-slate-300">{content.availabilityHours}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* LINKS & DOCUMENTS */}
+            {(content.catalogUrl || content.brochurePdfUrl || content.portfolioUrl || content.bookingLink || content.paymentLink || content.publicNotes) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Liens & Documents" icon={Link} />
+                <div className="grid grid-cols-2 gap-3">
+                  {content.catalogUrl && <a href={content.catalogUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-800 rounded-xl border border-slate-700 text-center"><span className="text-[9px] font-black uppercase text-slate-200">Catalogue</span></a>}
+                  {content.brochurePdfUrl && <a href={content.brochurePdfUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-800 rounded-xl border border-slate-700 text-center"><span className="text-[9px] font-black uppercase text-slate-200">Brochure PDF</span></a>}
+                  {content.portfolioUrl && <a href={content.portfolioUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-800 rounded-xl border border-slate-700 text-center"><span className="text-[9px] font-black uppercase text-slate-200">Portfolio</span></a>}
+                  {content.bookingLink && <a href={content.bookingLink} target="_blank" rel="noopener noreferrer" className="p-3 bg-blue-600/20 rounded-xl border border-blue-600/30 text-center"><span className="text-[9px] font-black uppercase text-blue-400">Réservation</span></a>}
+                  {content.paymentLink && <a href={content.paymentLink} target="_blank" rel="noopener noreferrer" className="p-3 bg-emerald-600/20 rounded-xl border border-emerald-600/30 text-center"><span className="text-[9px] font-black uppercase text-emerald-400">Paiement</span></a>}
+                </div>
+                {content.publicNotes && (
+                  <div className="mt-4 p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-1 block">Notes</span>
+                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed">{content.publicNotes}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>

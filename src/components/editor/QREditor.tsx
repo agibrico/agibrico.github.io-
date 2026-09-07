@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  User, Building2, Share2, ShoppingBag, Image as ImageIcon, Calendar, MapPin, Globe, Sparkles, Plus, Trash2, Lock, Check, Palette, Upload, Clock, Shield, Sliders, Layers, ArrowRight, Eye, Save, X, FileCode, Info, BookOpen, Store, Navigation, CheckCircle2, Smartphone, Printer, CalendarDays, Hash, Languages, DollarSign, ShoppingCart, Facebook, Instagram, Truck, Wallet, Package, MapPinned, LocateFixed, Linkedin, Youtube, FileText, Briefcase, Twitter, Send, MessageSquare, Book, Link, Map, UserPlus, List, ImagePlus, FileUp, Star, Tag, Activity, CheckSquare, LayoutList, GripVertical, Phone, BadgeCheck, GraduationCap, Quote, Users, Landmark, TruckIcon, CreditCard, PenTool, BookMarked, Languages as LangIcon, Headphones, Video
+  User, Building2, Share2, ShoppingBag, Image as ImageIcon, Calendar, MapPin, Globe, Sparkles, Plus, Trash2, Lock, Check, Palette, Upload, Clock, Shield, Sliders, Layers, ArrowRight, Eye, Save, X, FileCode, Info, BookOpen, Store, Navigation, CheckCircle2, Smartphone, Printer, CalendarDays, Hash, Languages, DollarSign, ShoppingCart, Facebook, Instagram, Truck, Wallet, Package, MapPinned, LocateFixed, Linkedin, Youtube, FileText, Briefcase, Twitter, Send, MessageSquare, Book, Link, Map, UserPlus, List, ImagePlus, FileUp, Star, Tag, Activity, CheckSquare, LayoutList, GripVertical, Phone, BadgeCheck, GraduationCap, Quote, Users, Landmark, TruckIcon, CreditCard, PenTool, BookMarked, Languages as LangIcon, Headphones, Video, Settings, ChevronDown, ChevronUp, Minus, Type, Mail
 } from 'lucide-react';
 import { QRCodeItem, QRType, QRMode, QRStyling, QRContent, CustomField, SocialLink, OpeningHourDay } from '../../types/qr';
 import { generateSecurePublicId, getPublicQRUrl, saveOrUpdateQRCode } from '../../utils/storage';
@@ -51,6 +51,93 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
     fgColor: '#0f172a', bgColor: '#ffffff', moduleStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#2563eb',
     margin: 2, errorCorrectionLevel: 'H', logoSizeRatio: 0.22, bottomText: 'SCANNEZ MOI'
   });
+
+  const [activeFieldSettings, setActiveFieldSettings] = useState<string | null>(null);
+
+  const toggleFieldSettings = (sectionId: string, fieldId: string) => {
+    const key = `${sectionId}_${fieldId}`;
+    setActiveFieldSettings(activeFieldSettings === key ? null : key);
+  };
+
+  const updateFieldProperty = (sIdx: number, fIdx: number, key: string, value: any) => {
+    const ns = [...(content.customSections || [])];
+    (ns[sIdx].fields[fIdx] as any)[key] = value;
+    updateContentField('customSections', ns);
+  };
+
+  const duplicateField = (sIdx: number, fIdx: number) => {
+    const ns = [...(content.customSections || [])];
+    const original = ns[sIdx].fields[fIdx];
+    const duplicate = { ...original, id: `f_${Date.now()}`, order: ns[sIdx].fields.length + 1 };
+    ns[sIdx].fields.push(duplicate);
+    updateContentField('customSections', ns);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: keyof QRContent) => {
+    const file = e.target.files?.[0];
+    if(file) {
+      const r = new FileReader();
+      r.onload = ev => updateContentField(field, ev.target?.result as string);
+      r.readAsDataURL(file);
+    }
+  };
+
+  const FIELD_TYPES = [
+    { id: 'text_short', label: 'Texte Court' },
+    { id: 'text_long', label: 'Texte Long' },
+    { id: 'number', label: 'Nombre' },
+    { id: 'phone', label: 'Téléphone' },
+    { id: 'whatsapp', label: 'WhatsApp' },
+    { id: 'email', label: 'E-mail' },
+    { id: 'url', label: 'Lien / URL' },
+    { id: 'date', label: 'Date' },
+    { id: 'time', label: 'Heure' },
+    { id: 'datetime', label: 'Date & Heure' },
+    { id: 'address', label: 'Adresse' },
+    { id: 'gps', label: 'Position GPS' },
+    { id: 'boolean', label: 'Oui/Non (Toggle)' },
+    { id: 'select', label: 'Liste Déroulante' },
+    { id: 'radio', label: 'Choix Unique' },
+    { id: 'multiselect', label: 'Choix Multiple' },
+    { id: 'image', label: 'Image Unique' },
+    { id: 'gallery', label: 'Galerie Photos' },
+    { id: 'document', label: 'Document' },
+    { id: 'pdf', label: 'Fichier PDF' },
+    { id: 'amount', label: 'Montant' },
+    { id: 'currency', label: 'Devise' },
+    { id: 'percentage', label: 'Pourcentage' },
+    { id: 'rating', label: 'Note / Etoiles' },
+    { id: 'matricule', label: 'Matricule' },
+    { id: 'reference', label: 'Référence' },
+    { id: 'code', label: 'Code' },
+    { id: 'id_number', label: 'N° Identité' },
+    { id: 'status', label: 'Statut' },
+    { id: 'button', label: 'Bouton Action' },
+    { id: 'social', label: 'Réseau Social' },
+    { id: 'video', label: 'Lien Vidéo' },
+    { id: 'audio', label: 'Lien Audio' },
+    { id: 'separator', label: 'Séparateur' },
+    { id: 'section_title', label: 'Sous-titre Section' },
+  ];
+
+  const getFieldIcon = (type: string) => {
+    switch(type) {
+      case 'text_short': return <Type className="w-4 h-4" />;
+      case 'text_long': return <FileText className="w-4 h-4" />;
+      case 'number': return <Hash className="w-4 h-4" />;
+      case 'phone': return <Phone className="w-4 h-4" />;
+      case 'whatsapp': return <MessageSquare className="w-4 h-4 text-emerald-500" />;
+      case 'email': return <Mail className="w-4 h-4" />;
+      case 'url': return <Link className="w-4 h-4" />;
+      case 'date': return <Calendar className="w-4 h-4" />;
+      case 'gps': return <MapPin className="w-4 h-4 text-rose-500" />;
+      case 'image': return <ImageIcon className="w-4 h-4" />;
+      case 'pdf': return <FileUp className="w-4 h-4 text-rose-600" />;
+      case 'button': return <ArrowRight className="w-4 h-4" />;
+      case 'separator': return <Minus className="w-4 h-4" />;
+      default: return <Sparkles className="w-4 h-4" />;
+    }
+  };
 
   const updateContentField = <K extends keyof QRContent>(key: K, value: QRContent[K]) => setContent(prev => ({ ...prev, [key]: value }));
   const updateStylingField = <K extends keyof QRStyling>(key: K, value: QRStyling[K]) => setStyling(prev => ({ ...prev, [key]: value }));
@@ -2045,100 +2132,276 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                     </div>
                   )
 
-                  {/* --- 10. CUSTOM --- */}
+                  {/* --- 10. CUSTOM BUILDER --- */}
                   {type === 'CUSTOM' && (
-                    <div className="space-y-8">
-                       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                         <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Sparkles className="w-4 h-4 text-amber-500"/> Fiche sur Mesure</h4>
-                         <button onClick={() => {
-                           const newSection = {
-                             id: `sec_${Date.now()}`,
-                             title: 'Nouvelle Section',
-                             order: (content.customSections?.length || 0) + 1,
-                             fields: [],
-                             isVisible: true
-                           };
-                           updateContentField('customSections', [...(content.customSections || []), newSection]);
-                         }} className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase rounded-xl shadow-lg">+ Nouvelle Section</button>
-                       </div>
+                    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      {/* SUBSECTION: GENERAL INFO */}
+                      <div className="space-y-6">
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2 text-slate-900">
+                          <Info className="w-4 h-4 text-blue-600"/> 1. Informations Générales
+                        </h4>
 
-                       <div className="space-y-6">
-                         {(content.customSections || []).sort((a,b) => a.order - b.order).map((section, sIdx) => (
-                           <div key={section.id} className="p-6 bg-slate-50 border border-slate-200 rounded-[32px] space-y-4 relative group">
-                              <div className="flex items-center gap-3">
-                                <GripVertical className="w-4 h-4 text-slate-300 cursor-move" />
-                                <input type="text" value={section.title} onChange={e => {
-                                  const newSections = [...content.customSections!];
-                                  newSections[sIdx].title = e.target.value;
-                                  updateContentField('customSections', newSections);
-                                }} className="bg-transparent border-none outline-none text-xs font-black uppercase tracking-widest text-slate-900 flex-1" />
-                                <button onClick={() => updateContentField('customSections', content.customSections!.filter(s => s.id !== section.id))} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
+                        <div className="grid grid-cols-3 gap-6">
+                          {/* LOGO UPLOADER */}
+                          <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50 relative group">
+                            {content.customLogoUrl ? (
+                              <div className="relative">
+                                <img src={content.customLogoUrl} className="w-20 h-20 rounded-2xl object-contain shadow-lg p-2 bg-white" />
+                                <button onClick={() => updateContentField('customLogoUrl', '')} className="absolute -top-3 -right-3 p-2 bg-rose-600 text-white rounded-full shadow-xl"><Trash2 className="w-4 h-4"/></button>
+                              </div>
+                            ) : (
+                              <label className="flex flex-col items-center cursor-pointer">
+                                <Building2 className="w-6 h-6 text-slate-300 mb-2" />
+                                <span className="text-[8px] font-black uppercase text-slate-400">Logo</span>
+                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'customLogoUrl')} />
+                              </label>
+                            )}
+                          </div>
+
+                          {/* PHOTO UPLOADER */}
+                          <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50 relative group">
+                            {content.customPhotoUrl ? (
+                              <div className="relative">
+                                <img src={content.customPhotoUrl} className="w-20 h-20 rounded-2xl object-cover shadow-lg" />
+                                <button onClick={() => updateContentField('customPhotoUrl', '')} className="absolute -top-3 -right-3 p-2 bg-rose-600 text-white rounded-full shadow-xl"><Trash2 className="w-4 h-4"/></button>
+                              </div>
+                            ) : (
+                              <label className="flex flex-col items-center cursor-pointer">
+                                <User className="w-6 h-6 text-slate-300 mb-2" />
+                                <span className="text-[8px] font-black uppercase text-slate-400">Photo Profil</span>
+                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'customPhotoUrl')} />
+                              </label>
+                            )}
+                          </div>
+
+                          {/* BANNER UPLOADER */}
+                          <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50 relative group">
+                            {content.customBannerUrl ? (
+                              <div className="relative">
+                                <img src={content.customBannerUrl} className="w-32 h-20 rounded-2xl object-cover shadow-lg" />
+                                <button onClick={() => updateContentField('customBannerUrl', '')} className="absolute -top-3 -right-3 p-2 bg-rose-600 text-white rounded-full shadow-xl"><Trash2 className="w-4 h-4"/></button>
+                              </div>
+                            ) : (
+                              <label className="flex flex-col items-center cursor-pointer">
+                                <ImageIcon className="w-6 h-6 text-slate-300 mb-2" />
+                                <span className="text-[8px] font-black uppercase text-slate-400">Bannière</span>
+                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'customBannerUrl')} />
+                              </label>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Nom de la Fiche (ex: Ma Carte VIP)" value={content.customCardName || ''} onChange={e => updateContentField('customCardName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Catégorie (ex: Portefeuille, Pro...)" value={content.customCategory || ''} onChange={e => updateContentField('customCategory', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <input type="text" placeholder="Titre Principal" value={content.customTitle || ''} onChange={e => updateContentField('customTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          <input type="text" placeholder="Sous-titre" value={content.customSubtitle || ''} onChange={e => updateContentField('customSubtitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                        </div>
+
+                        <textarea placeholder="Description générale..." value={content.customDescription || ''} onChange={e => updateContentField('customDescription', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Visibilité</label>
+                            <select value={content.customVisibility || 'public'} onChange={e => updateContentField('customVisibility', e.target.value as any)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold">
+                              <option value="public">Publique</option>
+                              <option value="private">Privée (Login)</option>
+                              <option value="hidden">Masquée</option>
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Expiration</label>
+                            <input type="date" value={content.customExpirationDate || ''} onChange={e => updateContentField('customExpirationDate', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Mode d'Accès</label>
+                            <select value={content.accessMode || 'public'} onChange={e => updateContentField('accessMode', e.target.value as any)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold">
+                              <option value="public">Accès Libre</option>
+                              <option value="pin">Code PIN</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {content.accessMode === 'pin' && (
+                          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 animate-in slide-in-from-top-2">
+                            <label className="text-[9px] font-black uppercase text-amber-600 block mb-1">Code PIN de Protection</label>
+                            <input type="password" placeholder="Ex: 1234" maxLength={6} value={content.accessPin || ''} onChange={e => updateContentField('accessPin', e.target.value)} className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-xs font-black tracking-widest text-amber-900" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* SUBSECTION: STRUCTURE BUILDER */}
+                      <div className="space-y-8">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-purple-600"/> 2. Structure de la Fiche
+                          </h4>
+                          <button onClick={() => {
+                            const newSection = { id: `sec_${Date.now()}`, title: 'Nouvelle Section', order: (content.customSections?.length || 0) + 1, fields: [], isVisible: true };
+                            updateContentField('customSections', [...(content.customSections || []), newSection]);
+                          }} className="px-5 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase rounded-2xl shadow-xl hover:scale-105 transition-all">+ Nouvelle Section</button>
+                        </div>
+
+                        <div className="space-y-8">
+                          {(content.customSections || []).sort((a,b) => a.order - b.order).map((section, sIdx) => (
+                            <div key={section.id} className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden group/section">
+                              <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center gap-4">
+                                <div className="flex flex-col gap-1">
+                                  <button onClick={() => {
+                                    if(sIdx === 0) return;
+                                    const ns = [...content.customSections!];
+                                    [ns[sIdx].order, ns[sIdx-1].order] = [ns[sIdx-1].order, ns[sIdx].order];
+                                    updateContentField('customSections', ns);
+                                  }} className="p-1 hover:bg-slate-200 rounded transition-colors"><ChevronUp className="w-3 h-3 text-slate-400" /></button>
+                                  <button onClick={() => {
+                                    if(sIdx === content.customSections!.length - 1) return;
+                                    const ns = [...content.customSections!];
+                                    [ns[sIdx].order, ns[sIdx+1].order] = [ns[sIdx+1].order, ns[sIdx].order];
+                                    updateContentField('customSections', ns);
+                                  }} className="p-1 hover:bg-slate-200 rounded transition-colors"><ChevronDown className="w-3 h-3 text-slate-400" /></button>
+                                </div>
+                                <div className="flex-1">
+                                  <input type="text" value={section.title} onChange={e => {
+                                    const ns = [...content.customSections!];
+                                    ns[sIdx].title = e.target.value;
+                                    updateContentField('customSections', ns);
+                                  }} className="bg-transparent border-none outline-none text-sm font-black uppercase tracking-[0.2em] text-slate-900 w-full" placeholder="Titre de la section..." />
+                                  <input type="text" value={section.description || ''} onChange={e => {
+                                    const ns = [...content.customSections!];
+                                    ns[sIdx].description = e.target.value;
+                                    updateContentField('customSections', ns);
+                                  }} className="bg-transparent border-none outline-none text-[10px] font-bold text-slate-400 w-full" placeholder="Description de la section (optionnel)..." />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <button onClick={() => {
+                                    const ns = [...content.customSections!];
+                                    ns[sIdx].isVisible = !ns[sIdx].isVisible;
+                                    updateContentField('customSections', ns);
+                                  }} className={`p-2 rounded-xl transition-colors ${section.isVisible ? 'bg-blue-50 text-blue-600' : 'bg-slate-200 text-slate-400'}`}>
+                                    {section.isVisible ? <Eye className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                                  </button>
+                                  <button onClick={() => updateContentField('customSections', content.customSections!.filter(s => s.id !== section.id))} className="p-2 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                </div>
                               </div>
 
-                              <div className="space-y-3">
+                              <div className="p-6 space-y-4">
                                 {section.fields.sort((a,b) => a.order - b.order).map((field, fIdx) => (
-                                  <div key={field.id} className="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
-                                      {field.type.includes('text') && <FileText className="w-4 h-4" />}
-                                      {field.type === 'image' && <ImageIcon className="w-4 h-4" />}
-                                      {field.type === 'url' && <Link className="w-4 h-4" />}
-                                      {field.type === 'phone' && <Phone className="w-4 h-4" />}
+                                  <div key={field.id} className="p-5 bg-slate-50 border border-slate-200 rounded-3xl space-y-4 animate-in slide-in-from-left-2 duration-300">
+                                    <div className="flex items-center gap-4">
+                                      <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+                                        {getFieldIcon(field.type)}
+                                      </div>
+                                      <div className="flex-1 grid grid-cols-12 gap-3">
+                                        <div className="col-span-4">
+                                          <label className="text-[8px] font-black uppercase text-slate-400 block mb-1">Label</label>
+                                          <input type="text" value={field.label} onChange={e => {
+                                            const ns = [...content.customSections!];
+                                            ns[sIdx].fields[fIdx].label = e.target.value;
+                                            updateContentField('customSections', ns);
+                                          }} className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 text-xs font-bold" />
+                                        </div>
+                                        <div className="col-span-3">
+                                          <label className="text-[8px] font-black uppercase text-slate-400 block mb-1">Type</label>
+                                          <select value={field.type} onChange={e => {
+                                            const ns = [...content.customSections!];
+                                            ns[sIdx].fields[fIdx].type = e.target.value as any;
+                                            updateContentField('customSections', ns);
+                                          }} className="w-full bg-white border border-slate-100 rounded-xl px-2 py-2 text-[9px] font-black uppercase">
+                                            {FIELD_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                                          </select>
+                                        </div>
+                                        <div className="col-span-5">
+                                          <label className="text-[8px] font-black uppercase text-slate-400 block mb-1">Valeur par défaut</label>
+                                          <input type="text" value={field.value} onChange={e => {
+                                            const ns = [...content.customSections!];
+                                            ns[sIdx].fields[fIdx].value = e.target.value;
+                                            updateContentField('customSections', ns);
+                                          }} className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 text-xs font-medium" />
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 pt-4">
+                                         <button onClick={() => toggleFieldSettings(section.id, field.id)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Settings className="w-4 h-4" /></button>
+                                         <button onClick={() => duplicateField(sIdx, fIdx)} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Copy className="w-4 h-4" /></button>
+                                         <button onClick={() => {
+                                            const ns = [...content.customSections!];
+                                            ns[sIdx].fields = ns[sIdx].fields.filter(f => f.id !== field.id);
+                                            updateContentField('customSections', ns);
+                                         }} className="p-2 text-rose-400 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                      </div>
                                     </div>
-                                    <div className="flex-1 grid grid-cols-2 gap-2">
-                                      <input type="text" placeholder="Label (Nom du champ)" value={field.label} onChange={e => {
-                                        const newSections = [...content.customSections!];
-                                        newSections[sIdx].fields[fIdx].label = e.target.value;
-                                        updateContentField('customSections', newSections);
-                                      }} className="bg-slate-50 rounded-lg px-2 py-1 text-[10px] font-bold" />
-                                      <select value={field.type} onChange={e => {
-                                        const newSections = [...content.customSections!];
-                                        newSections[sIdx].fields[fIdx].type = e.target.value as any;
-                                        updateContentField('customSections', newSections);
-                                      }} className="bg-slate-50 rounded-lg px-2 py-1 text-[9px] font-black uppercase">
-                                        <option value="text_short">Texte Court</option>
-                                        <option value="text_long">Texte Long</option>
-                                        <option value="number">Nombre</option>
-                                        <option value="url">Lien / URL</option>
-                                        <option value="phone">Téléphone</option>
-                                        <option value="email">E-mail</option>
-                                        <option value="image">Image</option>
-                                        <option value="pdf">Document PDF</option>
-                                        <option value="button">Bouton Action</option>
-                                        <option value="separator">Séparateur</option>
-                                      </select>
-                                    </div>
-                                    <button onClick={() => {
-                                      const newSections = [...content.customSections!];
-                                      newSections[sIdx].fields = newSections[sIdx].fields.filter(f => f.id !== field.id);
-                                      updateContentField('customSections', newSections);
-                                    }} className="text-rose-400"><Trash2 className="w-3 h-3" /></button>
+
+                                    {/* EXPANDABLE SETTINGS */}
+                                    {activeFieldSettings === `${section.id}_${field.id}` && (
+                                      <div className="pt-4 border-t border-slate-200 grid grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2">
+                                         <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                               <div className="space-y-1">
+                                                  <label className="text-[9px] font-black uppercase text-slate-400">Placeholder</label>
+                                                  <input type="text" value={field.placeholder || ''} onChange={e => updateFieldProperty(sIdx, fIdx, 'placeholder', e.target.value)} className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 text-[10px]" />
+                                               </div>
+                                               <div className="space-y-1">
+                                                  <label className="text-[9px] font-black uppercase text-slate-400">Icône (Lucide name)</label>
+                                                  <input type="text" value={field.icon || ''} onChange={e => updateFieldProperty(sIdx, fIdx, 'icon', e.target.value)} className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 text-[10px]" />
+                                               </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                               <label className="text-[9px] font-black uppercase text-slate-400">Description du champ</label>
+                                               <input type="text" value={field.description || ''} onChange={e => updateFieldProperty(sIdx, fIdx, 'description', e.target.value)} className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 text-[10px]" />
+                                            </div>
+                                            {(field.type === 'select' || field.type === 'radio' || field.type === 'multiselect') && (
+                                              <div className="space-y-1">
+                                                 <label className="text-[9px] font-black uppercase text-slate-400">Options (virgules)</label>
+                                                 <input type="text" value={field.options?.join(', ') || ''} onChange={e => updateFieldProperty(sIdx, fIdx, 'options', e.target.value.split(',').map(o => o.trim()).filter(Boolean))} className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 text-[10px]" />
+                                              </div>
+                                            )}
+                                         </div>
+                                         <div className="grid grid-cols-2 gap-3">
+                                            <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100">
+                                               <span className="text-[9px] font-black uppercase text-slate-500">Requis</span>
+                                               <input type="checkbox" checked={field.isRequired} onChange={e => updateFieldProperty(sIdx, fIdx, 'isRequired', e.target.checked)} className="w-4 h-4 rounded text-blue-600" />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100">
+                                               <span className="text-[9px] font-black uppercase text-slate-500">Visible</span>
+                                               <input type="checkbox" checked={field.isVisible} onChange={e => updateFieldProperty(sIdx, fIdx, 'isVisible', e.target.checked)} className="w-4 h-4 rounded text-blue-600" />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100">
+                                               <span className="text-[9px] font-black uppercase text-slate-500">Public</span>
+                                               <input type="checkbox" checked={field.isPublic} onChange={e => updateFieldProperty(sIdx, fIdx, 'isPublic', e.target.checked)} className="w-4 h-4 rounded text-blue-600" />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100">
+                                               <span className="text-[9px] font-black uppercase text-slate-500">Privé</span>
+                                               <input type="checkbox" checked={!field.isPublic} onChange={e => updateFieldProperty(sIdx, fIdx, 'isPublic', !e.target.checked)} className="w-4 h-4 rounded text-rose-600" />
+                                            </div>
+                                         </div>
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
+
                                 <button onClick={() => {
-                                  const newField = {
-                                    id: `f_${Date.now()}`,
-                                    type: 'text_short' as any,
-                                    label: 'Nouveau champ',
-                                    value: '',
-                                    isRequired: false,
-                                    isVisible: true,
-                                    isPublic: true,
-                                    order: (section.fields?.length || 0) + 1
-                                  };
-                                  const newSections = [...content.customSections!];
-                                  newSections[sIdx].fields.push(newField);
-                                  updateContentField('customSections', newSections);
-                                }} className="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-[9px] font-black uppercase text-slate-400 hover:border-slate-300 hover:text-slate-500 transition-all">+ Ajouter un champ</button>
+                                  const newField = { id: `f_${Date.now()}`, type: 'text_short', label: 'Nouveau Champ', value: '', isRequired: false, isVisible: true, isPublic: true, order: (section.fields?.length || 0) + 1 };
+                                  const ns = [...content.customSections!];
+                                  ns[sIdx].fields.push(newField as any);
+                                  updateContentField('customSections', ns);
+                                }} className="w-full py-4 border-2 border-dashed border-slate-200 rounded-3xl text-[10px] font-black uppercase text-slate-400 hover:border-blue-200 hover:text-blue-500 transition-all flex items-center justify-center gap-2">
+                                  <Plus className="w-4 h-4" /> Ajouter un champ
+                                </button>
                               </div>
-                           </div>
-                         ))}
-                         {(content.customSections?.length || 0) === 0 && (
-                           <div className="py-20 text-center border-2 border-dashed border-slate-100 rounded-[40px]">
-                             <Sparkles className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Commencez par créer une section personnalisée.</p>
-                           </div>
-                         )}
-                       </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {(content.customSections?.length || 0) === 0 && (
+                          <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-[60px] bg-slate-50/50">
+                            <Sparkles className="w-16 h-16 text-slate-200 mx-auto mb-4" />
+                            <h5 className="text-sm font-black text-slate-400 uppercase tracking-widest">Votre toile est vide</h5>
+                            <p className="text-[10px] font-bold text-slate-300 uppercase mt-1">Créez votre première section pour commencer le build.</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

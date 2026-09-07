@@ -78,6 +78,10 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
 
+  const [pinInput, setPinInput] = useState<string>('');
+  const [accessGranted, setAccessGranted] = useState<boolean>(false);
+  const [pinError, setPinError] = useState<boolean>(false);
+
   // --- COMPATIBILITY LAYER FOR OLD FLUTTER TYPES ---
   const normalizeItem = (rawItem: any): QRCodeItem => {
     if (!rawItem) return {} as QRCodeItem;
@@ -100,10 +104,16 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   };
 
   useEffect(() => {
-    if (item && item.type === 'WEB_LINK' && item.content.redirectMode === 'DIRECT' && item.content.linkDestinationUrl && !isSimulator) {
-      window.location.href = item.content.linkDestinationUrl;
+    if (item && (item.content.accessMode !== 'pin' || isSimulator)) {
+      setAccessGranted(true);
     }
   }, [item, isSimulator]);
+
+  useEffect(() => {
+    if (item && item.type === 'WEB_LINK' && item.content.redirectMode === 'DIRECT' && item.content.linkDestinationUrl && !isSimulator && accessGranted) {
+      window.location.href = item.content.linkDestinationUrl;
+    }
+  }, [item, isSimulator, accessGranted]);
 
   useEffect(() => {
     if (propQrItem) {
@@ -150,6 +160,16 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     setSavedContact(true);
     try { confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } }); } catch (e) {}
     setTimeout(() => setSavedContact(false), 4000);
+  };
+
+  const handlePinSubmit = () => {
+    if (item?.content.accessPin === pinInput) {
+      setAccessGranted(true);
+      setPinError(false);
+    } else {
+      setPinError(true);
+      setPinInput('');
+    }
   };
 
   const handleCopy = (text: string, type: 'phone' | 'email') => {
@@ -212,6 +232,34 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   if (error || !item) return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white p-6 text-center"><div className="space-y-4"><ShieldAlert className="w-16 h-16 mx-auto text-amber-500"/><h2 className="text-xl font-bold">{error || "Fiche introuvable"}</h2><button onClick={() => window.location.reload()} className="px-6 py-2 bg-slate-800 rounded-xl border border-slate-700">Réessayer</button></div></div>;
   if (item.status === 'inactive' || item.status === 'archived') return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white p-6 text-center"><div className="space-y-4"><Lock className="w-16 h-16 mx-auto text-amber-500"/><h2 className="text-xl font-bold">Fiche Temporairement Suspendue</h2></div></div>;
 
+  if (item.content.accessMode === 'pin' && !accessGranted && !isSimulator) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 p-6">
+        <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-[40px] p-8 space-y-8 text-center shadow-2xl">
+          <div className="w-20 h-20 bg-blue-600/10 rounded-3xl mx-auto flex items-center justify-center border border-blue-500/20">
+            <Lock className="w-10 h-10 text-blue-500" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-black text-white uppercase tracking-tight">Accès Protégé</h2>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Veuillez saisir le code PIN pour voir cette fiche.</p>
+          </div>
+          <div className="space-y-4">
+            <input
+              type="password"
+              value={pinInput}
+              onChange={e => setPinInput(e.target.value)}
+              placeholder="••••"
+              className={`w-full bg-slate-950 border ${pinError ? 'border-rose-500' : 'border-slate-800'} rounded-2xl py-4 text-center text-2xl font-black tracking-[1em] text-white focus:border-blue-600 outline-none transition-all`}
+              maxLength={6}
+            />
+            {pinError && <p className="text-[10px] font-black text-rose-500 uppercase">Code PIN incorrect</p>}
+            <button onClick={handlePinSubmit} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-xl uppercase tracking-widest transition-all active:scale-95">Valider</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const linkedClient = item.clientId ? getClientById(item.clientId) : null;
   const content: QRContent = linkedClient ? { ...item.content, ...linkedClient } : item.content;
   const { styling } = item;
@@ -262,6 +310,79 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       case 'threads': return <AtSign className="w-5 h-5 text-slate-200" />;
       case 'whatsapp_channel': return <MessageSquare className="w-5 h-5 text-emerald-600" />;
       default: return <Globe className="w-5 h-5 text-slate-400" />;
+    }
+  };
+
+  const CustomFieldSmartRenderer = ({ field }: { field: any }) => {
+    switch (field.type) {
+      case 'separator':
+        return <div className="h-px bg-slate-800/50 w-full my-4" />;
+      case 'section_title':
+        return <h3 className="text-sm font-black text-white uppercase tracking-widest mt-6 mb-2">{field.label}</h3>;
+      case 'image':
+        return (
+          <div className="rounded-3xl overflow-hidden border border-slate-800 shadow-xl">
+            <img src={field.value} className="w-full h-auto" />
+          </div>
+        );
+      case 'video':
+        return (
+          <a href={field.value} target="_blank" rel="noopener noreferrer" className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group">
+            <div className="w-12 h-12 bg-rose-600/10 rounded-2xl flex items-center justify-center text-rose-500"><Video className="w-6 h-6" /></div>
+            <div className="flex-1"><span className="text-[9px] font-black uppercase text-slate-500 block">{field.label}</span><span className="text-xs font-black text-white">Voir la Vidéo</span></div>
+            <ExternalLink className="w-4 h-4 text-slate-700" />
+          </a>
+        );
+      case 'pdf':
+      case 'document':
+        return (
+          <a href={field.value} target="_blank" rel="noopener noreferrer" className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group">
+            <div className="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500"><FileText className="w-6 h-6" /></div>
+            <div className="flex-1"><span className="text-[9px] font-black uppercase text-slate-500 block">{field.label}</span><span className="text-xs font-black text-white">Télécharger Document</span></div>
+            <Download className="w-4 h-4 text-slate-700" />
+          </a>
+        );
+      case 'phone':
+      case 'whatsapp':
+        return (
+          <a href={field.type === 'phone' ? `tel:${field.value}` : `https://wa.me/${field.value.replace(/\D/g, '')}`} className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group hover:border-emerald-500 transition-colors">
+            <div className="w-12 h-12 bg-emerald-600/10 rounded-2xl flex items-center justify-center text-emerald-500">{field.type === 'phone' ? <Phone className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}</div>
+            <div className="flex-1"><span className="text-[9px] font-black uppercase text-slate-500 block">{field.label}</span><span className="text-xs font-black text-white">{field.value}</span></div>
+            <ExternalLink className="w-4 h-4 text-slate-700" />
+          </a>
+        );
+      case 'email':
+        return (
+          <a href={`mailto:${field.value}`} className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group hover:border-blue-500 transition-colors">
+            <div className="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500"><Mail className="w-6 h-6" /></div>
+            <div className="flex-1"><span className="text-[9px] font-black uppercase text-slate-500 block">{field.label}</span><span className="text-xs font-black text-white">{field.value}</span></div>
+            <ExternalLink className="w-4 h-4 text-slate-700" />
+          </a>
+        );
+      case 'url':
+      case 'button':
+        return (
+          <a href={field.value} target="_blank" rel="noopener noreferrer" className="p-5 bg-blue-600 text-white rounded-[28px] flex items-center gap-4 shadow-xl active:scale-[0.98] transition-all">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Link className="w-5 h-5" /></div>
+            <span className="text-xs font-black uppercase tracking-widest flex-1 text-center">{field.label}</span>
+            <ArrowRight className="w-4 h-4 opacity-50" />
+          </a>
+        );
+      case 'gps':
+        return (
+          <a href={`https://www.google.com/maps/search/?api=1&query=${field.value}`} target="_blank" rel="noopener noreferrer" className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group">
+            <div className="w-12 h-12 bg-rose-600/10 rounded-2xl flex items-center justify-center text-rose-500"><MapPin className="w-6 h-6" /></div>
+            <div className="flex-1"><span className="text-[9px] font-black uppercase text-slate-500 block">{field.label}</span><span className="text-xs font-black text-white">Ouvrir Itinéraire</span></div>
+            <Navigation className="w-4 h-4 text-slate-700" />
+          </a>
+        );
+      default:
+        return (
+          <div className="p-5 bg-slate-900/50 border border-slate-800 rounded-[28px] space-y-1">
+            <span className="text-[9px] font-black uppercase text-slate-500 block tracking-widest">{field.label}</span>
+            <p className="text-xs font-black text-white uppercase tracking-tight whitespace-pre-line">{field.value}</p>
+          </div>
+        );
     }
   };
 
@@ -1923,23 +2044,38 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       case 'CUSTOM':
         return (
           <div className="space-y-8 pb-10">
-            {(content.customSections || []).map(section => (
-              <div key={section.id} className="bg-slate-900/50 border border-slate-800/50 rounded-[40px] p-8 space-y-6 shadow-2xl">
-                <SectionHeader title={section.title} icon={Sparkles} colorClass="text-amber-500" />
-                <div className="grid grid-cols-1 gap-4">
-                  {section.fields.map(field => (
-                    <div key={field.id} className="p-5 bg-slate-950/50 border border-slate-800 rounded-[28px] space-y-1 hover:border-slate-700 transition-colors">
-                      <span className="text-[9px] font-black uppercase text-slate-500 block tracking-widest">{field.label}</span>
-                      {field.type === 'url' ? (
-                        <a href={field.value} className="text-xs font-black text-blue-500 hover:underline break-all uppercase tracking-tight flex items-center gap-2">{field.value} <ExternalLink className="w-3 h-3" /></a>
-                      ) : field.type === 'phone' ? (
-                        <a href={`tel:${field.value}`} className="text-xs font-black text-emerald-500 hover:underline flex items-center gap-2">{field.value} <Phone className="w-3 h-3" /></a>
-                      ) : field.type === 'text_long' ? (
-                        <p className="text-xs font-medium text-slate-300 leading-relaxed whitespace-pre-line">{field.value}</p>
-                      ) : (
-                        <p className="text-xs font-black text-white uppercase tracking-tight">{field.value}</p>
-                      )}
+            {/* HERO INFO */}
+            {(content.customBannerUrl || content.customPhotoUrl || content.customLogoUrl || content.customTitle) && (
+              <div className="bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl relative">
+                {content.customBannerUrl && (
+                  <div className="w-full h-48 relative">
+                    <img src={content.customBannerUrl} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+                  </div>
+                )}
+                <div className={`p-8 text-center space-y-4 ${content.customBannerUrl ? '-mt-16 relative' : ''}`}>
+                  {(content.customPhotoUrl || content.customLogoUrl) && (
+                    <div className="w-24 h-24 rounded-3xl bg-white p-1 mx-auto shadow-2xl border-4 border-slate-800 overflow-hidden">
+                      <img src={content.customPhotoUrl || content.customLogoUrl} className="w-full h-full object-cover rounded-2xl" />
                     </div>
+                  )}
+                  <div className="space-y-1">
+                    {content.customCategory && <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">{content.customCategory}</span>}
+                    <h1 className="text-2xl font-black text-white uppercase tracking-tight">{content.customTitle || item.title}</h1>
+                    {content.customSubtitle && <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{content.customSubtitle}</p>}
+                  </div>
+                  {content.customDescription && <p className="text-xs font-medium text-slate-400 italic">« {content.customDescription} »</p>}
+                </div>
+              </div>
+            )}
+
+            {(content.customSections || []).map(section => (
+              <div key={section.id} className="space-y-4">
+                <SectionHeader title={section.title} icon={Sparkles} colorClass="text-amber-500" />
+                {section.description && <p className="text-[10px] text-slate-500 font-bold uppercase -mt-2 ml-6">{section.description}</p>}
+                <div className="grid grid-cols-1 gap-4">
+                  {section.fields.filter(f => f.isVisible).map(field => (
+                    <CustomFieldSmartRenderer key={field.id} field={field} />
                   ))}
                 </div>
               </div>

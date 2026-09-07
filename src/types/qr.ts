@@ -502,6 +502,21 @@ export interface QRContent {
   customSections?: CustomSection[];
   customFields?: CustomField[]; // For backward compatibility or simple lists
 
+  // Custom Card Metadata (for Builder)
+  customCardName?: string;
+  customTitle?: string;
+  customSubtitle?: string;
+  customDescription?: string;
+  customPhotoUrl?: string;
+  customLogoUrl?: string;
+  customBannerUrl?: string;
+  customCategory?: string;
+  customStatus?: 'draft' | 'published' | 'expired';
+  customVisibility?: 'public' | 'private' | 'hidden';
+  customExpirationDate?: string;
+  accessMode?: 'public' | 'pin';
+  accessPin?: string;
+
   // Privacy & Protection
   privacy: {
     hideAddress?: boolean;
@@ -534,7 +549,7 @@ export interface CustomFieldExtended {
     | 'date' | 'time' | 'datetime' | 'address' | 'gps' | 'boolean' | 'select'
     | 'radio' | 'multiselect' | 'image' | 'gallery' | 'document' | 'pdf'
     | 'amount' | 'currency' | 'percentage' | 'rating' | 'matricule' | 'reference'
-    | 'code' | 'number_id' | 'status' | 'button' | 'social' | 'video' | 'audio'
+    | 'code' | 'id_number' | 'status' | 'button' | 'social' | 'video' | 'audio'
     | 'separator' | 'section_title';
   label: string;
   value: any;

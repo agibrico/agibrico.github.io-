@@ -477,6 +477,11 @@ export interface QRContent {
   linkType?: string; // Website, Shop, Facebook, etc.
   redirectMode?: RedirectMode;
   customButtonText?: string;
+  linkLogoUrl?: string;
+  linkImageUrl?: string;
+  linkCoverImageUrl?: string;
+  linkExpirationDate?: string;
+  showCustomButton?: boolean;
 
   // --- LOCATION SPECIFIC ---
   locationPlaceName?: string;

@@ -1879,18 +1879,44 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
       case 'WEB_LINK':
         return (
-          <div className="min-h-[70vh] flex flex-col items-center justify-center text-center space-y-8">
-            <div className="w-24 h-24 bg-blue-600/10 rounded-[32px] flex items-center justify-center border border-blue-600/20 animate-pulse">
-              <Globe className="w-10 h-10 text-blue-600" />
+          <div className="space-y-8 pb-10">
+            {/* Image de Couverture si présente */}
+            {content.linkCoverImageUrl && (
+              <div className="w-full h-48 rounded-[40px] overflow-hidden shadow-2xl border border-slate-800/50">
+                <img src={content.linkCoverImageUrl} className="w-full h-full object-cover" alt="Cover" />
+              </div>
+            )}
+
+            <div className={`flex flex-col items-center justify-center text-center space-y-8 ${!content.linkCoverImageUrl ? 'min-h-[60vh]' : ''}`}>
+              {/* Logo si présent, sinon icône Globe par défaut */}
+              <div className="w-24 h-24 bg-slate-900 border border-slate-800 rounded-[32px] flex items-center justify-center shadow-2xl overflow-hidden group">
+                {content.linkLogoUrl ? (
+                  <img src={content.linkLogoUrl} className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500" alt="Logo" />
+                ) : (
+                  <Globe className="w-10 h-10 text-blue-600 animate-pulse" />
+                )}
+              </div>
+
+              <div className="space-y-4 px-4">
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500">{content.linkType || 'Lien Web'}</span>
+                  <h1 className="text-4xl font-black text-white uppercase tracking-tight leading-none drop-shadow-lg">{content.linkTitle || 'Bienvenue'}</h1>
+                </div>
+                {content.linkDescription && (
+                  <p className="text-sm font-medium text-slate-400 max-w-sm mx-auto leading-relaxed">{content.linkDescription}</p>
+                )}
+              </div>
+
+              <div className="w-full pt-4">
+                <a href={content.linkDestinationUrl} className="group relative block w-full max-w-xs mx-auto">
+                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur opacity-60 group-hover:opacity-100 transition duration-500" />
+                   <button className="relative w-full py-6 bg-slate-950 text-white rounded-[28px] font-black text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all active:scale-[0.98] border border-white/5 shadow-2xl">
+                     {content.showCustomButton && content.customButtonText ? content.customButtonText : 'Ouvrir le lien'}
+                     <ArrowRight className="w-5 h-5 text-blue-500 group-hover:translate-x-1 transition-transform" />
+                   </button>
+                </a>
+              </div>
             </div>
-            <div className="space-y-3">
-              <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none">{content.linkTitle || ''}</h1>
-              {content.linkDescription && <p className="text-xs font-medium text-slate-400 max-w-xs">{content.linkDescription}</p>}
-            </div>
-            <a href={content.linkDestinationUrl} className="group relative">
-               <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
-               <button className="relative px-10 py-5 bg-slate-950 text-white rounded-2xl font-black text-sm uppercase tracking-[0.3em] flex items-center gap-4 transition-all active:scale-95">Accéder au site <ArrowRight className="w-5 h-5 text-blue-500" /></button>
-            </a>
           </div>
         );
 

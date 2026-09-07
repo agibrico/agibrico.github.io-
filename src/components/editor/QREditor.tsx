@@ -1886,34 +1886,164 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                   )}
 
                   {/* --- 9. WEB_LINK --- */}
+                  {/* --- 9. WEB_LINK --- */}
                   {type === 'WEB_LINK' && (
-                    <div className="space-y-8">
-                       <div className="space-y-4">
-                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Globe className="w-4 h-4 text-blue-600"/> Destination</h4>
-                          <input type="url" placeholder="Lien complet (https://...)" value={content.linkDestinationUrl || ''} onChange={e => updateContentField('linkDestinationUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 text-sm font-bold text-blue-600" />
-                       </div>
+                    <div className="space-y-10">
+                       {/* SECTION 1: INFORMATIONS */}
+                       <div className="space-y-6">
+                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
+                            <Info className="w-4 h-4 text-blue-600"/> Informations
+                          </h4>
 
-                       <div className="bg-slate-900 p-5 rounded-3xl space-y-4 shadow-xl">
-                          <label className="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Mode de Redirection</label>
-                          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-800 rounded-2xl">
-                            <button onClick={() => updateContentField('redirectMode', 'DIRECT')} className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${content.redirectMode === 'DIRECT' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500'}`}>Direct (Immédiat)</button>
-                            <button onClick={() => updateContentField('redirectMode', 'LANDING_PAGE')} className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${content.redirectMode === 'LANDING_PAGE' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500'}`}>Landing Page (Profil)</button>
+                          <div className="grid grid-cols-2 gap-4">
+                             <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
+                                {content.linkLogoUrl ? (
+                                  <div className="relative">
+                                    <img src={content.linkLogoUrl} className="w-16 h-16 rounded-xl object-contain shadow-md p-1 bg-white" />
+                                    <button onClick={() => updateContentField('linkLogoUrl', '')} className="absolute -top-2 -right-2 p-1 bg-rose-600 text-white rounded-full shadow-lg"><Trash2 className="w-3 h-3"/></button>
+                                  </div>
+                                ) : (
+                                  <label className="flex flex-col items-center cursor-pointer">
+                                    <Upload className="w-5 h-5 text-slate-300 mb-1" />
+                                    <span className="text-[8px] font-black uppercase text-slate-400">Logo</span>
+                                    <input type="file" className="hidden" accept="image/*" onChange={e => {
+                                      const file = e.target.files?.[0];
+                                      if(file) {
+                                        const r = new FileReader();
+                                        r.onload = ev => updateContentField('linkLogoUrl', ev.target?.result as string);
+                                        r.readAsDataURL(file);
+                                      }
+                                    }} />
+                                  </label>
+                                )}
+                             </div>
+                             <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
+                                {content.linkCoverImageUrl ? (
+                                  <div className="relative w-full h-full flex items-center justify-center">
+                                    <img src={content.linkCoverImageUrl} className="w-full h-16 rounded-xl object-cover shadow-md" />
+                                    <button onClick={() => updateContentField('linkCoverImageUrl', '')} className="absolute -top-2 -right-2 p-1 bg-rose-600 text-white rounded-full shadow-lg"><Trash2 className="w-3 h-3"/></button>
+                                  </div>
+                                ) : (
+                                  <label className="flex flex-col items-center cursor-pointer">
+                                    <ImageIcon className="w-5 h-5 text-slate-300 mb-1" />
+                                    <span className="text-[8px] font-black uppercase text-slate-400">Image de Couverture</span>
+                                    <input type="file" className="hidden" accept="image/*" onChange={e => {
+                                      const file = e.target.files?.[0];
+                                      if(file) {
+                                        const r = new FileReader();
+                                        r.onload = ev => updateContentField('linkCoverImageUrl', ev.target?.result as string);
+                                        r.readAsDataURL(file);
+                                      }
+                                    }} />
+                                  </label>
+                                )}
+                             </div>
                           </div>
-                          <p className="text-[9px] text-slate-500 italic text-center">
-                            {content.redirectMode === 'DIRECT'
-                              ? "Le scan redirige instantanément vers l'URL sans afficher de page intermédiaire."
-                              : "Affiche une page de présentation stylisée avec un bouton vers votre lien."}
-                          </p>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Type de Lien</label>
+                              <select
+                                value={content.linkType || 'Website'}
+                                onChange={e => updateContentField('linkType', e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold"
+                              >
+                                <option value="Website">Site Web</option>
+                                <option value="Shop">Boutique</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="YouTube">YouTube</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="Google Maps">Google Maps</option>
+                                <option value="Google Drive">Google Drive</option>
+                                <option value="PDF">PDF</option>
+                                <option value="Catalog">Catalogue</option>
+                                <option value="Form">Formulaire</option>
+                                <option value="Payment">Paiement</option>
+                                <option value="Download">Téléchargement</option>
+                                <option value="Other">Autre</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Titre d'Affichage</label>
+                              <input type="text" placeholder="Ex: Notre Boutique" value={content.linkTitle || ''} onChange={e => updateContentField('linkTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">URL de Destination</label>
+                            <input type="url" placeholder="https://..." value={content.linkDestinationUrl || ''} onChange={e => updateContentField('linkDestinationUrl', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-blue-600" />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400">Description</label>
+                            <textarea placeholder="Description facultative..." value={content.linkDescription || ''} onChange={e => updateContentField('linkDescription', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
+                          </div>
                        </div>
 
-                       {content.redirectMode === 'LANDING_PAGE' && (
-                         <div className="space-y-4 animate-in slide-in-from-top-4">
-                           <input type="text" placeholder="Titre affiché sur la page" value={content.linkTitle || ''} onChange={e => updateContentField('linkTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
-                           <textarea placeholder="Description facultative" value={content.linkDescription || ''} onChange={e => updateContentField('linkDescription', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
-                         </div>
-                       )}
+                       {/* SECTION 2: PARAMÈTRES */}
+                       <div className="space-y-6">
+                          <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
+                            <Sliders className="w-4 h-4 text-slate-600"/> Paramètres
+                          </h4>
+
+                          <div className="bg-slate-900 p-5 rounded-3xl space-y-4 shadow-xl">
+                            <label className="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Mode de Redirection</label>
+                            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-800 rounded-2xl">
+                              <button onClick={() => updateContentField('redirectMode', 'DIRECT')} className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${content.redirectMode === 'DIRECT' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500'}`}>Direct (Immédiat)</button>
+                              <button onClick={() => updateContentField('redirectMode', 'LANDING_PAGE')} className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${content.redirectMode === 'LANDING_PAGE' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500'}`}>Landing Page (Profil)</button>
+                            </div>
+                            <p className="text-[9px] text-slate-500 italic text-center">
+                              {content.redirectMode === 'DIRECT'
+                                ? "Le scan redirige instantanément vers l'URL sans afficher de page intermédiaire."
+                                : "Affiche une page de présentation stylisée avec un bouton vers votre lien."}
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Date d'Expiration</label>
+                              <input type="date" value={content.linkExpirationDate || ''} onChange={e => updateContentField('linkExpirationDate', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black uppercase text-slate-400">Statut Interne</label>
+                              <select
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold"
+                                disabled
+                              >
+                                <option value="active">Actif</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-0.5">
+                                <label className="text-[10px] font-black uppercase text-slate-900">Bouton Personnalisé</label>
+                                <p className="text-[9px] text-slate-500">Modifier le texte du bouton d'appel à l'action.</p>
+                              </div>
+                              <button
+                                onClick={() => updateContentField('showCustomButton', !content.showCustomButton)}
+                                className={`w-10 h-5 rounded-full transition-colors relative ${content.showCustomButton ? 'bg-blue-600' : 'bg-slate-300'}`}
+                              >
+                                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${content.showCustomButton ? 'left-6' : 'left-1'}`} />
+                              </button>
+                            </div>
+                            {content.showCustomButton && (
+                              <input
+                                type="text"
+                                placeholder="Ex: Découvrir nos offres"
+                                value={content.customButtonText || ''}
+                                onChange={e => updateContentField('customButtonText', e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold animate-in slide-in-from-top-2"
+                              />
+                            )}
+                          </div>
+                       </div>
                     </div>
-                  )}
+                  )
 
                   {/* --- 10. CUSTOM --- */}
                   {type === 'CUSTOM' && (

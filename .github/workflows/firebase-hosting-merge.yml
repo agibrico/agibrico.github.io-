@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting on merge
+name: Build Web and Android APK
 
 on:
   push:
@@ -9,7 +9,6 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    # Ajout de l'environnement au cas où le secret y soit stocké
     environment: github-pages
     steps:
       - uses: actions/checkout@v4
@@ -17,13 +16,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24 # Passage à la version 24
+          node-version: 24
           cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
 
       - name: Install dependencies
         run: npm ci || npm install
 
-      - name: Build
+      - name: Build Web App
         run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.APIKEY }}
@@ -37,7 +42,20 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          # On accepte maintenant soit le long nom, soit le nouveau nom simple
           firebaseServiceAccount: ${{ secrets.FIREBASE_TOKEN || secrets.FIREBASE_SERVICE_ACCOUNT_AGB_VCARD_STUDIO }}
           channelId: live
           projectId: agb-vcard-studio
+
+      - name: Capacitor Android Build
+        run: |
+          npx cap add android
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk

@@ -477,11 +477,11 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* SOCIAL NETWORKS */}
-            {content.socialLinks && content.socialLinks.length > 0 && (
+            {content.socialLinks?.filter(l => l.url && l.url.trim() !== "").length > 0 && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
                 <SectionHeader title="Réseaux Sociaux" icon={Share2} />
                 <div className="grid grid-cols-4 gap-3">
-                  {content.socialLinks.map(link => (
+                  {content.socialLinks.filter(l => l.url && l.url.trim() !== "").map(link => (
                     <a
                       key={link.id}
                       href={link.url}
@@ -928,41 +928,43 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* LOCATION & ACCESS */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
-              <SectionHeader title="Accès au Lieu" icon={MapPin} colorClass="text-rose-500" />
-              <div className="space-y-3">
-                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
-                  <h3 className="text-sm font-black text-white uppercase">{content.eventLocationName}</h3>
-                  <p className="text-xs text-slate-400">{content.eventAddress}</p>
-                  <p className="text-[10px] font-bold text-slate-500">{content.eventCommune}, {content.eventCity}</p>
-                </div>
-                {content.eventLandmark && <InfoRow label="Repère" value={content.eventLandmark} icon={LocateFixed} />}
-                {content.eventAccessInstructions && (
-                  <div className="p-4 bg-slate-800/20 rounded-2xl border border-slate-700/50">
-                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-1">Instructions d'accès</span>
-                    <p className="text-[10px] text-slate-400 font-medium italic">{content.eventAccessInstructions}</p>
+            {(content.eventLocationName || content.eventAddress || content.eventLatitude || content.eventLongitude) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Accès au Lieu" icon={MapPin} colorClass="text-rose-500" />
+                <div className="space-y-3">
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
+                    <h3 className="text-sm font-black text-white uppercase">{content.eventLocationName}</h3>
+                    <p className="text-xs text-slate-400">{content.eventAddress}</p>
+                    <p className="text-[10px] font-bold text-slate-500">{content.eventCommune}, {content.eventCity}</p>
                   </div>
-                )}
+                  {content.eventLandmark && <InfoRow label="Repère" value={content.eventLandmark} icon={LocateFixed} />}
+                  {content.eventAccessInstructions && (
+                    <div className="p-4 bg-slate-800/20 rounded-2xl border border-slate-700/50">
+                      <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-1">Instructions d'accès</span>
+                      <p className="text-[10px] text-slate-400 font-medium italic">{content.eventAccessInstructions}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${content.eventLatitude && content.eventLongitude ? `${content.eventLatitude},${content.eventLongitude}` : encodeURIComponent(`${content.eventLocationName} ${content.eventAddress}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-3 bg-slate-800 rounded-xl text-white font-black text-[10px] uppercase flex items-center justify-center gap-2 border border-slate-700"
+                  >
+                    <Navigation className="w-3.5 h-3.5 text-blue-400" /> Google Maps
+                  </a>
+                  <a
+                    href={`https://waze.com/ul?q=${encodeURIComponent(`${content.eventLocationName} ${content.eventAddress}`)}&navigate=yes`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-3 bg-slate-800 rounded-xl text-white font-black text-[10px] uppercase flex items-center justify-center gap-2 border border-slate-700"
+                  >
+                    <Map className="w-3.5 h-3.5 text-cyan-400" /> Waze
+                  </a>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${content.eventLatitude && content.eventLongitude ? `${content.eventLatitude},${content.eventLongitude}` : encodeURIComponent(`${content.eventLocationName} ${content.eventAddress}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-3 bg-slate-800 rounded-xl text-white font-black text-[10px] uppercase flex items-center justify-center gap-2 border border-slate-700"
-                >
-                  <Navigation className="w-3.5 h-3.5 text-blue-400" /> Google Maps
-                </a>
-                <a
-                  href={`https://waze.com/ul?q=${encodeURIComponent(`${content.eventLocationName} ${content.eventAddress}`)}&navigate=yes`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-3 bg-slate-800 rounded-xl text-white font-black text-[10px] uppercase flex items-center justify-center gap-2 border border-slate-700"
-                >
-                  <Map className="w-3.5 h-3.5 text-cyan-400" /> Waze
-                </a>
-              </div>
-            </div>
+            )}
 
             {/* GUEST SPECIFIC (PERSONALIZED) */}
             {(content.eventInvitationNumber || content.eventTable || content.eventSeat || content.eventZone) && (
@@ -1160,30 +1162,32 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* LIVRAISON & PAIEMENTS */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
-              <SectionHeader title="Services Logistiques" icon={Truck} colorClass="text-blue-500" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center text-center gap-2">
-                   <Truck className={`w-6 h-6 ${content.shopDeliveryAvailable ? 'text-emerald-500' : 'text-slate-700'}`} />
-                   <span className="text-[9px] font-black uppercase text-white">Livraison</span>
-                   <span className="text-[8px] font-bold text-slate-500 uppercase">{content.shopDeliveryAvailable ? 'Disponible' : 'Non disp.'}</span>
-                </div>
-                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center text-center gap-2">
-                   <Package className={`w-6 h-6 ${content.shopInStorePickup ? 'text-blue-500' : 'text-slate-700'}`} />
-                   <span className="text-[9px] font-black uppercase text-white">Retrait</span>
-                   <span className="text-[8px] font-bold text-slate-500 uppercase">{content.shopInStorePickup ? 'En Magasin' : 'Non disp.'}</span>
-                </div>
-              </div>
-
-              {content.shopPaymentMethods && content.shopPaymentMethods.length > 0 && (
-                <div className="space-y-3">
-                  <span className="text-[8px] font-black uppercase text-slate-600 block tracking-widest text-center">Modes de Paiement Acceptés</span>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {content.shopPaymentMethods.map(p => <span key={p} className="px-3 py-1 bg-slate-800 text-[9px] font-black text-slate-300 uppercase rounded-lg border border-slate-700">{p}</span>)}
+            {(content.shopDeliveryAvailable || content.shopInStorePickup || (content.shopPaymentMethods && content.shopPaymentMethods.length > 0)) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Services Logistiques" icon={Truck} colorClass="text-blue-500" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center text-center gap-2">
+                     <Truck className={`w-6 h-6 ${content.shopDeliveryAvailable ? 'text-emerald-500' : 'text-slate-700'}`} />
+                     <span className="text-[9px] font-black uppercase text-white">Livraison</span>
+                     <span className="text-[8px] font-bold text-slate-500 uppercase">{content.shopDeliveryAvailable ? 'Disponible' : 'Non disp.'}</span>
+                  </div>
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center text-center gap-2">
+                     <Package className={`w-6 h-6 ${content.shopInStorePickup ? 'text-blue-500' : 'text-slate-700'}`} />
+                     <span className="text-[9px] font-black uppercase text-white">Retrait</span>
+                     <span className="text-[8px] font-bold text-slate-500 uppercase">{content.shopInStorePickup ? 'En Magasin' : 'Non disp.'}</span>
                   </div>
                 </div>
-              )}
-            </div>
+
+                {content.shopPaymentMethods && content.shopPaymentMethods.length > 0 && (
+                  <div className="space-y-3">
+                    <span className="text-[8px] font-black uppercase text-slate-600 block tracking-widest text-center">Modes de Paiement Acceptés</span>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {content.shopPaymentMethods.map(p => <span key={p} className="px-3 py-1 bg-slate-800 text-[9px] font-black text-slate-300 uppercase rounded-lg border border-slate-700">{p}</span>)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* DOCUMENTS */}
             {(content.shopPriceListUrl || content.shopMenuUrl || content.shopBrochureUrl) && (
@@ -1198,11 +1202,11 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* RÉSEAUX SOCIAUX */}
-            {content.socialLinks && content.socialLinks.length > 0 && (
+            {content.socialLinks?.filter(l => l.url && l.url.trim() !== "").length > 0 && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
                 <SectionHeader title="Suivez-nous" icon={Share2} />
                 <div className="grid grid-cols-4 gap-3">
-                  {content.socialLinks.map(link => (
+                  {content.socialLinks.filter(l => l.url && l.url.trim() !== "").map(link => (
                     <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group">
                       {getSocialIcon(link.platform)}
                       <span className="text-[7px] font-black uppercase text-slate-500 group-hover:text-slate-200 truncate w-full text-center">{link.platform}</span>
@@ -1614,11 +1618,11 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* SOCIAL NETWORKS */}
-            {content.socialLinks && content.socialLinks.length > 0 && (
+            {content.socialLinks?.filter(l => l.url && l.url.trim() !== "").length > 0 && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
                 <SectionHeader title="Suivez-nous" icon={Share2} />
                 <div className="grid grid-cols-4 gap-3">
-                  {content.socialLinks.map(link => (
+                  {content.socialLinks.filter(l => l.url && l.url.trim() !== "").map(link => (
                     <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group">
                       {getSocialIcon(link.platform)}
                       <span className="text-[7px] font-black uppercase text-slate-500 group-hover:text-slate-200 truncate w-full text-center">{link.platform}</span>
@@ -1726,10 +1730,10 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             </div>
 
             {/* 3. Social Grid */}
-            {socialPlatforms.length > 0 && (
+            {socialPlatforms.filter(l => l.url && l.url.trim() !== "").length > 0 && (
               <div className="px-8 pt-10">
                 <div className="grid grid-cols-4 gap-4">
-                  {socialPlatforms.map(link => (
+                  {socialPlatforms.filter(l => l.url && l.url.trim() !== "").map(link => (
                     <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 group">
                       <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-white group-hover:scale-110 group-hover:bg-indigo-600 transition-all shadow-lg">
                         {getSocialIcon(link.platform)}
@@ -1744,7 +1748,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             {/* 4. Action Buttons */}
             <div className="px-8 pt-8 flex flex-wrap justify-center gap-3">
               <button onClick={() => {
-                const primary = socialPlatforms[0]?.url || content.websiteUrl || (content.socialLinks && content.socialLinks[0]?.url);
+                const primary = socialPlatforms.filter(l => l.url && l.url.trim() !== "")[0]?.url || content.websiteUrl || (content.socialLinks?.filter(l => l.url && l.url.trim() !== "")[0]?.url);
                 if(primary) window.open(primary, '_blank');
               }} className="flex-1 min-w-[120px] py-3 bg-white text-slate-950 rounded-2xl font-black text-xs uppercase tracking-tighter shadow-xl flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors">
                 <UserPlus className="w-4 h-4" /> Suivre
@@ -1903,17 +1907,19 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                  )}
 
                  {/* LOGISTICS & GUARANTEE */}
-                 <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
-                    <SectionHeader title="Logistique & Garantie" icon={Truck} colorClass="text-amber-500" />
-                    <InfoRow label="Frais de livraison" value={content.productDeliveryFees || content.productDeliveryInfo} icon={Truck} />
-                    <InfoRow label="Garantie" value={content.productGuarantee} icon={Award} />
-                    {content.productConditions && (
-                       <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
-                          <span className="text-[8px] font-black text-slate-600 uppercase block mb-1">Conditions de vente</span>
-                          <p className="text-[10px] text-slate-500 font-medium italic">{content.productConditions}</p>
-                       </div>
-                    )}
-                 </div>
+                 {(content.productDeliveryFees || content.productDeliveryInfo || content.productGuarantee || content.productConditions) && (
+                    <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                       <SectionHeader title="Logistique & Garantie" icon={Truck} colorClass="text-amber-500" />
+                       <InfoRow label="Frais de livraison" value={content.productDeliveryFees || content.productDeliveryInfo} icon={Truck} />
+                       <InfoRow label="Garantie" value={content.productGuarantee} icon={Award} />
+                       {content.productConditions && (
+                          <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                             <span className="text-[8px] font-black text-slate-600 uppercase block mb-1">Conditions de vente</span>
+                             <p className="text-[10px] text-slate-500 font-medium italic">{content.productConditions}</p>
+                          </div>
+                       )}
+                    </div>
+                 )}
               </div>
             )}
 

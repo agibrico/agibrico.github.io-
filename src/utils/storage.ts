@@ -402,7 +402,8 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     content: {
       fullName: 'Christophe FODJO',
       jobTitle: 'Gérant',
-      company: 'Indépendant',
+      company: 'Canaan Services',
+      logoUrl: CANAAN_SERVICES_LOGO,
       primaryPhone: '+225 07 07 12 34 56',
       email: 'c.fodjo@outlook.com',
       city: 'Abidjan',
@@ -419,7 +420,8 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       errorCorrectionLevel: 'H',
       margin: 3,
       size: 320,
-      cardBackgroundTheme: 'matte_dark'
+      cardBackgroundTheme: 'matte_dark',
+      logoUrl: CANAAN_SERVICES_LOGO
     }
   },
   {
@@ -651,29 +653,35 @@ export async function fetchQRCodeByPublicId(publicId: string, preferServer = tru
   if (!publicId) return null;
   const cleanId = publicId.trim();
 
-  // 1. Try Firestore first if preferred (to get latest data on scan)
+  // 1. Try Firestore if preferred (to get latest data on scan)
+  let serverFound: QRCodeItem | null = null;
   if (preferServer && db) {
     try {
       const cardRef = doc(db, 'cards', cleanId);
       const cardSnap = await getDoc(cardRef);
       if (cardSnap.exists()) {
-        return {
+        serverFound = {
           ...cardSnap.data() as QRCodeItem,
-          // Ensure updatedAt is string for consistency if Firestore returns Timestamp
           updatedAt: cardSnap.data().updatedAt?.toDate?.()?.toISOString() || cardSnap.data().updatedAt
         };
       }
     } catch (err) {
-      console.warn("Firestore fetch failed, falling back to local", err);
+      console.warn("Firestore fetch failed", err);
     }
   }
 
-  // 2. Local fallback
+  if (serverFound) return serverFound;
+
+  // 2. Local fallback (Matches Initial Items or Local Storage)
   const localFound = getQRCodeByPublicId(cleanId);
   if (localFound) return localFound;
 
-  // 3. Firestore fallback if not preferred but not found locally
-  if (!preferServer && db) {
+  // 3. HARDCODED FALLBACK FOR DEMO/OFFICIAL IDS (Ensures they work globally without Cloud sync)
+  const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toLowerCase() === cleanId.toLowerCase());
+  if (demoItem) return demoItem;
+
+  // 4. Last chance Firestore if not already tried
+  if (!preferServer && db && !serverFound) {
     try {
       const cardRef = doc(db, 'cards', cleanId);
       const cardSnap = await getDoc(cardRef);
@@ -1146,3 +1154,5 @@ export function importFullDatabaseJSON(jsonStr: string): boolean {
     return false;
   }
 }
+/ /   G l o b a l   F i x   f o r   E V 6 M K M Q U :   2 0 2 6 - 0 9 - 0 8   1 7 : 5 8 : 4 1  
+ 

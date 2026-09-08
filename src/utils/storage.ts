@@ -112,7 +112,7 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     lastName: 'DONGO',
     fullName: 'Richmond DONGO',
     company: 'Canaan Services',
-    jobTitle: 'Responsable Imprimerie & Gadgets',
+    jobTitle: 'Responsable Commercial',
     industry: 'Imprimerie',
     logoUrl: CANAAN_SERVICES_LOGO,
     primaryPhone: '+225 06 64 41 65 15',
@@ -130,7 +130,7 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     lastName: 'FODJO',
     fullName: 'Christophe FODJO',
     company: 'Indépendant',
-    jobTitle: 'Consultant Senior',
+    jobTitle: 'Gérant',
     industry: 'Conseil',
     primaryPhone: '+225 07 07 12 34 56',
     email: 'c.fodjo@outlook.com',
@@ -279,7 +279,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     cardNumber: 'CARD-2026-0004',
     publicId: 'CAN2026R',
     clientId: 'client_004',
-    title: 'Richmond DONGO — Canaan Services',
+    title: 'Richmond DONGO — Responsable Commercial',
     type: 'BUSINESS_CARD',
     mode: 'dynamic',
     status: 'active',
@@ -288,7 +288,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     scanCount: 68,
     content: {
       fullName: 'Richmond DONGO',
-      jobTitle: 'Responsable Imprimerie & Gadgets',
+      jobTitle: 'Responsable Commercial',
       company: 'Canaan Services',
       logoUrl: CANAAN_SERVICES_LOGO,
       primaryPhone: '+225 06 64 41 65 15',
@@ -392,7 +392,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     cardNumber: 'CARD-2026-0009',
     publicId: 'EV6MKMQU',
     clientId: 'client_005',
-    title: 'Christophe FODJO — Consultant Senior',
+    title: 'Christophe FODJO — Gérant',
     type: 'BUSINESS_CARD',
     mode: 'dynamic',
     status: 'active',
@@ -401,7 +401,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     scanCount: 12,
     content: {
       fullName: 'Christophe FODJO',
-      jobTitle: 'Consultant Senior',
+      jobTitle: 'Gérant',
       company: 'Indépendant',
       primaryPhone: '+225 07 07 12 34 56',
       email: 'c.fodjo@outlook.com',
@@ -519,20 +519,37 @@ export function getStoredQRCodes(): QRCodeItem[] {
 
     let changed = false;
 
-    // --- Legacy Compatibility: Cleanup redundant Christophe FODJO cards ---
-    // Remove any Christophe cards except the official one (EV6MKMQU)
+    // --- Legacy Compatibility: Cleanup redundant cards for Specific Clients ---
+    // Rule 1: Richmond DONGO — Keep ONLY "Responsable Commercial" (qr_demo_04)
+    // Rule 2: Christophe FODJO — Keep ONLY "Gérant" (qr_demo_09)
     const countBefore = items.length;
     items = items.filter(item => {
       if (!item) return false;
-      const isChristophe =
-        (item.content?.fullName === 'Christophe FODJO') ||
-        (item.title?.toLowerCase().includes('christophe fodjo'));
-      const isKeepable = item.id === 'qr_demo_09' || item.publicId === 'EV6MKMQU';
 
-      if (isChristophe && !isKeepable) {
-        if (!deletedIds.includes(item.id)) deletedIds.push(item.id);
-        return false;
+      const fullName = (item.content?.fullName || '').toLowerCase();
+      const title = (item.title || '').toLowerCase();
+      const jobTitle = (item.content?.jobTitle || '').toLowerCase();
+
+      // Richmond DONGO cleanup
+      if (fullName.includes('richmond dongo') || title.includes('richmond dongo')) {
+        const isKeepable = item.id === 'qr_demo_04' || item.publicId === 'CAN2026R';
+        const hasRightJob = jobTitle === 'responsable commercial';
+        if (!isKeepable || !hasRightJob) {
+          if (!deletedIds.includes(item.id)) deletedIds.push(item.id);
+          return false;
+        }
       }
+
+      // Christophe FODJO cleanup
+      if (fullName.includes('christophe fodjo') || title.includes('christophe fodjo')) {
+        const isKeepable = item.id === 'qr_demo_09' || item.publicId === 'EV6MKMQU';
+        const hasRightJob = jobTitle === 'gérant';
+        if (!isKeepable || !hasRightJob) {
+          if (!deletedIds.includes(item.id)) deletedIds.push(item.id);
+          return false;
+        }
+      }
+
       return true;
     });
 

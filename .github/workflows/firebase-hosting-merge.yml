@@ -42,9 +42,10 @@ jobs:
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
+        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AGB_VCARD_STUDIO || secrets.FIREBASE_SERVICE_ACCOUNT }}
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AGB_VCARD_STUDIO }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AGB_VCARD_STUDIO || secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           projectId: agb-vcard-studio
 

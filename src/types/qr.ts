@@ -107,6 +107,7 @@ export interface SocialLink {
     | 'twitch'
     | 'website'
     | 'pinterest'
+    | 'phone'
     | 'whatsapp_channel'
     | 'other';
   url: string;
@@ -364,7 +365,6 @@ export interface QRContent {
   // Additional Company Fields
   companyCoverUrl?: string;
   companySigle?: string;
-  companyCnpsId?: string;
   companyAgreement?: string;
   companyLicense?: string;
   companyAuthNumber?: string;
@@ -495,6 +495,15 @@ export interface QRContent {
   locationParkingInfo?: string;
   locationTransportInfo?: string;
   locationAccessibilityInfo?: string;
+  locationAddress?: string;
+  locationCommune?: string;
+  locationNeighborhood?: string;
+  locationCity?: string;
+  locationCountry?: string;
+  locationLandmark?: string;
+  locationLatitude?: number;
+  locationLongitude?: number;
+  locationOpeningHours?: OpeningHourDay[];
   locationManagerName?: string;
   locationOpeningDays?: string; // Optional if we want a text summary
 

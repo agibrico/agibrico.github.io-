@@ -127,8 +127,13 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     firstName: 'Christophe',
     lastName: 'FODJO',
     fullName: 'Christophe FODJO',
+    company: 'Indépendant',
+    jobTitle: 'Consultant',
+    primaryPhone: '+225 00 00 00 00 00',
+    email: 'c.fodjo@example.com',
     city: 'Abidjan',
     country: 'Côte d\'Ivoire',
+    socialLinks: [],
     createdAt: '2026-09-07T18:00:00.000Z',
     updatedAt: '2026-09-07T18:00:00.000Z'
   },
@@ -182,6 +187,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     styling: {
       fgColor: '#0f172a',
       bgColor: '#ffffff',
+      transparentBg: false,
       moduleStyle: 'rounded',
       eyeStyle: 'rounded',
       errorCorrectionLevel: 'H',
@@ -218,6 +224,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     styling: {
       fgColor: '#1e293b',
       bgColor: '#ffffff',
+      transparentBg: false,
       moduleStyle: 'classy',
       eyeStyle: 'square',
       errorCorrectionLevel: 'H',
@@ -254,6 +261,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     styling: {
       fgColor: '#0f766e',
       bgColor: '#ffffff',
+      transparentBg: false,
       moduleStyle: 'rounded',
       eyeStyle: 'rounded',
       errorCorrectionLevel: 'H',
@@ -290,6 +298,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     styling: {
       fgColor: '#dc2626',
       bgColor: '#ffffff',
+      transparentBg: false,
       moduleStyle: 'dots',
       eyeStyle: 'circle',
       errorCorrectionLevel: 'H',
@@ -313,9 +322,10 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       bookTitle: 'L\'Art du Digital',
       bookAuthor: 'Gilles Brice ATSÉ',
       bookSummary: 'Un guide complet sur la transformation digitale en Afrique.',
+      socialLinks: [],
       privacy: { isPublic: true }
     },
-    styling: { fgColor: '#2563eb', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
+    styling: { fgColor: '#2563eb', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', errorCorrectionLevel: 'M', margin: 2, size: 300 }
   },
   {
     id: 'qr_demo_06',
@@ -329,11 +339,12 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     scanCount: 89,
     content: {
       eventTitle: 'Gala Annuel AGB Digital',
-      eventDate: '2026-12-20',
+      eventStartDate: '2026-12-20',
       eventLocationName: 'Hôtel Ivoire, Abidjan',
+      socialLinks: [],
       privacy: { isPublic: true }
     },
-    styling: { fgColor: '#7c3aed', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
+    styling: { fgColor: '#7c3aed', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', errorCorrectionLevel: 'M', margin: 2, size: 300 }
   },
   {
     id: 'qr_demo_07',
@@ -348,9 +359,10 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     content: {
       commercialName: 'Canaan Gadgets',
       shopIndustry: 'E-commerce & Personnalisation',
+      socialLinks: [],
       privacy: { isPublic: true }
     },
-    styling: { fgColor: '#059669', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
+    styling: { fgColor: '#059669', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', errorCorrectionLevel: 'M', margin: 2, size: 300 }
   },
   {
     id: 'qr_demo_08',
@@ -367,9 +379,10 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       address: 'Riviera 3, Abidjan',
       latitude: 5.3599,
       longitude: -3.9870,
+      socialLinks: [],
       privacy: { isPublic: true }
     },
-    styling: { fgColor: '#475569', bgColor: '#ffffff', errorCorrectionLevel: 'M', margin: 2, size: 300 }
+    styling: { fgColor: '#475569', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', errorCorrectionLevel: 'M', margin: 2, size: 300 }
   },
   {
     id: 'qr_demo_09',
@@ -387,11 +400,13 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       fullName: 'Christophe FODJO',
       city: 'Abidjan',
       country: 'Côte d\'Ivoire',
+      socialLinks: [],
       privacy: { hideAddress: false }
     },
     styling: {
       fgColor: '#0f172a',
       bgColor: '#ffffff',
+      transparentBg: false,
       moduleStyle: 'rounded',
       eyeStyle: 'rounded',
       errorCorrectionLevel: 'H',
@@ -429,6 +444,7 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     styling: {
       fgColor: '#1e293b',
       bgColor: '#ffffff',
+      transparentBg: false,
       moduleStyle: 'rounded',
       eyeStyle: 'rounded',
       errorCorrectionLevel: 'H',
@@ -609,8 +625,9 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
     let hasKeys = false;
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        // Exception: privacy settings are preserved if they are objects
-        if (key === 'privacy') {
+        // Exception: privacy settings and customSections are preserved if they are objects
+        // We preserve customSections to keep field definitions even if empty in the editor
+        if (key === 'privacy' || key === 'customSections') {
           res[key] = obj[key];
           hasKeys = true;
           continue;

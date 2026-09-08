@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  User, Building2, Share2, ShoppingBag, Image as ImageIcon, Calendar, MapPin, Globe, Sparkles, Plus, Trash2, Lock, Check, Palette, Upload, Clock, Shield, Sliders, Layers, ArrowRight, Eye, Save, X, FileCode, Info, BookOpen, Store, Navigation, CheckCircle2, Smartphone, Printer, CalendarDays, Hash, Languages, DollarSign, ShoppingCart, Facebook, Instagram, Truck, Wallet, Package, MapPinned, LocateFixed, Linkedin, Youtube, FileText, Briefcase, Twitter, Send, MessageSquare, Book, Link, Map, UserPlus, List, ImagePlus, FileUp, Star, Tag, Activity, CheckSquare, LayoutList, GripVertical, Phone, BadgeCheck, GraduationCap, Quote, Users, Landmark, TruckIcon, CreditCard, PenTool, BookMarked, Languages as LangIcon, Headphones, Video, Settings, ChevronDown, ChevronUp, Minus, Type, Mail
+  User, Building2, Share2, ShoppingBag, Image as ImageIcon, Calendar, MapPin, Globe, Sparkles, Plus, Trash2, Lock, Check, Palette, Upload, Clock, Shield, Sliders, Layers, ArrowRight, Eye, Save, X, FileCode, Info, BookOpen, Store, Navigation, CheckCircle2, Smartphone, Printer, CalendarDays, Hash, Languages, DollarSign, ShoppingCart, Facebook, Instagram, Truck, Wallet, Package, MapPinned, LocateFixed, Linkedin, Youtube, FileText, Briefcase, Twitter, Send, MessageSquare, Book, Link, Map, UserPlus, List, ImagePlus, FileUp, Star, Tag, Activity, CheckSquare, LayoutList, GripVertical, Phone, BadgeCheck, GraduationCap, Quote, Users, Landmark, TruckIcon, CreditCard, PenTool, BookMarked, Languages as LangIcon, Headphones, Video, Settings, ChevronDown, ChevronUp, Minus, Type, Mail, Copy
 } from 'lucide-react';
 import { QRCodeItem, QRType, QRMode, QRStyling, QRContent, CustomField, SocialLink, OpeningHourDay } from '../../types/qr';
 import { generateSecurePublicId, getPublicQRUrl, saveOrUpdateQRCode, cleanQRCodeContent } from '../../utils/storage';
@@ -1964,7 +1964,6 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                   )}
 
                   {/* --- 9. WEB_LINK --- */}
-                  {/* --- 9. WEB_LINK --- */}
                   {type === 'WEB_LINK' && (
                     <div className="space-y-10">
                        {/* SECTION 1: INFORMATIONS */}
@@ -2121,7 +2120,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                           </div>
                        </div>
                     </div>
-                  )
+                  )}
 
                   {/* --- 10. CUSTOM BUILDER --- */}
                   {type === 'CUSTOM' && (

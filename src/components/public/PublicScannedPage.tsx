@@ -51,7 +51,12 @@ import {
   Smartphone,
   BadgeCheck,
   Pin,
-  AtSign
+  AtSign,
+  Star,
+  CreditCard,
+  Shield,
+  Quote,
+  DollarSign
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
@@ -313,7 +318,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     }
   };
 
-  const CustomFieldSmartRenderer = ({ field }: { field: any }) => {
+  const CustomFieldSmartRenderer: React.FC<{ field: any }> = ({ field }) => {
     switch (field.type) {
       case 'separator':
         return <div className="h-px bg-slate-800/50 w-full my-4" />;
@@ -426,37 +431,39 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             </div>
 
             {/* CONTACT & ADDRESS */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
-              <SectionHeader title="Coordonnées & Localisation" icon={Info} />
-              <div className="space-y-3">
-                <InfoRow label="Email Personnel" value={content.email} icon={Mail} href={`mailto:${content.email}`} />
-                <InfoRow label="Email Travail" value={content.workEmail} icon={Mail} href={`mailto:${content.workEmail}`} />
-                <InfoRow label="Tél. Travail" value={content.workPhone} icon={Phone} href={`tel:${content.workPhone}`} />
-                <InfoRow label="Site Web" value={content.websiteUrl} icon={Globe} href={content.websiteUrl} />
-                <InfoRow label="Adresse" value={content.address} icon={MapPin} />
-                {(content.city || content.commune || content.region) && (
-                  <InfoRow
-                    label="Zone"
-                    value={[content.commune, content.city, content.region, content.country].filter(Boolean).join(', ')}
-                    icon={Navigation}
-                  />
-                )}
-                {content.postalCode && <InfoRow label="Code Postal" value={content.postalCode} icon={Hash} />}
-              </div>
+            {(content.email || content.workEmail || content.workPhone || content.websiteUrl || content.address || content.city || content.commune || content.region || content.postalCode) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
+                <SectionHeader title="Coordonnées & Localisation" icon={Info} />
+                <div className="space-y-3">
+                  <InfoRow label="Email Personnel" value={content.email} icon={Mail} href={`mailto:${content.email}`} />
+                  <InfoRow label="Email Travail" value={content.workEmail} icon={Mail} href={`mailto:${content.workEmail}`} />
+                  <InfoRow label="Tél. Travail" value={content.workPhone} icon={Phone} href={`tel:${content.workPhone}`} />
+                  <InfoRow label="Site Web" value={content.websiteUrl} icon={Globe} href={content.websiteUrl} />
+                  <InfoRow label="Adresse" value={content.address} icon={MapPin} />
+                  {(content.city || content.commune || content.region) && (
+                    <InfoRow
+                      label="Zone"
+                      value={[content.commune, content.city, content.region, content.country].filter(Boolean).join(', ')}
+                      icon={Navigation}
+                    />
+                  )}
+                  {content.postalCode && <InfoRow label="Code Postal" value={content.postalCode} icon={Smartphone} />}
+                </div>
 
-              {((content.latitude && content.longitude) || content.address) && (
-                <a
-                  href={content.latitude && content.longitude
-                    ? `https://www.google.com/maps/search/?api=1&query=${content.latitude},${content.longitude}`
-                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-black uppercase rounded-xl flex items-center justify-center gap-2 transition-colors border border-slate-700"
-                >
-                  <Map className="w-4 h-4 text-rose-500" /> Itinéraire GPS
-                </a>
-              )}
-            </div>
+                {((content.latitude && content.longitude) || content.address) && (
+                  <a
+                    href={content.latitude && content.longitude
+                      ? `https://www.google.com/maps/search/?api=1&query=${content.latitude},${content.longitude}`
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-black uppercase rounded-xl flex items-center justify-center gap-2 transition-colors border border-slate-700"
+                  >
+                    <Map className="w-4 h-4 text-rose-500" /> Itinéraire GPS
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* SOCIAL NETWORKS */}
             {content.socialLinks && content.socialLinks.length > 0 && (
@@ -659,34 +666,38 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* --- SPECIFICATIONS / EDITION --- */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
-              <SectionHeader title="Fiche Technique" icon={Activity} colorClass="text-emerald-500" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <InfoRow label="ISBN-13" value={content.bookIsbn13} />
-                  <InfoRow label="Éditeur" value={content.bookPublisher} />
-                  <InfoRow label="Année" value={content.bookYear} />
-                  <InfoRow label="Langue" value={content.bookLanguage} />
+            {(content.bookIsbn13 || content.bookPublisher || content.bookYear || content.bookLanguage || content.bookFormat || content.bookPages || content.bookWeight || content.bookDimensions || (content.bookKeywords && content.bookKeywords.length > 0) || (content.bookThemes && content.bookThemes.length > 0)) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Fiche Technique" icon={Activity} colorClass="text-emerald-500" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <InfoRow label="ISBN-13" value={content.bookIsbn13} />
+                    <InfoRow label="Éditeur" value={content.bookPublisher} />
+                    <InfoRow label="Année" value={content.bookYear} />
+                    <InfoRow label="Langue" value={content.bookLanguage} />
+                  </div>
+                  <div className="space-y-4">
+                    <InfoRow label="Format" value={content.bookFormat} />
+                    <InfoRow label="Pages" value={content.bookPages} />
+                    <InfoRow label="Poids" value={content.bookWeight} />
+                    <InfoRow label="Dimensions" value={content.bookDimensions} />
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  <InfoRow label="Format" value={content.bookFormat} />
-                  <InfoRow label="Pages" value={content.bookPages} />
-                  <InfoRow label="Poids" value={content.bookWeight} />
-                  <InfoRow label="Dimensions" value={content.bookDimensions} />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 gap-3 pt-2">
-                 <div className="p-3 bg-slate-950/50 border border-slate-800 rounded-2xl">
-                    <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Mots-clés & Thèmes</span>
-                    <div className="flex flex-wrap gap-2">
-                      {[...(content.bookKeywords || []), ...(content.bookThemes || [])].filter(Boolean).map((tag, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-slate-800 text-[8px] font-bold text-slate-400 uppercase rounded-md border border-slate-700">#{tag}</span>
-                      ))}
+                {((content.bookKeywords && content.bookKeywords.length > 0) || (content.bookThemes && content.bookThemes.length > 0)) && (
+                  <div className="grid grid-cols-1 gap-3 pt-2">
+                    <div className="p-3 bg-slate-950/50 border border-slate-800 rounded-2xl">
+                        <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Mots-clés & Thèmes</span>
+                        <div className="flex flex-wrap gap-2">
+                          {[...(content.bookKeywords || []), ...(content.bookThemes || [])].filter(Boolean).map((tag, idx) => (
+                            <span key={idx} className="px-2 py-0.5 bg-slate-800 text-[8px] font-bold text-slate-400 uppercase rounded-md border border-slate-700">#{tag}</span>
+                          ))}
+                        </div>
                     </div>
-                 </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
             {/* --- MEDIA SECTION --- */}
             {(content.bookTrailerUrl || content.bookPresentationVideoUrl || content.bookInterviewUrl || content.bookGallery) && (
@@ -1097,26 +1108,30 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* ADRESSE & ITINÉRAIRE */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
-              <SectionHeader title="Où nous trouver" icon={MapPin} colorClass="text-rose-500" />
-              <div className="space-y-3">
-                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
-                  <p className="text-xs font-black text-white uppercase">{content.address}</p>
-                  <p className="text-[10px] font-bold text-slate-500">{content.neighborhood}, {content.commune}</p>
-                  <p className="text-[10px] font-bold text-slate-500">{content.city}, {content.country}</p>
-                </div>
-                {content.landmark && <InfoRow label="Repère" value={content.landmark} icon={LocateFixed} />}
+            {(content.address || content.landmark || (content.latitude && content.longitude)) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Où nous trouver" icon={MapPin} colorClass="text-rose-500" />
+                <div className="space-y-3">
+                  {content.address && (
+                    <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1">
+                      <p className="text-xs font-black text-white uppercase">{content.address}</p>
+                      <p className="text-[10px] font-bold text-slate-500">{content.neighborhood}, {content.commune}</p>
+                      <p className="text-[10px] font-bold text-slate-500">{content.city}, {content.country}</p>
+                    </div>
+                  )}
+                  {content.landmark && <InfoRow label="Repère" value={content.landmark} icon={LocateFixed} />}
 
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${content.latitude && content.longitude ? `${content.latitude},${content.longitude}` : encodeURIComponent(`${shopDisplayName} ${content.address || ''}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 border border-slate-700"
-                >
-                  <Navigation className="w-4 h-4 text-rose-500" /> Itinéraire GPS
-                </a>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${content.latitude && content.longitude ? `${content.latitude},${content.longitude}` : encodeURIComponent(`${shopDisplayName} ${content.address || ''}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95 border border-slate-700"
+                  >
+                    <Navigation className="w-4 h-4 text-rose-500" /> Itinéraire GPS
+                  </a>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* HORAIRES */}
             {content.openingHours && (
@@ -1272,44 +1287,50 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             </div>
 
             {/* ADDRESS SECTION */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
-              <SectionHeader title="Adresse & Localisation" icon={MapPinned} colorClass="text-rose-500" />
-              <div className="space-y-3">
-                <div className="p-5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
-                  <p className="text-sm font-black text-white uppercase leading-tight">{content.address}</p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1">
-                    {content.locationStreet && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Rue: {content.locationStreet}</span>}
-                    {content.neighborhood && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Quartier: {content.neighborhood}</span>}
-                    {content.commune && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Commune: {content.commune}</span>}
-                    {content.city && <span className="text-[10px] font-black text-blue-400 uppercase tracking-tight">{content.city}</span>}
-                    {content.country && <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{content.country}</span>}
-                  </div>
+            {(content.address || content.locationStreet || content.neighborhood || content.commune || content.city || content.country || content.landmark || content.postalCode) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Adresse & Localisation" icon={MapPinned} colorClass="text-rose-500" />
+                <div className="space-y-3">
+                  {content.address && (
+                    <div className="p-5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+                      <p className="text-sm font-black text-white uppercase leading-tight">{content.address}</p>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        {content.locationStreet && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Rue: {content.locationStreet}</span>}
+                        {content.neighborhood && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Quartier: {content.neighborhood}</span>}
+                        {content.commune && <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Commune: {content.commune}</span>}
+                        {content.city && <span className="text-[10px] font-black text-blue-400 uppercase tracking-tight">{content.city}</span>}
+                        {content.country && <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{content.country}</span>}
+                      </div>
+                    </div>
+                  )}
+                  {content.landmark && <InfoRow label="Point de repère" value={content.landmark} icon={LocateFixed} />}
+                  {content.postalCode && <InfoRow label="Code Postal" value={content.postalCode} />}
                 </div>
-                {content.landmark && <InfoRow label="Point de repère" value={content.landmark} icon={LocateFixed} />}
-                {content.postalCode && <InfoRow label="Code Postal" value={content.postalCode} />}
               </div>
-            </div>
+            )}
 
             {/* GPS & MAP LINKS */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
-              <SectionHeader title="Coordonnées GPS" icon={LocateFixed} colorClass="text-blue-500" />
-              <div className="grid grid-cols-2 gap-3">
-                <InfoRow label="Latitude" value={content.latitude} />
-                <InfoRow label="Longitude" value={content.longitude} />
-                {content.altitude && <InfoRow label="Altitude" value={`${content.altitude} m`} />}
+            {(content.latitude || content.longitude || content.altitude || content.appleMapsUrl) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Coordonnées GPS" icon={LocateFixed} colorClass="text-blue-500" />
+                <div className="grid grid-cols-2 gap-3">
+                  <InfoRow label="Latitude" value={content.latitude} />
+                  <InfoRow label="Longitude" value={content.longitude} />
+                  {content.altitude && <InfoRow label="Altitude" value={`${content.altitude} m`} />}
+                </div>
+                <div className="space-y-3 pt-2">
+                  {content.appleMapsUrl && (
+                    <a href={content.appleMapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-950 border border-slate-800 rounded-2xl group hover:border-indigo-500/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center"><Navigation className="w-4 h-4 text-indigo-500" /></div>
+                        <span className="text-[10px] font-black uppercase text-white">Apple Maps</span>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-700" />
+                    </a>
+                  )}
+                </div>
               </div>
-              <div className="space-y-3 pt-2">
-                {content.appleMapsUrl && (
-                  <a href={content.appleMapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 bg-slate-950 border border-slate-800 rounded-2xl group hover:border-indigo-500/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center"><Navigation className="w-4 h-4 text-indigo-500" /></div>
-                      <span className="text-[10px] font-black uppercase text-white">Apple Maps</span>
-                    </div>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-700" />
-                  </a>
-                )}
-              </div>
-            </div>
+            )}
 
             {/* ACCESS & COMMODITIES */}
             {(content.locationItineraryDescription || content.locationMainEntrance || content.locationMeetingPoint || content.locationParkingInfo || content.locationTransportInfo || content.locationAccessibilityInfo) && (
@@ -1556,28 +1577,30 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             )}
 
             {/* COORDINATES & SIEGE */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
-              <SectionHeader title="Coordonnées & Siège" icon={MapPin} colorClass="text-rose-500" />
-              <div className="space-y-3">
-                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Siège Social</span>
-                      <p className="text-xs font-black text-white uppercase">{content.companyHeadquarters}</p>
-                    </div>
-                    {content.companyAgency && (
-                      <div className="text-right">
-                        <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Agence</span>
-                        <p className="text-[10px] font-bold text-slate-400">{content.companyAgency}</p>
+            {(content.companyHeadquarters || content.companyAgency || content.address || content.commune || content.city || content.country) && (
+              <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-6">
+                <SectionHeader title="Coordonnées & Siège" icon={MapPin} colorClass="text-rose-500" />
+                <div className="space-y-3">
+                  <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        {content.companyHeadquarters && <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Siège Social</span>}
+                        <p className="text-xs font-black text-white uppercase">{content.companyHeadquarters}</p>
                       </div>
-                    )}
+                      {content.companyAgency && (
+                        <div className="text-right">
+                          <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Agence</span>
+                          <p className="text-[10px] font-bold text-slate-400">{content.companyAgency}</p>
+                        </div>
+                      )}
+                    </div>
+                    {(content.companyHeadquarters && content.address) && <div className="h-px bg-slate-800 w-full my-2" />}
+                    <p className="text-xs font-bold text-slate-300">{content.address}</p>
+                    <p className="text-[10px] font-bold text-slate-500">{content.commune}, {content.city}, {content.country}</p>
                   </div>
-                  <div className="h-px bg-slate-800 w-full my-2" />
-                  <p className="text-xs font-bold text-slate-300">{content.address}</p>
-                  <p className="text-[10px] font-bold text-slate-500">{content.commune}, {content.city}, {content.country}</p>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* SOCIAL NETWORKS */}
             {content.socialLinks && content.socialLinks.length > 0 && (
@@ -2069,17 +2092,30 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               </div>
             )}
 
-            {(content.customSections || []).map(section => (
-              <div key={section.id} className="space-y-4">
-                <SectionHeader title={section.title} icon={Sparkles} colorClass="text-amber-500" />
-                {section.description && <p className="text-[10px] text-slate-500 font-bold uppercase -mt-2 ml-6">{section.description}</p>}
-                <div className="grid grid-cols-1 gap-4">
-                  {section.fields.filter(f => f.isVisible).map(field => (
-                    <CustomFieldSmartRenderer key={field.id} field={field} />
-                  ))}
+            {(content.customSections || []).map(section => {
+              // Perfect "Fill-to-Show": Only display fields with actual content
+              const visibleFields = section.fields.filter(f =>
+                f.isVisible &&
+                f.value !== undefined &&
+                f.value !== null &&
+                f.value.toString().trim() !== ""
+              );
+
+              // Skip entire section if empty
+              if (visibleFields.length === 0 && !section.title) return null;
+
+              return (
+                <div key={section.id} className="space-y-4">
+                  {section.title && <SectionHeader title={section.title} icon={Sparkles} colorClass="text-amber-500" />}
+                  {section.description && <p className="text-[10px] text-slate-500 font-bold uppercase -mt-2 ml-6">{section.description}</p>}
+                  <div className="grid grid-cols-1 gap-4">
+                    {visibleFields.map(field => (
+                      <CustomFieldSmartRenderer key={field.id} field={field} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {(!content.customSections || content.customSections.length === 0) && (
               <div className="py-20 text-center space-y-4 opacity-50">
                 <Sparkles className="w-12 h-12 text-slate-700 mx-auto" />

@@ -521,7 +521,6 @@ export function getStoredQRCodes(): QRCodeItem[] {
 
     let changed = false;
 
-    // --- Legacy Compatibility: Cleanup redundant cards for Specific Clients ---
     const countBefore = items.length;
     items = items.filter(item => {
       if (!item) return false;
@@ -530,7 +529,6 @@ export function getStoredQRCodes(): QRCodeItem[] {
       const title = (item.title || '').toLowerCase();
       const jobTitle = (item.content?.jobTitle || '').toLowerCase();
 
-      // Richmond DONGO cleanup
       if (fullName.includes('richmond dongo') || title.includes('richmond dongo')) {
         const isKeepable = item.id === 'qr_demo_04' || item.publicId === 'CAN2026R';
         const hasRightJob = jobTitle === 'responsable commercial';
@@ -540,7 +538,6 @@ export function getStoredQRCodes(): QRCodeItem[] {
         }
       }
 
-      // Christophe FODJO cleanup
       if (fullName.includes('christophe fodjo') || title.includes('christophe fodjo')) {
         const isKeepable = item.id === 'qr_demo_09' || item.publicId === 'EV6MKMQU';
         const hasRightJob = jobTitle === 'gérant';
@@ -565,7 +562,6 @@ export function getStoredQRCodes(): QRCodeItem[] {
       }
     });
 
-    // Strict De-duplication by publicId (keeping most recent)
     const uniqueMap = new Map<string, QRCodeItem>();
     items.forEach(item => {
       if (!item || !item.publicId) return;
@@ -650,11 +646,9 @@ export async function fetchQRCodeByPublicId(publicId: string, preferServer = tru
   if (!publicId) return null;
   const cleanId = publicId.trim();
 
-  // 1. HARDCODED FALLBACK FOR DEMO/OFFICIAL IDS (Guaranteed availability)
   const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toLowerCase() === cleanId.toLowerCase());
   if (demoItem) return demoItem;
 
-  // 2. Try Firestore first if preferred (to get latest data on scan)
   let serverFound: QRCodeItem | null = null;
   if (preferServer && db) {
     try {
@@ -673,11 +667,9 @@ export async function fetchQRCodeByPublicId(publicId: string, preferServer = tru
 
   if (serverFound) return serverFound;
 
-  // 3. Local fallback (Matches Local Storage)
   const localFound = getQRCodeByPublicId(cleanId);
   if (localFound) return localFound;
 
-  // 4. Last chance Firestore
   if (!preferServer && db && !serverFound) {
     try {
       const cardRef = doc(db, 'cards', cleanId);
@@ -689,10 +681,6 @@ export async function fetchQRCodeByPublicId(publicId: string, preferServer = tru
   return null;
 }
 
-/**
- * Recursively removes all keys with empty string values (""), null, undefined, or empty arrays ([])
- * from the QR content object before returning it.
- */
 export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent {
   if (!content) return {} as QRContent;
 
@@ -1175,5 +1163,3 @@ export function importFullDatabaseJSON(jsonStr: string): boolean {
     return false;
   }
 }
-/ /   F o r c e   B u i l d :   2 0 2 6 0 9 0 8 1 8 5 0 3 3  
- 

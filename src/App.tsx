@@ -27,7 +27,8 @@ import {
   getStoredClients,
   getStoredHistory,
   syncCardsWithServer,
-  generateCardNumber
+  generateCardNumber,
+  syncOfficialDataToCloud
 } from './utils/storage';
 import { CARD_TEMPLATES } from './components/templates/TemplateGalleryView';
 
@@ -53,6 +54,9 @@ export default function App() {
   useEffect(() => {
     // Load initial data
     refreshData();
+
+    // Ensure official demo cards are in cloud
+    syncOfficialDataToCloud();
 
     // Check URL for public scan route
     const checkHashRoute = () => {

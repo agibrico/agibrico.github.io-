@@ -129,7 +129,7 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     firstName: 'Christophe',
     lastName: 'FODJO',
     fullName: 'Christophe FODJO',
-    company: 'Indépendant',
+    company: 'Canaan Services',
     jobTitle: 'Gérant',
     industry: 'Conseil',
     primaryPhone: '+225 07 07 12 34 56',
@@ -522,8 +522,6 @@ export function getStoredQRCodes(): QRCodeItem[] {
     let changed = false;
 
     // --- Legacy Compatibility: Cleanup redundant cards for Specific Clients ---
-    // Rule 1: Richmond DONGO — Keep ONLY "Responsable Commercial" (qr_demo_04)
-    // Rule 2: Christophe FODJO — Keep ONLY "Gérant" (qr_demo_09)
     const countBefore = items.length;
     items = items.filter(item => {
       if (!item) return false;
@@ -561,7 +559,6 @@ export function getStoredQRCodes(): QRCodeItem[] {
     }
 
     INITIAL_QR_ITEMS.forEach(initItem => {
-      // Only add if not in current items AND not in deleted list
       if (!items.find(i => i && i.id === initItem.id) && !deletedIds.includes(initItem.id)) {
         items.push(initItem);
         changed = true;
@@ -653,7 +650,11 @@ export async function fetchQRCodeByPublicId(publicId: string, preferServer = tru
   if (!publicId) return null;
   const cleanId = publicId.trim();
 
-  // 1. Try Firestore if preferred (to get latest data on scan)
+  // 1. HARDCODED FALLBACK FOR DEMO/OFFICIAL IDS (Guaranteed availability)
+  const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toLowerCase() === cleanId.toLowerCase());
+  if (demoItem) return demoItem;
+
+  // 2. Try Firestore first if preferred (to get latest data on scan)
   let serverFound: QRCodeItem | null = null;
   if (preferServer && db) {
     try {
@@ -672,15 +673,11 @@ export async function fetchQRCodeByPublicId(publicId: string, preferServer = tru
 
   if (serverFound) return serverFound;
 
-  // 2. Local fallback (Matches Initial Items or Local Storage)
+  // 3. Local fallback (Matches Local Storage)
   const localFound = getQRCodeByPublicId(cleanId);
   if (localFound) return localFound;
 
-  // 3. HARDCODED FALLBACK FOR DEMO/OFFICIAL IDS (Ensures they work globally without Cloud sync)
-  const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toLowerCase() === cleanId.toLowerCase());
-  if (demoItem) return demoItem;
-
-  // 4. Last chance Firestore if not already tried
+  // 4. Last chance Firestore
   if (!preferServer && db && !serverFound) {
     try {
       const cardRef = doc(db, 'cards', cleanId);
@@ -695,7 +692,6 @@ export async function fetchQRCodeByPublicId(publicId: string, preferServer = tru
 /**
  * Recursively removes all keys with empty string values (""), null, undefined, or empty arrays ([])
  * from the QR content object before returning it.
- * Ensures data minimality.
  */
 export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent {
   if (!content) return {} as QRContent;
@@ -715,8 +711,6 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
     let hasKeys = false;
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        // Exception: privacy settings and customSections are preserved if they are objects
-        // We preserve customSections to keep field definitions even if empty in the editor
         if (key === 'privacy' || key === 'customSections') {
           res[key] = obj[key];
           hasKeys = true;
@@ -736,7 +730,6 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
   const initialCleaned = deepClean(content) || {};
   const cleaned: any = {};
 
-  // Field-to-Type mapping for prefix-based filtering
   const typePrefixMap: Record<string, string> = {
     'BOOK': 'book',
     'EVENT': 'event',
@@ -754,7 +747,6 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
   for (const key in initialCleaned) {
     const value = initialCleaned[key];
 
-    // Always keep common fields
     const commonFields = [
       'firstName', 'lastName', 'fullName', 'civility', 'middleName', 'jobTitle', 'profession',
       'company', 'department', 'industry', 'slogan', 'bio', 'photoUrl', 'logoUrl', 'bannerUrl',
@@ -768,24 +760,20 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
       continue;
     }
 
-    // Category type check (e.g. productSheetType only for PRODUCT)
     if (key === 'productSheetType' || key === 'menuItems' || key === 'serviceName') {
       if (type === 'PRODUCT') cleaned[key] = value;
       continue;
     }
 
-    // Keep fields starting with the current prefix
     if (currentPrefix && key.startsWith(currentPrefix)) {
       cleaned[key] = value;
       continue;
     }
 
-    // If it's a field for another type (prefixed), discard it
     if (otherPrefixes.some(p => key.startsWith(p))) {
       continue;
     }
 
-    // Otherwise keep it
     cleaned[key] = value;
   }
 
@@ -796,7 +784,6 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
   const items = getStoredQRCodes();
   const cleanedContent = cleanQRCodeContent(item.content, item.type);
 
-  // Remove from deleted list if re-added
   const deletedData = localStorage.getItem(DELETED_CARDS_KEY);
   if (deletedData) {
     const deletedIds: string[] = JSON.parse(deletedData);
@@ -805,7 +792,6 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
     }
   }
 
-  // De-duplication check: Find by ID or by PublicId
   let existingIdx = items.findIndex(q => q.id === item.id);
   if (existingIdx === -1 && item.publicId) {
     existingIdx = items.findIndex(q => q.publicId === item.publicId);
@@ -813,12 +799,11 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
 
   const isUpdate = existingIdx >= 0;
 
-  // Merge logic: ensure we don't lose existing fields if update is partial
   const updatedItem: QRCodeItem = {
     ...(isUpdate ? items[existingIdx] : {}),
     ...item,
     content: cleanedContent,
-    userId: auth?.currentUser?.uid || (isUpdate ? items[existingIdx].userId : item.userId),
+    userId: auth?.currentUser?.uid || (isUpdate ? (items[existingIdx] as any).userId : item.userId),
     updatedAt: new Date().toISOString()
   };
 
@@ -832,7 +817,6 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
 
   if (syncToServer && db && updatedItem.publicId) {
     const cardRef = doc(db, 'cards', updatedItem.publicId);
-    // Use setDoc WITHOUT merge: true to ensure cleaned fields are removed from Firestore too
     setDoc(cardRef, {
       ...updatedItem,
       updatedAt: serverTimestamp()
@@ -847,18 +831,13 @@ export function deleteQRCode(id: string): void {
   const target = items.find(q => q.id === id);
 
   if (target) {
-    // 1. Mark as deleted in Local Storage
     const deletedData = localStorage.getItem(DELETED_CARDS_KEY);
     const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
     if (!deletedIds.includes(id)) {
       deletedIds.push(id);
       localStorage.setItem(DELETED_CARDS_KEY, JSON.stringify(deletedIds));
     }
-
-    // 2. Remove from active list
     saveQRCodes(items.filter(q => q.id !== id));
-
-    // 3. Delete from Firestore if possible
     if (db && target.publicId) {
       deleteDoc(doc(db, 'cards', target.publicId)).catch(err => console.error("Firestore delete failed:", err));
     }
@@ -885,7 +864,6 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
   try {
     const userId = auth.currentUser.uid;
 
-    // 1. Sync Cards
     const qCards = query(collection(db, 'cards'), where('userId', '==', userId));
     const cardSnaps = await getDocs(qCards);
     const serverCards = cardSnaps.docs.map(doc => doc.data() as QRCodeItem);
@@ -904,7 +882,6 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
 
     saveQRCodes(mergedCards);
 
-    // 2. Sync Clients
     const qClients = query(collection(db, 'clients'), where('userId', '==', userId));
     const clientSnaps = await getDocs(qClients);
     const serverClients = clientSnaps.docs.map(doc => doc.data() as ClientProfile);
@@ -950,7 +927,6 @@ export function getStoredClients(): ClientProfile[] {
       }
     });
 
-    // Strict De-duplication by fullName (keeping most recent)
     const uniqueMap = new Map<string, ClientProfile>();
     clients.forEach(c => {
       if (!c || !c.fullName) return;
@@ -977,7 +953,6 @@ export function getStoredClients(): ClientProfile[] {
 }
 
 export function deduplicateData(): void {
-  // Trigger re-load with de-duplication logic
   getStoredClients();
   getStoredQRCodes();
 }
@@ -990,7 +965,6 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
   const clients = getStoredClients();
   const nameKey = (client.fullName || '').trim().toLowerCase();
 
-  // Remove from deleted list if re-added
   if (client.id) {
     const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
     if (deletedData) {
@@ -1001,7 +975,6 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
     }
   }
 
-  // De-duplication check: Find by ID or by FullName
   let existingIdx = clients.findIndex(c => c.id === client.id);
   if (existingIdx === -1 && nameKey) {
     existingIdx = clients.findIndex(c => (c.fullName || '').trim().toLowerCase() === nameKey);
@@ -1014,6 +987,7 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
     ...(isUpdate ? clients[existingIdx] : {}),
     ...client as ClientProfile,
     id,
+    userId: auth?.currentUser?.uid || (isUpdate ? (clients[existingIdx] as any).userId : undefined),
     updatedAt: new Date().toISOString()
   };
 
@@ -1024,19 +998,25 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
   }
 
   saveClients(clients);
+
+  if (db && fullClient.id) {
+    const clientRef = doc(db, 'clients', fullClient.id);
+    setDoc(clientRef, {
+      ...fullClient,
+      updatedAt: serverTimestamp()
+    }).catch(err => console.error("Client Firestore sync failed:", err));
+  }
+
   return { client: fullClient, isUpdate };
 }
 
 export function deleteClient(id: string): void {
-  // 1. Mark as deleted
   const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
   const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
   if (!deletedIds.includes(id)) {
     deletedIds.push(id);
     localStorage.setItem(DELETED_CLIENTS_KEY, JSON.stringify(deletedIds));
   }
-
-  // 2. Filter out
   saveClients(getStoredClients().filter(c => c.id !== id));
 }
 
@@ -1125,6 +1105,49 @@ export function getClientById(id: string): ClientProfile | undefined {
   return getStoredClients().find(c => c.id === id);
 }
 
+export async function syncOfficialDataToCloud(): Promise<void> {
+  if (!db) return;
+  try {
+    const cardId = 'EV6MKMQU';
+    const officialCard = INITIAL_QR_ITEMS.find(i => i.publicId === cardId);
+    const officialClient = INITIAL_CLIENTS.find(c => c.id === 'client_005');
+    if (officialCard) {
+      const cardRef = doc(db, 'cards', cardId);
+      await setDoc(cardRef, { ...officialCard, updatedAt: serverTimestamp() });
+    }
+    if (officialClient) {
+      const clientRef = doc(db, 'clients', officialClient.id);
+      await setDoc(clientRef, { ...officialClient, updatedAt: serverTimestamp() });
+    }
+  } catch (err) {
+    console.error("Official data sync failed:", err);
+  }
+}
+
+export async function syncAllToCloud(): Promise<{ cards: number, clients: number }> {
+  if (!db || !auth.currentUser) throw new Error("Authentification requise.");
+  const cards = getStoredQRCodes();
+  const clients = getStoredClients();
+  const userId = auth.currentUser.uid;
+  let cardsSynced = 0;
+  let clientsSynced = 0;
+  for (const card of cards) {
+    if (card.publicId) {
+      const cardRef = doc(db, 'cards', card.publicId);
+      await setDoc(cardRef, { ...card, userId, updatedAt: serverTimestamp() });
+      cardsSynced++;
+    }
+  }
+  for (const client of clients) {
+    if (client.id) {
+      const clientRef = doc(db, 'clients', client.id);
+      await setDoc(clientRef, { ...client, userId, updatedAt: serverTimestamp() });
+      clientsSynced++;
+    }
+  }
+  return { cards: cardsSynced, clients: clientsSynced };
+}
+
 export function exportFullDatabaseJSON(): string {
   const db = {
     cards: getStoredQRCodes(),
@@ -1142,17 +1165,13 @@ export function importFullDatabaseJSON(jsonStr: string): boolean {
   try {
     const data = JSON.parse(jsonStr);
     if (!data.cards || !data.clients) return false;
-
     saveQRCodes(data.cards);
     saveClients(data.clients);
     if (data.scans) localStorage.setItem(SCANS_STORAGE_KEY, JSON.stringify(data.scans));
     if (data.history) localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(data.history));
     if (data.designer) saveDesignerProfile(data.designer);
-
     return true;
   } catch (e) {
     return false;
   }
 }
-/ /   G l o b a l   F i x   f o r   E V 6 M K M Q U :   2 0 2 6 - 0 9 - 0 8   1 7 : 5 8 : 4 1  
- 

@@ -61,7 +61,8 @@ import {
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
 import { downloadVCard } from '../../utils/vcard';
-import { recordScanEvent, fetchQRCodeByPublicId, getClientById, getStoredClients, decodeCardPayload } from '../../utils/storage';
+import { recordScanEvent, fetchQRCodeByPublicId, getClientById, getStoredClients, decodeCardPayload, INITIAL_QR_ITEMS } from '../../utils/storage';
+import { CANAAN_SERVICES_LOGO, AGB_ENGINEERING_LOGO } from '../../utils/defaultLogos';
 
 interface PublicScannedPageProps {
   publicId?: string;
@@ -86,6 +87,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   const [pinInput, setPinInput] = useState<string>('');
   const [accessGranted, setAccessGranted] = useState<boolean>(false);
   const [pinError, setPinError] = useState<boolean>(false);
+  const [debugTaps, setDebugTaps] = useState<number>(0);
 
   // --- COMPATIBILITY LAYER FOR OLD FLUTTER TYPES ---
   const normalizeItem = (rawItem: any): QRCodeItem => {
@@ -283,6 +285,31 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
   const registeredLogo = (content.logoUrl && !content.logoUrl.includes('unsplash.com')) ? content.logoUrl : (styling?.logoUrl && !styling.logoUrl.includes('unsplash.com')) ? styling.logoUrl : null;
 
+  // --- ULTRA-ROBUST LOGO RESOLVER ---
+  const getResolvedLogo = () => {
+    // 1. Data URI check
+    if (registeredLogo && registeredLogo.startsWith('data:image')) return registeredLogo;
+
+    // 2. Global demo fallback (Checks INITIAL_QR_ITEMS if local/cloud logo is missing)
+    if (!registeredLogo || registeredLogo.includes('unsplash.com')) {
+      const demoMatch = INITIAL_QR_ITEMS.find(d =>
+        (d.publicId && d.publicId.toLowerCase() === item.publicId?.toLowerCase()) ||
+        d.id === item.id
+      );
+      if (demoMatch?.styling?.logoUrl) return demoMatch.styling.logoUrl;
+      if (demoMatch?.content?.logoUrl) return demoMatch.content.logoUrl;
+    }
+
+    // 3. Fallback based on company name (Keywords)
+    const company = (content.company || "").toLowerCase();
+    if (company.includes('canaan')) return CANAAN_SERVICES_LOGO;
+    if (company.includes('agb')) return AGB_ENGINEERING_LOGO;
+
+    return registeredLogo;
+  };
+
+  const resolvedLogo = getResolvedLogo();
+
   // -------------------------------------------------------------------------
   // RENDER HELPERS
   // -------------------------------------------------------------------------
@@ -408,7 +435,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   const renderContent = () => {
     switch (item.type) {
       case 'BUSINESS_CARD':
-        const displayPhoto = content.photoUrl || registeredLogo;
+        const displayPhoto = content.photoUrl || resolvedLogo;
         return (
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
@@ -2161,7 +2188,34 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       <footer className="py-12 text-center relative z-10">
         <div className="flex flex-col items-center space-y-3">
           <div className="w-1 h-px bg-slate-800 rounded-full" />
-          <p className="text-[7px] font-bold uppercase tracking-[0.4em] text-slate-800">ID: {item.publicId}</p>
+          <p
+            onClick={() => setDebugTaps(prev => prev + 1)}
+            className="text-[7px] font-bold uppercase tracking-[0.4em] text-slate-800 cursor-pointer"
+          >
+            ID: {item.publicId}
+          </p>
+          {debugTaps >= 5 && (
+            <div className="mt-4 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-[8px] font-mono text-slate-500 text-left max-w-xs overflow-auto shadow-2xl">
+              <div className="flex justify-between items-center mb-2 border-b border-slate-800 pb-2">
+                <span className="font-black text-blue-500 uppercase tracking-widest">Debug Info</span>
+                <button onClick={() => setDebugTaps(0)} className="text-rose-500 font-bold px-2 py-0.5 bg-rose-500/10 rounded">X</button>
+              </div>
+              <p>Type: {item.type}</p>
+              <p>Logo: {resolvedLogo ? 'OK' : 'MISSING'}</p>
+              <p>Cloud User: {item.userId || 'NONE'}</p>
+              <p>Public ID: {item.publicId}</p>
+
+              <button
+                onClick={() => {
+                  console.log("FULL DATA INSPECTION:", item);
+                  alert(JSON.stringify(item, null, 2));
+                }}
+                className="mt-4 w-full py-2 bg-blue-600 text-white font-black uppercase rounded-lg active:scale-95 transition-transform"
+              >
+                Inspecter les données (JSON)
+              </button>
+            </div>
+          )}
         </div>
       </footer>
     </div>

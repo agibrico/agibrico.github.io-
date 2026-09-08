@@ -15,6 +15,7 @@ import {
   exportFullDatabaseJSON, 
   importFullDatabaseJSON, 
   syncCardsWithServer,
+  syncAllToCloud,
   getStoredClients,
   getStoredQRCodes,
   getStoredHistory,
@@ -83,6 +84,22 @@ export const BackupView: React.FC<BackupViewProps> = ({
       onDataRestored();
     } catch (e) {
       setSyncResult("Erreur lors de la communication avec le serveur API.");
+    } finally {
+      setSyncingServer(false);
+    }
+  };
+
+  const handleFullPushToCloud = async () => {
+    if (!window.confirm("Voulez-vous pousser toutes vos données locales vers le Cloud ? Cela écrasera les versions distantes par vos versions locales actuelles.")) return;
+
+    setSyncingServer(true);
+    setSyncResult(null);
+    try {
+      const result = await syncAllToCloud();
+      setSyncResult(`Parité Cloud réussie : ${result.cards} cartes et ${result.clients} clients synchronisés avec succès.`);
+      onDataRestored();
+    } catch (e: any) {
+      setSyncResult(e.message || "Erreur lors de la synchronisation forcée.");
     } finally {
       setSyncingServer(false);
     }
@@ -188,25 +205,36 @@ export const BackupView: React.FC<BackupViewProps> = ({
 
       {/* Server API Real-time Sync */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Server className="w-4 h-4 text-blue-600" />
-              <h3 className="text-sm font-bold text-slate-900">Synchronisation Serveur API & URLs Publiques</h3>
+              <h3 className="text-sm font-bold text-slate-900">Synchronisation & Parité Cloud</h3>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Les cartes sont automatiquement synchronisées avec le serveur central (`/api/cards`) afin que tout smartphone scannant un QR Code accède en permanence à la fiche même sans cache local.
+              Les cartes sont synchronisées avec le serveur central. Utilisez le bouton "Pousser vers le Cloud" pour garantir que vos données locales écrasent le serveur en cas de doute.
             </p>
           </div>
 
-          <button
-            onClick={handleManualSync}
-            disabled={syncingServer}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-xl transition-colors cursor-pointer shrink-0"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${syncingServer ? 'animate-spin text-blue-600' : ''}`} />
-            <span>Synchroniser maintenant</span>
-          </button>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button
+              onClick={handleManualSync}
+              disabled={syncingServer}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-xl transition-colors cursor-pointer shrink-0"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${syncingServer ? 'animate-spin text-blue-600' : ''}`} />
+              <span>Synchronisation Standard</span>
+            </button>
+
+            <button
+              onClick={handleFullPushToCloud}
+              disabled={syncingServer}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-xs rounded-xl transition-colors cursor-pointer shrink-0"
+            >
+              <Upload className={`w-3.5 h-3.5 ${syncingServer ? 'animate-pulse' : ''}`} />
+              <span>Pousser toutes les données vers le Cloud</span>
+            </button>
+          </div>
         </div>
 
         {syncResult && (

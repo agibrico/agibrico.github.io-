@@ -34,6 +34,8 @@ const CLIENTS_STORAGE_KEY = 'smart_qr_clients_v2';
 const SCANS_STORAGE_KEY = 'smart_qr_scans_v2';
 const HISTORY_STORAGE_KEY = 'smart_qr_history_v2';
 const DESIGNER_STORAGE_KEY = 'smart_qr_designer_v2';
+const DELETED_CARDS_KEY = 'smart_qr_deleted_ids_v1';
+const DELETED_CLIENTS_KEY = 'smart_qr_deleted_clients_v1';
 
 export const DEFAULT_DESIGNER_PROFILE: DesignerProfile = {
   name: 'Gilles Brice ATSÉ',
@@ -128,14 +130,15 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     lastName: 'FODJO',
     fullName: 'Christophe FODJO',
     company: 'Indépendant',
-    jobTitle: 'Consultant',
-    primaryPhone: '+225 00 00 00 00 00',
-    email: 'c.fodjo@example.com',
+    jobTitle: 'Consultant Senior',
+    industry: 'Conseil',
+    primaryPhone: '+225 07 07 12 34 56',
+    email: 'c.fodjo@outlook.com',
     city: 'Abidjan',
     country: 'Côte d\'Ivoire',
-    socialLinks: [],
+    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707123456', displayOrder: 1 }],
     createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-07T18:00:00.000Z'
+    updatedAt: '2026-09-08T10:00:00.000Z'
   },
   {
     id: 'client_006',
@@ -389,18 +392,22 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     cardNumber: 'CARD-2026-0009',
     publicId: 'EV6MKMQU',
     clientId: 'client_005',
-    title: 'Christophe FODJO',
+    title: 'Christophe FODJO — Consultant Senior',
     type: 'BUSINESS_CARD',
     mode: 'dynamic',
     status: 'active',
     createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-07T18:00:00.000Z',
-    scanCount: 0,
+    updatedAt: '2026-09-08T10:00:00.000Z',
+    scanCount: 12,
     content: {
       fullName: 'Christophe FODJO',
+      jobTitle: 'Consultant Senior',
+      company: 'Indépendant',
+      primaryPhone: '+225 07 07 12 34 56',
+      email: 'c.fodjo@outlook.com',
       city: 'Abidjan',
       country: 'Côte d\'Ivoire',
-      socialLinks: [],
+      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707123456', displayOrder: 1 }],
       privacy: { hideAddress: false }
     },
     styling: {
@@ -501,21 +508,39 @@ function generateSampleScans(): ScanEvent[] {
 export function getStoredQRCodes(): QRCodeItem[] {
   try {
     const data = localStorage.getItem(CARDS_STORAGE_KEY);
+    const deletedData = localStorage.getItem(DELETED_CARDS_KEY);
+    const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
+
     let items: QRCodeItem[] = data ? JSON.parse(data) : [];
 
-    // Robustness: ensure items is an array
     if (!Array.isArray(items)) {
       items = [];
     }
 
-    // Ensure initial items are present
     let changed = false;
     INITIAL_QR_ITEMS.forEach(initItem => {
-      if (!items.find(i => i && i.id === initItem.id)) {
+      // Only add if not in current items AND not in deleted list
+      if (!items.find(i => i && i.id === initItem.id) && !deletedIds.includes(initItem.id)) {
         items.push(initItem);
         changed = true;
       }
     });
+
+    // Strict De-duplication by publicId (keeping most recent)
+    const uniqueMap = new Map<string, QRCodeItem>();
+    items.forEach(item => {
+      if (!item || !item.publicId) return;
+      const key = item.publicId.trim().toUpperCase();
+      const existing = uniqueMap.get(key);
+      if (!existing || new Date(item.updatedAt).getTime() > new Date(existing.updatedAt).getTime()) {
+        uniqueMap.set(key, item);
+      }
+    });
+
+    if (uniqueMap.size < items.length) {
+      items = Array.from(uniqueMap.values());
+      changed = true;
+    }
 
     if (changed || !data) {
       saveQRCodes(items);
@@ -582,16 +607,33 @@ export function decodeCardPayload(payload: string): QRCodeItem | null {
   }
 }
 
-export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeItem | null> {
+export async function fetchQRCodeByPublicId(publicId: string, preferServer = true): Promise<QRCodeItem | null> {
   if (!publicId) return null;
   const cleanId = publicId.trim();
 
-  // 1. Local
+  // 1. Try Firestore first if preferred (to get latest data on scan)
+  if (preferServer && db) {
+    try {
+      const cardRef = doc(db, 'cards', cleanId);
+      const cardSnap = await getDoc(cardRef);
+      if (cardSnap.exists()) {
+        return {
+          ...cardSnap.data() as QRCodeItem,
+          // Ensure updatedAt is string for consistency if Firestore returns Timestamp
+          updatedAt: cardSnap.data().updatedAt?.toDate?.()?.toISOString() || cardSnap.data().updatedAt
+        };
+      }
+    } catch (err) {
+      console.warn("Firestore fetch failed, falling back to local", err);
+    }
+  }
+
+  // 2. Local fallback
   const localFound = getQRCodeByPublicId(cleanId);
   if (localFound) return localFound;
 
-  // 2. Firestore
-  if (db) {
+  // 3. Firestore fallback if not preferred but not found locally
+  if (!preferServer && db) {
     try {
       const cardRef = doc(db, 'cards', cleanId);
       const cardSnap = await getDoc(cardRef);
@@ -702,22 +744,37 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
   return cleaned as QRContent;
 }
 
-export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): QRCodeItem {
+export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { item: QRCodeItem, isUpdate: boolean } {
   const items = getStoredQRCodes();
-
-  // Apply cleaning logic to ensure minimalist data
   const cleanedContent = cleanQRCodeContent(item.content, item.type);
 
-  const existingIdx = items.findIndex(q => q.id === item.id);
-  
+  // Remove from deleted list if re-added
+  const deletedData = localStorage.getItem(DELETED_CARDS_KEY);
+  if (deletedData) {
+    const deletedIds: string[] = JSON.parse(deletedData);
+    if (deletedIds.includes(item.id)) {
+      localStorage.setItem(DELETED_CARDS_KEY, JSON.stringify(deletedIds.filter(id => id !== item.id)));
+    }
+  }
+
+  // De-duplication check: Find by ID or by PublicId
+  let existingIdx = items.findIndex(q => q.id === item.id);
+  if (existingIdx === -1 && item.publicId) {
+    existingIdx = items.findIndex(q => q.publicId === item.publicId);
+  }
+
+  const isUpdate = existingIdx >= 0;
+
+  // Merge logic: ensure we don't lose existing fields if update is partial
   const updatedItem: QRCodeItem = {
+    ...(isUpdate ? items[existingIdx] : {}),
     ...item,
     content: cleanedContent,
-    userId: auth?.currentUser?.uid || item.userId,
+    userId: auth?.currentUser?.uid || (isUpdate ? items[existingIdx].userId : item.userId),
     updatedAt: new Date().toISOString()
   };
 
-  if (existingIdx >= 0) {
+  if (isUpdate) {
     items[existingIdx] = updatedItem;
   } else {
     items.unshift(updatedItem);
@@ -725,20 +782,38 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): QRCod
 
   saveQRCodes(items);
 
-  if (syncToServer && db) {
+  if (syncToServer && db && updatedItem.publicId) {
     const cardRef = doc(db, 'cards', updatedItem.publicId);
-    setDoc(cardRef, { ...updatedItem, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+    // Use setDoc WITHOUT merge: true to ensure cleaned fields are removed from Firestore too
+    setDoc(cardRef, {
+      ...updatedItem,
+      updatedAt: serverTimestamp()
+    }).catch(err => console.error("Firestore sync failed:", err));
   }
 
-  return updatedItem;
+  return { item: updatedItem, isUpdate };
 }
 
 export function deleteQRCode(id: string): void {
   const items = getStoredQRCodes();
   const target = items.find(q => q.id === id);
+
   if (target) {
+    // 1. Mark as deleted in Local Storage
+    const deletedData = localStorage.getItem(DELETED_CARDS_KEY);
+    const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
+    if (!deletedIds.includes(id)) {
+      deletedIds.push(id);
+      localStorage.setItem(DELETED_CARDS_KEY, JSON.stringify(deletedIds));
+    }
+
+    // 2. Remove from active list
     saveQRCodes(items.filter(q => q.id !== id));
-    if (db) deleteDoc(doc(db, 'cards', target.publicId)).catch(() => {});
+
+    // 3. Delete from Firestore if possible
+    if (db && target.publicId) {
+      deleteDoc(doc(db, 'cards', target.publicId)).catch(err => console.error("Firestore delete failed:", err));
+    }
   }
 }
 
@@ -810,21 +885,38 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
 export function getStoredClients(): ClientProfile[] {
   try {
     const data = localStorage.getItem(CLIENTS_STORAGE_KEY);
+    const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
+    const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
+
     let clients: ClientProfile[] = data ? JSON.parse(data) : [];
 
-    // Robustness: ensure clients is an array
     if (!Array.isArray(clients)) {
       clients = [];
     }
 
-    // Ensure initial clients are present
     let changed = false;
     INITIAL_CLIENTS.forEach(initClient => {
-      if (!clients.find(c => c && c.id === initClient.id)) {
+      if (!clients.find(c => c && c.id === initClient.id) && !deletedIds.includes(initClient.id)) {
         clients.push(initClient);
         changed = true;
       }
     });
+
+    // Strict De-duplication by fullName (keeping most recent)
+    const uniqueMap = new Map<string, ClientProfile>();
+    clients.forEach(c => {
+      if (!c || !c.fullName) return;
+      const key = c.fullName.trim().toLowerCase();
+      const existing = uniqueMap.get(key);
+      if (!existing || new Date(c.updatedAt).getTime() > new Date(existing.updatedAt).getTime()) {
+        uniqueMap.set(key, c);
+      }
+    });
+
+    if (uniqueMap.size < clients.length) {
+      clients = Array.from(uniqueMap.values());
+      changed = true;
+    }
 
     if (changed || !data) {
       saveClients(clients);
@@ -836,21 +928,67 @@ export function getStoredClients(): ClientProfile[] {
   }
 }
 
+export function deduplicateData(): void {
+  // Trigger re-load with de-duplication logic
+  getStoredClients();
+  getStoredQRCodes();
+}
+
 export function saveClients(clients: ClientProfile[]): void {
   localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clients));
 }
 
-export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: string }): ClientProfile {
+export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: string }): { client: ClientProfile, isUpdate: boolean } {
   const clients = getStoredClients();
-  const id = client.id || `client_${Date.now()}`;
-  const fullClient: ClientProfile = { ...client as ClientProfile, id, updatedAt: new Date().toISOString() };
-  const idx = clients.findIndex(c => c.id === id);
-  if (idx >= 0) clients[idx] = fullClient; else clients.unshift(fullClient);
+  const nameKey = (client.fullName || '').trim().toLowerCase();
+
+  // Remove from deleted list if re-added
+  if (client.id) {
+    const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
+    if (deletedData) {
+      const deletedIds: string[] = JSON.parse(deletedData);
+      if (deletedIds.includes(client.id)) {
+        localStorage.setItem(DELETED_CLIENTS_KEY, JSON.stringify(deletedIds.filter(id => id !== client.id)));
+      }
+    }
+  }
+
+  // De-duplication check: Find by ID or by FullName
+  let existingIdx = clients.findIndex(c => c.id === client.id);
+  if (existingIdx === -1 && nameKey) {
+    existingIdx = clients.findIndex(c => (c.fullName || '').trim().toLowerCase() === nameKey);
+  }
+
+  const isUpdate = existingIdx >= 0;
+  const id = isUpdate ? clients[existingIdx].id : (client.id || `client_${Date.now()}`);
+
+  const fullClient: ClientProfile = {
+    ...(isUpdate ? clients[existingIdx] : {}),
+    ...client as ClientProfile,
+    id,
+    updatedAt: new Date().toISOString()
+  };
+
+  if (isUpdate) {
+    clients[existingIdx] = fullClient;
+  } else {
+    clients.unshift(fullClient);
+  }
+
   saveClients(clients);
-  return fullClient;
+  return { client: fullClient, isUpdate };
 }
 
 export function deleteClient(id: string): void {
+  // 1. Mark as deleted
+  const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
+  const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
+  if (!deletedIds.includes(id)) {
+    deletedIds.push(id);
+    localStorage.setItem(DELETED_CLIENTS_KEY, JSON.stringify(deletedIds));
+  }
+
+  // 2. Filter out
   saveClients(getStoredClients().filter(c => c.id !== id));
 }
 

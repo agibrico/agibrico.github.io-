@@ -221,13 +221,17 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
       return;
     }
 
-    const saved = saveOrUpdateClient(editingClient);
+    const { client: saved, isUpdate } = saveOrUpdateClient(editingClient);
     setIsModalOpen(false);
     setEditingClient(null);
     onRefresh();
 
-    // Show confirmation that all existing QR codes have been automatically updated
-    setSaveSuccessMessage(`Fiche de ${saved.fullName} synchronisée avec succès ! Le QR Code existant diffusera automatiquement ces nouvelles coordonnées lors des scans.`);
+    // Show confirmation with specific message for update vs creation
+    const msg = isUpdate
+      ? `Mise à jour de la fiche de ${saved.fullName} effectuée !`
+      : `Fiche de ${saved.fullName} créée avec succès !`;
+
+    setSaveSuccessMessage(`${msg} Le QR Code associé diffusera automatiquement ces coordonnées.`);
     setTimeout(() => setSaveSuccessMessage(null), 6000);
   };
 

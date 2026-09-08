@@ -43,6 +43,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
   });
 
   const [activeFieldSettings, setActiveFieldSettings] = useState<string | null>(null);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
 
   const toggleFieldSettings = (sectionId: string, fieldId: string) => {
     const key = `${sectionId}_${fieldId}`;
@@ -143,7 +144,20 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
 
   useEffect(() => { saveOrUpdateQRCode(getCurrentItem(), true); }, [title, type, mode, content, styling]);
 
-  const handleSave = () => { onSave(getCurrentItem()); };
+  const handleSave = () => {
+    const item = getCurrentItem();
+    const { isUpdate } = saveOrUpdateQRCode(item);
+
+    if (isUpdate && !isEditing) {
+      setSuccessToast("Mise à jour de la fiche existante détectée");
+      setTimeout(() => {
+        setSuccessToast(null);
+        onSave(item);
+      }, 2000);
+    } else {
+      onSave(item);
+    }
+  };
 
   const qrTypesList = [
     { type: 'BUSINESS_CARD', label: 'Carte Visite', desc: 'vCard Pro', icon: User },
@@ -160,6 +174,14 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20">
+      {/* Toast Feedback */}
+      {successToast && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce border border-slate-700">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <span className="font-bold">{successToast}</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div className="flex-1 w-full">
           <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="text-xl font-black w-full outline-none border-b border-transparent focus:border-blue-600" placeholder="Titre de la fiche..." />

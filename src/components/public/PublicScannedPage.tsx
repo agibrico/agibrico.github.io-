@@ -102,9 +102,20 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       'url': 'WEB_LINK'
     };
 
+    // --- Legacy Compatibility: Normalize content fields from old APK data ---
+    const content = { ...(rawItem.content || {}) };
+
+    // Mapping for old Event/Invitation fields
+    if (content.eventDate) content.eventStartDate = content.eventDate;
+    if (content.invitationDate) content.eventStartDate = content.invitationDate;
+    if (content.invitationTime) content.eventStartTime = content.invitationTime;
+    if (content.invitationLocationName) content.eventLocationName = content.invitationLocationName;
+    if (content.invitationAddress) content.eventAddress = content.invitationAddress;
+
     return {
       ...rawItem,
-      type: typeMap[rawItem.type] || rawItem.type
+      type: typeMap[rawItem.type] || rawItem.type,
+      content
     };
   };
 

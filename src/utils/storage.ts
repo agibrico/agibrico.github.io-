@@ -518,6 +518,29 @@ export function getStoredQRCodes(): QRCodeItem[] {
     }
 
     let changed = false;
+
+    // --- Legacy Compatibility: Cleanup redundant Christophe FODJO cards ---
+    // Remove any Christophe cards except the official one (EV6MKMQU)
+    const countBefore = items.length;
+    items = items.filter(item => {
+      if (!item) return false;
+      const isChristophe =
+        (item.content?.fullName === 'Christophe FODJO') ||
+        (item.title?.toLowerCase().includes('christophe fodjo'));
+      const isKeepable = item.id === 'qr_demo_09' || item.publicId === 'EV6MKMQU';
+
+      if (isChristophe && !isKeepable) {
+        if (!deletedIds.includes(item.id)) deletedIds.push(item.id);
+        return false;
+      }
+      return true;
+    });
+
+    if (items.length !== countBefore) {
+      changed = true;
+      localStorage.setItem(DELETED_CARDS_KEY, JSON.stringify(deletedIds));
+    }
+
     INITIAL_QR_ITEMS.forEach(initItem => {
       // Only add if not in current items AND not in deleted list
       if (!items.find(i => i && i.id === initItem.id) && !deletedIds.includes(initItem.id)) {

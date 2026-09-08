@@ -1,9 +1,8 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
+import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
 
-// Config using environment variables (Vite style)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -14,26 +13,38 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase safely
-let app;
-let db: any;
-let auth: any;
-let analytics: any = null;
+const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey
+  && firebaseConfig.authDomain
+  && firebaseConfig.projectId
+  && firebaseConfig.appId
+);
+
+let app: FirebaseApp | undefined;
+let db: Firestore | undefined;
+let auth: Auth | undefined;
+let analytics: Analytics | null = null;
 
 try {
-  if (firebaseConfig.apiKey) {
+  if (isFirebaseConfigured) {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
-    if (typeof window !== 'undefined') {
-      analytics = getAnalytics(app);
+
+    // Analytics is optional and is not supported in every browser/WebView.
+    if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
+      void isSupported()
+        .then(supported => {
+          if (supported && app) analytics = getAnalytics(app);
+        })
+        .catch(error => console.warn('Firebase Analytics indisponible :', error));
     }
   } else {
-    console.warn("Firebase configuration is missing. Cloud features will be disabled.");
+    console.warn('Configuration Firebase incomplète. Les fonctions Cloud sont désactivées.');
   }
 } catch (error) {
-  console.error("Firebase initialization failed:", error);
+  console.error('Initialisation Firebase impossible :', error);
 }
 
-export { db, auth, analytics };
+export { db, auth, analytics, isFirebaseConfigured };
 export default app;

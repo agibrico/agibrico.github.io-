@@ -1,26 +1,64 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Admin unique configuration
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == 'atsegillesbrice@gmail.com';
+      return isSignedIn() && request.auth.token.email == 'atsegillesbrice@gmail.com';
+    }
+
+    function ownsExistingDocument() {
+      return isSignedIn()
+        && resource.data.userId != null
+        && resource.data.userId == request.auth.uid;
+    }
+
+    function ownsIncomingDocument() {
+      return isSignedIn()
+        && request.resource.data.userId != null
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    function isPublicCard() {
+      let content = resource.data.get('content', {});
+      let privacy = content.get('privacy', {});
+      return (resource.data.status == 'active' || resource.data.status == 'PUBLISHED')
+        && content.get('customVisibility', 'public') == 'public'
+        && privacy.get('isPublic', true) == true;
+    }
+
+    function isValidPublicScanIncrement() {
+      return isPublicCard()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['scanCount', 'lastScannedAt'])
+        && resource.data.scanCount is int
+        && request.resource.data.scanCount == resource.data.scanCount + 1
+        && request.resource.data.lastScannedAt == request.time;
     }
 
     match /cards/{cardId} {
-      // Lecture d'une fiche individuelle : publique si publiée ou admin
-      allow get: if resource.data.status == 'PUBLISHED' || isAdmin();
+      // Une fiche active est lisible publiquement. Le propriétaire et l'admin peuvent lire les autres états.
+      allow get: if isPublicCard() || ownsExistingDocument() || isAdmin();
 
-      // Liste de toutes les fiches : admin seulement
-      allow list: if isAdmin();
+      // Les requêtes de liste doivent être limitées au userId du propriétaire côté client.
+      allow list: if ownsExistingDocument() || isAdmin();
 
-      // Création et suppression : admin seulement
-      allow create, delete: if isAdmin();
+      allow create: if ownsIncomingDocument() || isAdmin();
+      allow delete: if ownsExistingDocument() || isAdmin();
 
-      // Mise à jour : admin peut tout faire, le public peut seulement incrémenter le scanCount
-      allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['scanCount', 'lastScanAt'])
-        && resource.data.status == 'PUBLISHED'
-      );
+      // Le propriétaire peut modifier sa fiche. Le public ne peut qu'incrémenter proprement les statistiques de scan.
+      allow update: if isAdmin()
+        || (ownsExistingDocument() && ownsIncomingDocument())
+        || isValidPublicScanIncrement();
+    }
+
+    match /clients/{clientId} {
+      // Les fiches clients ne sont jamais publiques.
+      allow get, list: if ownsExistingDocument() || isAdmin();
+      allow create: if ownsIncomingDocument() || isAdmin();
+      allow update: if isAdmin() || (ownsExistingDocument() && ownsIncomingDocument());
+      allow delete: if ownsExistingDocument() || isAdmin();
     }
   }
 }

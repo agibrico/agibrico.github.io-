@@ -12,14 +12,13 @@ permissions:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    environment: github-pages
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
           cache: 'npm'
 
       - name: Setup Java
@@ -29,7 +28,7 @@ jobs:
           distribution: 'zulu'
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm ci
 
       - name: Build Web App
         run: npm run build
@@ -45,7 +44,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_TOKEN || secrets.FIREBASE_SERVICE_ACCOUNT_AGB_VCARD_STUDIO }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AGB_VCARD_STUDIO }}
           channelId: live
           projectId: agb-vcard-studio
 
@@ -59,13 +58,10 @@ jobs:
       - name: Capacitor Android Build
         run: |
           # Initialize Android project if missing
-          npx cap add android || true
+          if [ ! -d android ]; then npx cap add android; fi
           
           # Sync Web assets to Android
           npx cap sync android
-          
-          # Inject Firebase Config into Android project
-          cp google-services.json android/app/google-services.json
           
           # Run native build
           cd android

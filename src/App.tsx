@@ -28,7 +28,8 @@ import {
   getStoredHistory,
   syncCardsWithServer,
   generateCardNumber,
-  syncOfficialDataToCloud
+  syncOfficialDataToCloud,
+  resetLocalAppData
 } from './utils/storage';
 import { CARD_TEMPLATES } from './components/templates/TemplateGalleryView';
 
@@ -39,6 +40,7 @@ export default function App() {
   const [clients, setClients] = useState<ClientProfile[]>([]);
   const [scans, setScans] = useState<ScanEvent[]>([]);
   const [historyLogs, setHistoryLogs] = useState<HistoryLogItem[]>([]);
+  const [cardClientFilter, setCardClientFilter] = useState<string | null>(null);
 
   // Active editing item (null = creating new)
   const [editingItem, setEditingItem] = useState<QRCodeItem | null>(null);
@@ -55,33 +57,46 @@ export default function App() {
     // Load initial data
     refreshData();
 
-    // Ensure official demo cards are in cloud
-    syncOfficialDataToCloud();
-
-    // Check URL for public scan route
-    const checkHashRoute = () => {
-      const hash = window.location.hash;
-      const match = hash.match(/#(?:q|c|card)\/([a-zA-Z0-9_-]+)/i);
-      if (match && match[1]) {
-        setPublicScanId(match[1]);
-      } else {
-        setPublicScanId(null);
-      }
+    // Accept both hash links (#q/ID) and clean routes (/q/ID).
+    const checkPublicRoute = () => {
+      const hashMatch = window.location.hash.match(/#(?:q|c|card)\/([a-zA-Z0-9_-]+)/i);
+      const pathMatch = window.location.pathname.match(/\/(?:q|c|card)\/([a-zA-Z0-9_-]+)(?:\/|$)/i);
+      const match = hashMatch || pathMatch;
+      setPublicScanId(match?.[1] || null);
     };
 
-    checkHashRoute();
-    window.addEventListener('hashchange', checkHashRoute);
-    
-    return () => window.removeEventListener('hashchange', checkHashRoute);
+    checkPublicRoute();
+    window.addEventListener('hashchange', checkPublicRoute);
+    window.addEventListener('popstate', checkPublicRoute);
+
+    return () => {
+      window.removeEventListener('hashchange', checkPublicRoute);
+      window.removeEventListener('popstate', checkPublicRoute);
+    };
   }, []);
 
   useEffect(() => {
     if (authLoading) return;
 
-    // Sync with server API in background when user changes
-    syncCardsWithServer().then(() => {
+    if (!user) {
       refreshData();
-    }).catch(() => {});
+      return;
+    }
+
+    let cancelled = false;
+    const syncAuthenticatedData = async () => {
+      try {
+        await syncOfficialDataToCloud();
+        await syncCardsWithServer();
+      } catch (error) {
+        console.error('Synchronisation Firebase impossible :', error);
+      } finally {
+        if (!cancelled) refreshData();
+      }
+    };
+
+    void syncAuthenticatedData();
+    return () => { cancelled = true; };
   }, [user, authLoading]);
 
   const refreshData = () => {
@@ -103,6 +118,7 @@ export default function App() {
   // Handlers
   const handleCreateNew = () => {
     setEditingItem(null);
+    setCardClientFilter(null);
     setCurrentTab('create');
   };
 
@@ -126,7 +142,7 @@ export default function App() {
         commercialName: client.commercialName,
         industry: client.industry,
         slogan: client.slogan,
-        bio: client.internalNotes,
+        bio: client.bio,
         photoUrl: client.photoUrl,
         logoUrl: client.logoUrl,
         primaryPhone: client.primaryPhone,
@@ -236,7 +252,7 @@ export default function App() {
   };
 
   const handleResetDemoData = () => {
-    localStorage.clear();
+    resetLocalAppData();
     refreshData();
     alert("Données réinitialisées aux modèles standards AGB !");
   };
@@ -280,6 +296,7 @@ export default function App() {
             onRefresh={refreshData}
             onCreateCardForClient={handleCreateCardForClient}
             onViewClientCards={(clientId) => {
+              setCardClientFilter(clientId);
               setCurrentTab('cards');
             }}
             onBackToDashboard={() => setCurrentTab('dashboard')}
@@ -291,6 +308,8 @@ export default function App() {
           <QRListView
             items={qrItems}
             clients={clients}
+            filterClientId={cardClientFilter}
+            onClearClientFilter={() => setCardClientFilter(null)}
             onCreateNew={handleCreateNew}
             onEdit={handleEditQR}
             onDuplicate={handleDuplicateQR}
@@ -298,7 +317,10 @@ export default function App() {
             onToggleStatus={handleToggleStatus}
             onOpenSimulator={item => setSimulatorModalItem(item)}
             onOpenPrintStudio={item => setPrintModalItem(item)}
-            onBackToDashboard={() => setCurrentTab('dashboard')}
+            onBackToDashboard={() => {
+              setCardClientFilter(null);
+              setCurrentTab('dashboard');
+            }}
           />
         )}
 

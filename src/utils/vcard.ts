@@ -47,15 +47,15 @@ export function generateVCardString(content: QRContent): string {
   }
 
   if (content.email) {
-    lines.push(`EMAIL;TYPE=INTERNET,pref:${content.email.trim()}`);
+    lines.push(`EMAIL;TYPE=INTERNET,pref:${escapeVCardText(content.email.trim())}`);
   }
 
   if (content.workEmail) {
-    lines.push(`EMAIL;TYPE=INTERNET,WORK:${content.workEmail.trim()}`);
+    lines.push(`EMAIL;TYPE=INTERNET,WORK:${escapeVCardText(content.workEmail.trim())}`);
   }
 
   if (content.websiteUrl) {
-    lines.push(`URL:${content.websiteUrl.trim()}`);
+    lines.push(`URL:${escapeVCardText(content.websiteUrl.trim())}`);
   }
 
   // Address
@@ -69,13 +69,13 @@ export function generateVCardString(content: QRContent): string {
   }
 
   // Geo GPS
-  if (content.latitude && content.longitude) {
+  if (!content.privacy?.hideAddress && content.latitude != null && content.longitude != null) {
     lines.push(`GEO:${content.latitude};${content.longitude}`);
   }
 
   // Location Link / Maps
-  if (content.locationLink) {
-    lines.push(`URL;type=LOCATION:${content.locationLink.trim()}`);
+  if (!content.privacy?.hideAddress && content.locationLink) {
+    lines.push(`URL;type=LOCATION:${escapeVCardText(content.locationLink.trim())}`);
   }
 
   // Slogan as TITLE suffix or NOTE
@@ -107,9 +107,6 @@ export function generateVCardString(content: QRContent): string {
   if (content.publicNotes) {
     noteParts.push(`Notes : ${content.publicNotes}`);
   }
-  if (content.internalNotes) {
-    noteParts.push(`Notes internes : ${content.internalNotes}`);
-  }
   if (content.catalogUrl) {
     noteParts.push(`Catalogue : ${content.catalogUrl}`);
   }
@@ -122,7 +119,7 @@ export function generateVCardString(content: QRContent): string {
   if (content.paymentLink) {
     noteParts.push(`Paiement : ${content.paymentLink}`);
   }
-  if (content.locationLink) {
+  if (!content.privacy?.hideAddress && content.locationLink) {
     noteParts.push(`Lien de localisation : ${content.locationLink.trim()}`);
   }
   if (content.otherInformation) {
@@ -148,7 +145,7 @@ export function generateVCardString(content: QRContent): string {
   // Social profiles as X-SOCIALPROFILE
   content.socialLinks?.forEach(s => {
     if (s.url) {
-      lines.push(`X-SOCIALPROFILE;type=${s.platform}:${s.url}`);
+      lines.push(`X-SOCIALPROFILE;type=${escapeVCardText(s.platform)}:${escapeVCardText(s.url)}`);
     }
   });
 

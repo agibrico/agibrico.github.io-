@@ -29,7 +29,7 @@ git branch -M main
 git remote add origin https://github.com/agibrico/agibrico.github.io-.git
 
 # 6. Pousser le code vers GitHub
-git push -u origin main --force
+git push -u origin main
 ```
 
 ---
@@ -41,13 +41,13 @@ git push -u origin main --force
 3. Dans le menu de gauche, cliquez sur **Pages** (sous la section *Code and automation*).
 4. Sous **Build and deployment** > **Source** :
    - Sélectionnez **GitHub Actions**.
-5. C'est tout ! Le workflow GitHub Actions automatique (`.github/workflows/deploy.yml`) va automatiquement compiler et publier l'application.
+5. C'est tout ! Le workflow GitHub Actions automatique (`.github/workflows/firebase-hosting-merge.yml`) va automatiquement compiler et publier l'application.
 
 ---
 
 ### 🌐 URL de l'Application en Ligne
 
-Une fois le déploiement terminé (environ 1 minute) :
+Une fois le workflow de déploiement terminé :
 - **Application Web & Tableau de Bord :** `https://agibrico.github.io/agibrico.github.io-/`
 - **Fiches publiques scannées par les clients :** `https://agibrico.github.io/agibrico.github.io-/#q/[ID_PUBLIC]`
 

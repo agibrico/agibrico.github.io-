@@ -39,7 +39,7 @@ git add .
 git commit -m "Déploiement AGB vCard Studio sur GitHub Pages"
 git branch -M main
 git remote add origin https://github.com/agibrico/agibrico.github.io-.git
-git push -u origin main --force`;
+git push -u origin main`;
 
   const handleCopyCommands = () => {
     navigator.clipboard.writeText(gitCommands);
@@ -166,7 +166,7 @@ git push -u origin main --force`;
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-xs">
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/70 space-y-1">
             <span className="font-bold text-slate-900 block">1. Workflow CI/CD</span>
-            <p className="text-slate-500 text-[11px]">Fichier <code className="text-blue-600 font-semibold">.github/workflows/deploy.yml</code> prêt pour le déploiement automatique.</p>
+            <p className="text-slate-500 text-[11px]">Fichier <code className="text-blue-600 font-semibold">.github/workflows/firebase-hosting-merge.yml</code> prêt pour le déploiement automatique.</p>
           </div>
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/70 space-y-1">
             <span className="font-bold text-slate-900 block">2. Routage SPA & 404</span>
@@ -174,7 +174,7 @@ git push -u origin main --force`;
           </div>
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/70 space-y-1">
             <span className="font-bold text-slate-900 block">3. Base Relative</span>
-            <p className="text-slate-500 text-[11px]">Chemins relatifs <code className="text-blue-600 font-semibold">base: './'</code> pour compatibilité absolue sous GitHub Pages.</p>
+            <p className="text-slate-500 text-[11px]">Chemins relatifs <code className="text-blue-600 font-semibold">base: ''</code> pour compatibilité absolue sous GitHub Pages.</p>
           </div>
         </div>
       </div>

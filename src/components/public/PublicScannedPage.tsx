@@ -61,7 +61,7 @@ import {
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
 import { downloadVCard } from '../../utils/vcard';
-import { recordScanEvent, fetchQRCodeByPublicId, getClientById, getStoredClients, decodeCardPayload, INITIAL_QR_ITEMS } from '../../utils/storage';
+import { recordScanEvent, fetchQRCodeByPublicId, getClientById, decodeCardPayload, INITIAL_QR_ITEMS } from '../../utils/storage';
 import { CANAAN_SERVICES_LOGO, AGB_ENGINEERING_LOGO } from '../../utils/defaultLogos';
 
 interface PublicScannedPageProps {
@@ -70,6 +70,25 @@ interface PublicScannedPageProps {
   isSimulator?: boolean;
   onCloseSimulator?: () => void;
 }
+
+const normalizeHttpUrl = (value?: string): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  try {
+    const candidate = /^[a-z][a-z0-9+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    const parsed = new URL(candidate);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+};
+
+const normalizeActionHref = (value?: string): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (/^(?:mailto|tel):/i.test(trimmed) && !/[\r\n]/.test(trimmed)) return trimmed;
+  return normalizeHttpUrl(trimmed);
+};
 
 export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   publicId,
@@ -87,7 +106,6 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
   const [pinInput, setPinInput] = useState<string>('');
   const [accessGranted, setAccessGranted] = useState<boolean>(false);
   const [pinError, setPinError] = useState<boolean>(false);
-  const [debugTaps, setDebugTaps] = useState<number>(0);
 
   // --- COMPATIBILITY LAYER FOR OLD FLUTTER TYPES ---
   const normalizeItem = (rawItem: any): QRCodeItem => {
@@ -117,6 +135,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     return {
       ...rawItem,
       type: typeMap[rawItem.type] || rawItem.type,
+      status: rawItem.status === 'PUBLISHED' ? 'active' : (rawItem.status || 'active'),
       content
     };
   };
@@ -129,7 +148,12 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
   useEffect(() => {
     if (item && item.type === 'WEB_LINK' && item.content.redirectMode === 'DIRECT' && item.content.linkDestinationUrl && !isSimulator && accessGranted) {
-      window.location.href = item.content.linkDestinationUrl;
+      const safeUrl = normalizeHttpUrl(item.content.linkDestinationUrl);
+      if (safeUrl) {
+        window.location.assign(safeUrl);
+      } else {
+        setError('Le lien de destination est invalide ou utilise un protocole non autorisé.');
+      }
     }
   }, [item, isSimulator, accessGranted]);
 
@@ -248,6 +272,21 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>;
   if (error || !item) return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white p-6 text-center"><div className="space-y-4"><ShieldAlert className="w-16 h-16 mx-auto text-amber-500"/><h2 className="text-xl font-bold">{error || "Fiche introuvable"}</h2><button onClick={() => window.location.reload()} className="px-6 py-2 bg-slate-800 rounded-xl border border-slate-700">Réessayer</button></div></div>;
+
+  const expirationValue = item.expiresAt || item.content.customExpirationDate;
+  const expirationTime = expirationValue ? Date.parse(expirationValue.length === 10 ? `${expirationValue}T23:59:59` : expirationValue) : NaN;
+  const isExpired = Number.isFinite(expirationTime) && Date.now() > expirationTime;
+  const isExplicitlyPrivate = item.content.privacy?.isPublic === false
+    || item.content.customVisibility === 'private'
+    || item.content.customVisibility === 'hidden'
+    || item.content.customStatus === 'draft';
+
+  if (!isSimulator && (isExpired || item.content.customStatus === 'expired')) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white p-6 text-center"><div className="space-y-4"><Clock className="w-16 h-16 mx-auto text-amber-500"/><h2 className="text-xl font-bold">Cette fiche a expiré.</h2></div></div>;
+  }
+  if (!isSimulator && isExplicitlyPrivate) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white p-6 text-center"><div className="space-y-4"><Lock className="w-16 h-16 mx-auto text-amber-500"/><h2 className="text-xl font-bold">Cette fiche n’est pas publique.</h2></div></div>;
+  }
   if (item.status === 'inactive' || item.status === 'archived') return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white p-6 text-center"><div className="space-y-4"><Lock className="w-16 h-16 mx-auto text-amber-500"/><h2 className="text-xl font-bold">Fiche Temporairement Suspendue</h2></div></div>;
 
   if (item.content.accessMode === 'pin' && !accessGranted && !isSimulator) {
@@ -278,8 +317,10 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     );
   }
 
-  const linkedClient = item.clientId ? getClientById(item.clientId) : null;
-  const content: QRContent = linkedClient ? { ...item.content, ...linkedClient } : item.content;
+  // A public visitor must never overwrite a cloud card with stale local demo-client data.
+  // Local client augmentation is useful only inside the simulator/editor context.
+  const linkedClient = isSimulator && item.clientId ? getClientById(item.clientId) : null;
+  const content: QRContent = linkedClient ? { ...linkedClient, ...item.content } : item.content;
   const { styling } = item;
   const fullName = content.fullName || `${content.firstName || ''} ${content.middleName ? content.middleName + ' ' : ''}${content.lastName || ''}`.trim() || item.publicId;
 
@@ -332,7 +373,8 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
         {href && <ExternalLink className="w-3 h-3 text-slate-600" />}
       </div>
     );
-    return href ? <a href={href} target="_blank" rel="noopener noreferrer">{content}</a> : content;
+    const safeHref = href ? normalizeActionHref(href) : null;
+    return safeHref ? <a href={safeHref} target="_blank" rel="noopener noreferrer">{content}</a> : content;
   };
 
   const getSocialIcon = (platform: string) => {
@@ -370,7 +412,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
         );
       case 'video':
         return (
-          <a href={field.value} target="_blank" rel="noopener noreferrer" className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group">
+          <a href={normalizeHttpUrl(String(field.value)) || undefined} target="_blank" rel="noopener noreferrer" className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group">
             <div className="w-12 h-12 bg-rose-600/10 rounded-2xl flex items-center justify-center text-rose-500"><Video className="w-6 h-6" /></div>
             <div className="flex-1"><span className="text-[9px] font-black uppercase text-slate-500 block">{field.label}</span><span className="text-xs font-black text-white">Voir la Vidéo</span></div>
             <ExternalLink className="w-4 h-4 text-slate-700" />
@@ -379,7 +421,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       case 'pdf':
       case 'document':
         return (
-          <a href={field.value} target="_blank" rel="noopener noreferrer" className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group">
+          <a href={normalizeHttpUrl(String(field.value)) || undefined} target="_blank" rel="noopener noreferrer" className="p-5 bg-slate-900 border border-slate-800 rounded-[28px] flex items-center gap-4 group">
             <div className="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500"><FileText className="w-6 h-6" /></div>
             <div className="flex-1"><span className="text-[9px] font-black uppercase text-slate-500 block">{field.label}</span><span className="text-xs font-black text-white">Télécharger Document</span></div>
             <Download className="w-4 h-4 text-slate-700" />
@@ -405,7 +447,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       case 'url':
       case 'button':
         return (
-          <a href={field.value} target="_blank" rel="noopener noreferrer" className="p-5 bg-blue-600 text-white rounded-[28px] flex items-center gap-4 shadow-xl active:scale-[0.98] transition-all">
+          <a href={normalizeHttpUrl(String(field.value)) || undefined} target="_blank" rel="noopener noreferrer" className="p-5 bg-blue-600 text-white rounded-[28px] flex items-center gap-4 shadow-xl active:scale-[0.98] transition-all">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Link className="w-5 h-5" /></div>
             <span className="text-xs font-black uppercase tracking-widest flex-1 text-center">{field.label}</span>
             <ArrowRight className="w-4 h-4 opacity-50" />
@@ -469,7 +511,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             </div>
 
             {/* CONTACT & ADDRESS */}
-            {(content.email || content.workEmail || content.workPhone || content.websiteUrl || content.address || content.city || content.commune || content.region || content.postalCode) && (
+            {(content.email || content.workEmail || content.workPhone || content.websiteUrl || (!content.privacy?.hideAddress && (content.address || content.city || content.commune || content.region || content.postalCode))) && (
               <div className="bg-slate-900/50 border border-slate-800/50 rounded-[32px] p-6 space-y-4">
                 <SectionHeader title="Coordonnées & Localisation" icon={Info} />
                 <div className="space-y-3">
@@ -477,20 +519,20 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                   <InfoRow label="Email Travail" value={content.workEmail} icon={Mail} href={`mailto:${content.workEmail}`} />
                   <InfoRow label="Tél. Travail" value={content.workPhone} icon={Phone} href={`tel:${content.workPhone}`} />
                   <InfoRow label="Site Web" value={content.websiteUrl} icon={Globe} href={content.websiteUrl} />
-                  <InfoRow label="Adresse" value={content.address} icon={MapPin} />
-                  {(content.city || content.commune || content.region) && (
+                  <InfoRow label="Adresse" value={content.privacy?.hideAddress ? undefined : content.address} icon={MapPin} />
+                  {!content.privacy?.hideAddress && (content.city || content.commune || content.region) && (
                     <InfoRow
                       label="Zone"
                       value={[content.commune, content.city, content.region, content.country].filter(Boolean).join(', ')}
                       icon={Navigation}
                     />
                   )}
-                  {content.postalCode && <InfoRow label="Code Postal" value={content.postalCode} icon={Smartphone} />}
+                  {!content.privacy?.hideAddress && content.postalCode && <InfoRow label="Code Postal" value={content.postalCode} icon={Smartphone} />}
                 </div>
 
-                {((content.latitude && content.longitude) || content.address) && (
+                {!content.privacy?.hideAddress && ((content.latitude != null && content.longitude != null) || content.address) && (
                   <a
-                    href={content.latitude && content.longitude
+                    href={content.latitude != null && content.longitude != null
                       ? `https://www.google.com/maps/search/?api=1&query=${content.latitude},${content.longitude}`
                       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`}
                     target="_blank"
@@ -511,7 +553,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                   {content.socialLinks.filter(l => l.url && l.url.trim() !== "").map(link => (
                     <a
                       key={link.id}
-                      href={link.url}
+                      href={normalizeHttpUrl(link.url) || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group"
@@ -1234,7 +1276,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 <SectionHeader title="Suivez-nous" icon={Share2} />
                 <div className="grid grid-cols-4 gap-3">
                   {content.socialLinks.filter(l => l.url && l.url.trim() !== "").map(link => (
-                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group">
+                    <a key={link.id} href={normalizeHttpUrl(link.url) || undefined} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group">
                       {getSocialIcon(link.platform)}
                       <span className="text-[7px] font-black uppercase text-slate-500 group-hover:text-slate-200 truncate w-full text-center">{link.platform}</span>
                     </a>
@@ -1498,7 +1540,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                       <ShoppingCart className="w-3.5 h-3.5" /> Catalogue
                     </a>
                   )}
-                  {((content.latitude && content.longitude) || content.address) && (
+                  {!content.privacy?.hideAddress && ((content.latitude != null && content.longitude != null) || content.address) && (
                     <a
                       href={content.latitude && content.longitude ? `https://www.google.com/maps/dir/?api=1&destination=${content.latitude},${content.longitude}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(content.address || '')}`}
                       target="_blank" rel="noopener noreferrer"
@@ -1650,7 +1692,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 <SectionHeader title="Suivez-nous" icon={Share2} />
                 <div className="grid grid-cols-4 gap-3">
                   {content.socialLinks.filter(l => l.url && l.url.trim() !== "").map(link => (
-                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group">
+                    <a key={link.id} href={normalizeHttpUrl(link.url) || undefined} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 group">
                       {getSocialIcon(link.platform)}
                       <span className="text-[7px] font-black uppercase text-slate-500 group-hover:text-slate-200 truncate w-full text-center">{link.platform}</span>
                     </a>
@@ -1761,7 +1803,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               <div className="px-8 pt-10">
                 <div className="grid grid-cols-4 gap-4">
                   {socialPlatforms.filter(l => l.url && l.url.trim() !== "").map(link => (
-                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 group">
+                    <a key={link.id} href={normalizeHttpUrl(link.url) || undefined} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 group">
                       <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-white group-hover:scale-110 group-hover:bg-indigo-600 transition-all shadow-lg">
                         {getSocialIcon(link.platform)}
                       </div>
@@ -1776,7 +1818,8 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
             <div className="px-8 pt-8 flex flex-wrap justify-center gap-3">
               <button onClick={() => {
                 const primary = socialPlatforms.filter(l => l.url && l.url.trim() !== "")[0]?.url || content.websiteUrl || (content.socialLinks?.filter(l => l.url && l.url.trim() !== "")[0]?.url);
-                if(primary) window.open(primary, '_blank');
+                const safePrimary = normalizeHttpUrl(primary);
+                if (safePrimary) window.open(safePrimary, '_blank', 'noopener,noreferrer');
               }} className="flex-1 min-w-[120px] py-3 bg-white text-slate-950 rounded-2xl font-black text-xs uppercase tracking-tighter shadow-xl flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors">
                 <UserPlus className="w-4 h-4" /> Suivre
               </button>
@@ -1804,7 +1847,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 {customLinks.map(link => (
                   <a
                     key={link.id}
-                    href={link.url}
+                    href={normalizeHttpUrl(link.url) || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-between p-5 bg-slate-900 border border-slate-800 text-white rounded-[28px] shadow-2xl group hover:border-indigo-500 transition-all"
@@ -1832,7 +1875,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 </button>
               )}
               {content.websiteUrl && (
-                <button onClick={() => window.open(content.websiteUrl, '_blank')} className="flex items-center justify-center gap-2 p-4 bg-blue-950/30 border border-blue-900/50 text-blue-400 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-900/50 transition-colors">
+                <button onClick={() => window.open(normalizeHttpUrl(content.websiteUrl) || '', '_blank', 'noopener,noreferrer')} className="flex items-center justify-center gap-2 p-4 bg-blue-950/30 border border-blue-900/50 text-blue-400 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-900/50 transition-colors">
                   <Globe className="w-4 h-4" /> Visiter
                 </button>
               )}
@@ -2096,7 +2139,7 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               </div>
 
               <div className="w-full pt-4">
-                <a href={content.linkDestinationUrl} className="group relative block w-full max-w-xs mx-auto">
+                <a href={normalizeHttpUrl(content.linkDestinationUrl) || undefined} className="group relative block w-full max-w-xs mx-auto">
                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur opacity-60 group-hover:opacity-100 transition duration-500" />
                    <button className="relative w-full py-6 bg-slate-950 text-white rounded-[28px] font-black text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all active:scale-[0.98] border border-white/5 shadow-2xl">
                      {content.showCustomButton && content.customButtonText ? content.customButtonText : 'Ouvrir le lien'}
@@ -2136,10 +2179,11 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
               </div>
             )}
 
-            {(content.customSections || []).map(section => {
+            {(content.customSections || []).filter(section => section.isVisible !== false).map(section => {
               // Perfect "Fill-to-Show": Only display fields with actual content
               const visibleFields = section.fields.filter(f =>
                 f.isVisible &&
+                f.isPublic !== false &&
                 f.value !== undefined &&
                 f.value !== null &&
                 f.value.toString().trim() !== ""
@@ -2188,34 +2232,9 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       <footer className="py-12 text-center relative z-10">
         <div className="flex flex-col items-center space-y-3">
           <div className="w-1 h-px bg-slate-800 rounded-full" />
-          <p
-            onClick={() => setDebugTaps(prev => prev + 1)}
-            className="text-[7px] font-bold uppercase tracking-[0.4em] text-slate-800 cursor-pointer"
-          >
+          <p className="text-[7px] font-bold uppercase tracking-[0.4em] text-slate-800">
             ID: {item.publicId}
           </p>
-          {debugTaps >= 5 && (
-            <div className="mt-4 p-4 bg-slate-900 border border-slate-800 rounded-2xl text-[8px] font-mono text-slate-500 text-left max-w-xs overflow-auto shadow-2xl">
-              <div className="flex justify-between items-center mb-2 border-b border-slate-800 pb-2">
-                <span className="font-black text-blue-500 uppercase tracking-widest">Debug Info</span>
-                <button onClick={() => setDebugTaps(0)} className="text-rose-500 font-bold px-2 py-0.5 bg-rose-500/10 rounded">X</button>
-              </div>
-              <p>Type: {item.type}</p>
-              <p>Logo: {resolvedLogo ? 'OK' : 'MISSING'}</p>
-              <p>Cloud User: {item.userId || 'NONE'}</p>
-              <p>Public ID: {item.publicId}</p>
-
-              <button
-                onClick={() => {
-                  console.log("FULL DATA INSPECTION:", item);
-                  alert(JSON.stringify(item, null, 2));
-                }}
-                className="mt-4 w-full py-2 bg-blue-600 text-white font-black uppercase rounded-lg active:scale-95 transition-transform"
-              >
-                Inspecter les données (JSON)
-              </button>
-            </div>
-          )}
         </div>
       </footer>
     </div>

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  User, Building2, Share2, ShoppingBag, Image as ImageIcon, Calendar, MapPin, Globe, Sparkles, Plus, Trash2, Lock, Check, Palette, Upload, Clock, Shield, Sliders, Layers, ArrowRight, Eye, Save, X, FileCode, Info, BookOpen, Store, Navigation, CheckCircle2, Smartphone, Printer, CalendarDays, Hash, Languages, DollarSign, ShoppingCart, Facebook, Instagram, Truck, Wallet, Package, MapPinned, LocateFixed, Linkedin, Youtube, FileText, Briefcase, Twitter, Send, MessageSquare, Book, Link, Map, UserPlus, List, ImagePlus, FileUp, Star, Tag, Activity, CheckSquare, LayoutList, GripVertical, Phone, BadgeCheck, GraduationCap, Quote, Users, Landmark, TruckIcon, CreditCard, PenTool, BookMarked, Languages as LangIcon, Headphones, Video, Settings, ChevronDown, ChevronUp, Minus, Type, Mail, Copy
+  User, Building2, Share2, ShoppingBag, Image as ImageIcon, Calendar, MapPin, Globe, Sparkles, Plus, Trash2, Lock, Check, Palette, Upload, Clock, Shield, Sliders, Layers, ArrowRight, Eye, Save, X, FileCode, Info, BookOpen, Store, Navigation, Smartphone, Printer, CalendarDays, Hash, Languages, DollarSign, ShoppingCart, Facebook, Instagram, Truck, Wallet, Package, MapPinned, LocateFixed, Linkedin, Youtube, FileText, Briefcase, Twitter, Send, MessageSquare, Book, Link, Map, UserPlus, List, ImagePlus, FileUp, Star, Tag, Activity, CheckSquare, LayoutList, GripVertical, Phone, BadgeCheck, GraduationCap, Quote, Users, Landmark, TruckIcon, CreditCard, PenTool, BookMarked, Languages as LangIcon, Headphones, Video, Settings, ChevronDown, ChevronUp, Minus, Type, Mail, Copy
 } from 'lucide-react';
 import { QRCodeItem, QRType, QRMode, QRStyling, QRContent, CustomField, SocialLink, OpeningHourDay } from '../../types/qr';
-import { generateSecurePublicId, getPublicQRUrl, saveOrUpdateQRCode, cleanQRCodeContent } from '../../utils/storage';
+import { generateSecurePublicId, getPublicQRUrl, cleanQRCodeContent } from '../../utils/storage';
 import { generateVCardString } from '../../utils/vcard';
 import { OpeningHoursEditor } from './OpeningHoursEditor';
 
@@ -26,7 +26,6 @@ const DEFAULT_DAYS: OpeningHourDay[] = [
 ];
 
 export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCancel, onOpenPrintStudio, onOpenSimulator }) => {
-  const isEditing = Boolean(initialItem);
   const [title, setTitle] = useState(initialItem?.title || '');
   const [type, setType] = useState<QRType>(initialItem?.type || 'BUSINESS_CARD');
   const [mode, setMode] = useState<QRMode>(initialItem?.mode || 'dynamic');
@@ -38,12 +37,11 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
   } as any);
 
   const [styling, setStyling] = useState<QRStyling>(initialItem?.styling || {
-    fgColor: '#0f172a', bgColor: '#ffffff', moduleStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#2563eb',
-    margin: 2, errorCorrectionLevel: 'H', logoSizeRatio: 0.22, bottomText: 'SCANNEZ MOI'
+    fgColor: '#0f172a', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#2563eb',
+    margin: 2, size: 320, errorCorrectionLevel: 'H', logoSizeRatio: 0.22, bottomText: 'SCANNEZ MOI'
   });
 
   const [activeFieldSettings, setActiveFieldSettings] = useState<string | null>(null);
-  const [successToast, setSuccessToast] = useState<string | null>(null);
 
   const toggleFieldSettings = (sectionId: string, fieldId: string) => {
     const key = `${sectionId}_${fieldId}`;
@@ -134,29 +132,24 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
   const updateStylingField = <K extends keyof QRStyling>(key: K, value: QRStyling[K]) => setStyling(prev => ({ ...prev, [key]: value }));
 
   const getCurrentItem = (): QRCodeItem => ({
+    ...(initialItem || {}),
     id: initialItem?.id || `qr_${publicId}`,
-    publicId, title, type, mode, status: initialItem?.status || 'active',
+    publicId,
+    title: title.trim() || `Fiche ${publicId}`,
+    type,
+    mode,
+    status: initialItem?.status || 'active',
     createdAt: initialItem?.createdAt || new Date().toISOString(),
-    updatedAt: new Date().toISOString(), scanCount: initialItem?.scanCount || 0,
+    updatedAt: new Date().toISOString(),
+    scanCount: initialItem?.scanCount ?? 0,
     content: cleanQRCodeContent(content, type),
     styling
   });
 
-  useEffect(() => { saveOrUpdateQRCode(getCurrentItem(), true); }, [title, type, mode, content, styling]);
-
+  // Important: no Firestore/localStorage write on each keystroke.
+  // The parent performs the single explicit save when the user validates the form.
   const handleSave = () => {
-    const item = getCurrentItem();
-    const { isUpdate } = saveOrUpdateQRCode(item);
-
-    if (isUpdate && !isEditing) {
-      setSuccessToast("Mise à jour de la fiche existante détectée");
-      setTimeout(() => {
-        setSuccessToast(null);
-        onSave(item);
-      }, 2000);
-    } else {
-      onSave(item);
-    }
+    onSave(getCurrentItem());
   };
 
   const qrTypesList = [
@@ -174,14 +167,6 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20">
-      {/* Toast Feedback */}
-      {successToast && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce border border-slate-700">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-          <span className="font-bold">{successToast}</span>
-        </div>
-      )}
-
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div className="flex-1 w-full">
           <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="text-xl font-black w-full outline-none border-b border-transparent focus:border-blue-600" placeholder="Titre de la fiche..." />
@@ -1625,7 +1610,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                         </div>
 
                         <div className="space-y-4">
-                          {(content.socialCustomLinks || []).sort((a,b) => a.order - b.order).map((clink, idx) => (
+                          {[...(content.socialCustomLinks || [])].sort((a,b) => a.order - b.order).map((clink, idx) => (
                             <div key={clink.id} className={`p-5 rounded-3xl border transition-all ${clink.isVisible ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
                               <div className="flex items-center gap-3 mb-4">
                                 <div className="flex flex-col gap-1">
@@ -2258,7 +2243,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                         </div>
 
                         <div className="space-y-8">
-                          {(content.customSections || []).sort((a,b) => a.order - b.order).map((section, sIdx) => (
+                          {[...(content.customSections || [])].sort((a,b) => a.order - b.order).map((section, sIdx) => (
                             <div key={section.id} className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden group/section">
                               <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center gap-4">
                                 <div className="flex flex-col gap-1">
@@ -2300,7 +2285,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                               </div>
 
                               <div className="p-6 space-y-4">
-                                {section.fields.sort((a,b) => a.order - b.order).map((field, fIdx) => (
+                                {[...section.fields].sort((a,b) => a.order - b.order).map((field, fIdx) => (
                                   <div key={field.id} className="p-5 bg-slate-50 border border-slate-200 rounded-3xl space-y-4 animate-in slide-in-from-left-2 duration-300">
                                     <div className="flex items-center gap-4">
                                       <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">

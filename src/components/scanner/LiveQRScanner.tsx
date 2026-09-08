@@ -31,7 +31,7 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [lastScannedResult, setLastScannedResult] = useState<string | null>(null);
   const [torchEnabled, setTorchEnabled] = useState(false);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const animationFrameId = useRef<number | null>(null);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
       };
 
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      setStream(mediaStream);
+      streamRef.current = mediaStream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -79,9 +79,9 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
       cancelAnimationFrame(animationFrameId.current);
       animationFrameId.current = null;
     }
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
     setIsScanning(false);
   };

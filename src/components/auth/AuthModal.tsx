@@ -35,6 +35,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError(null);
     setLoading(true);
 
+    if (!auth) {
+      setError('Firebase n’est pas configuré sur cette installation.');
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);

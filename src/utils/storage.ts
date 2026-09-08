@@ -26,7 +26,8 @@ import {
   where,
   deleteDoc,
   updateDoc,
-  serverTimestamp
+  serverTimestamp,
+  increment
 } from 'firebase/firestore';
 
 const CARDS_STORAGE_KEY = 'smart_qr_items_v2';
@@ -36,6 +37,80 @@ const HISTORY_STORAGE_KEY = 'smart_qr_history_v2';
 const DESIGNER_STORAGE_KEY = 'smart_qr_designer_v2';
 const DELETED_CARDS_KEY = 'smart_qr_deleted_ids_v1';
 const DELETED_CLIENTS_KEY = 'smart_qr_deleted_clients_v1';
+
+const ADMIN_EMAIL = 'atsegillesbrice@gmail.com';
+
+function getDeletedIdSet(storageKey: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === 'string') : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function normalizeTimestamp(value: any, fallback: string = new Date().toISOString()): string {
+  if (typeof value === 'string' && value) return value;
+  if (value?.toDate instanceof Function) {
+    try { return value.toDate().toISOString(); } catch { return fallback; }
+  }
+  if (typeof value?.seconds === 'number') {
+    return new Date(value.seconds * 1000).toISOString();
+  }
+  return fallback;
+}
+
+function normalizeFirestoreCard(data: any): QRCodeItem {
+  const now = new Date().toISOString();
+  const normalizedStatus = data?.status === 'PUBLISHED' ? 'active' : (data?.status || 'active');
+  return {
+    ...data,
+    status: normalizedStatus,
+    createdAt: normalizeTimestamp(data?.createdAt, now),
+    updatedAt: normalizeTimestamp(data?.updatedAt, now),
+    lastScannedAt: data?.lastScannedAt ? normalizeTimestamp(data.lastScannedAt, now) : undefined,
+    expiresAt: data?.expiresAt ? normalizeTimestamp(data.expiresAt, now) : undefined
+  } as QRCodeItem;
+}
+
+function normalizeFirestoreClient(data: any): ClientProfile {
+  const now = new Date().toISOString();
+  return {
+    ...data,
+    createdAt: normalizeTimestamp(data?.createdAt, now),
+    updatedAt: normalizeTimestamp(data?.updatedAt, now)
+  } as ClientProfile;
+}
+
+function removeUndefinedDeep<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value
+      .map(item => removeUndefinedDeep(item))
+      .filter(item => item !== undefined) as T;
+  }
+  if (value && typeof value === 'object') {
+    const output: Record<string, unknown> = {};
+    for (const [key, nestedValue] of Object.entries(value as Record<string, unknown>)) {
+      if (nestedValue !== undefined) output[key] = removeUndefinedDeep(nestedValue);
+    }
+    return output as T;
+  }
+  return value;
+}
+
+
+export function resetLocalAppData(): void {
+  [
+    CARDS_STORAGE_KEY,
+    CLIENTS_STORAGE_KEY,
+    SCANS_STORAGE_KEY,
+    HISTORY_STORAGE_KEY,
+    DESIGNER_STORAGE_KEY,
+    DELETED_CARDS_KEY,
+    DELETED_CLIENTS_KEY
+  ].forEach(key => localStorage.removeItem(key));
+}
 
 export const DEFAULT_DESIGNER_PROFILE: DesignerProfile = {
   name: 'Gilles Brice ATSÉ',
@@ -464,49 +539,6 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
   }
 ];
 
-export const INITIAL_HISTORY: HistoryLogItem[] = [
-  {
-    id: 'hist_01',
-    timestamp: '2026-08-21T08:00:00.000Z',
-    action: 'update_card',
-    title: 'Mise à jour coordonnées',
-    details: 'Ajout du lien de localisation GPS et note d\'urgence sur la carte AGB2026X',
-    clientId: 'client_001',
-    cardId: 'qr_demo_01'
-  }
-];
-
-function generateSampleScans(): ScanEvent[] {
-  const scans: ScanEvent[] = [];
-  const qrCodes = [
-    { id: 'qr_demo_01', publicId: 'AGB2026X' }
-  ];
-  const devices: ScanEvent['deviceType'][] = ['mobile', 'mobile', 'mobile', 'mobile', 'tablet', 'desktop'];
-  const oss: ScanEvent['os'][] = ['iOS', 'iOS', 'Android', 'Android', 'Android'];
-  const browsers: ScanEvent['browser'][] = ['Safari', 'Chrome', 'Samsung Internet', 'Chrome'];
-  const cities = ['Abidjan', 'Abidjan', 'Paris', 'Dakar', 'Yamoussoukro', 'San-Pédro', 'Lyon'];
-
-  for (let i = 0; i < 20; i++) {
-    const daysAgo = Math.floor(Math.random() * 14);
-    const target = qrCodes[Math.floor(Math.random() * qrCodes.length)];
-    const d = new Date(Date.now() - (daysAgo * 86400000));
-    
-    scans.push({
-      id: `scan_${Math.random().toString(36).substring(2, 9)}`,
-      qrCodeId: target.id,
-      publicId: target.publicId,
-      timestamp: d.toISOString(),
-      deviceType: devices[Math.floor(Math.random() * devices.length)],
-      os: oss[Math.floor(Math.random() * oss.length)],
-      browser: browsers[Math.floor(Math.random() * browsers.length)],
-      country: 'Côte d\'Ivoire',
-      city: cities[Math.floor(Math.random() * cities.length)],
-      referrer: 'Scan Appareil Photo'
-    });
-  }
-  return scans.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-}
-
 export function getStoredQRCodes(): QRCodeItem[] {
   try {
     const data = localStorage.getItem(CARDS_STORAGE_KEY);
@@ -520,40 +552,6 @@ export function getStoredQRCodes(): QRCodeItem[] {
     }
 
     let changed = false;
-
-    const countBefore = items.length;
-    items = items.filter(item => {
-      if (!item) return false;
-
-      const fullName = (item.content?.fullName || '').toLowerCase();
-      const title = (item.title || '').toLowerCase();
-      const jobTitle = (item.content?.jobTitle || '').toLowerCase();
-
-      if (fullName.includes('richmond dongo') || title.includes('richmond dongo')) {
-        const isKeepable = item.id === 'qr_demo_04' || item.publicId === 'CAN2026R';
-        const hasRightJob = jobTitle === 'responsable commercial';
-        if (!isKeepable || !hasRightJob) {
-          if (!deletedIds.includes(item.id)) deletedIds.push(item.id);
-          return false;
-        }
-      }
-
-      if (fullName.includes('christophe fodjo') || title.includes('christophe fodjo')) {
-        const isKeepable = item.id === 'qr_demo_09' || item.publicId === 'EV6MKMQU';
-        const hasRightJob = jobTitle === 'gérant';
-        if (!isKeepable || !hasRightJob) {
-          if (!deletedIds.includes(item.id)) deletedIds.push(item.id);
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    if (items.length !== countBefore) {
-      changed = true;
-      localStorage.setItem(DELETED_CARDS_KEY, JSON.stringify(deletedIds));
-    }
 
     INITIAL_QR_ITEMS.forEach(initItem => {
       if (!items.find(i => i && i.id === initItem.id) && !deletedIds.includes(initItem.id)) {
@@ -646,38 +644,31 @@ export async function fetchQRCodeByPublicId(publicId: string, preferServer = tru
   if (!publicId) return null;
   const cleanId = publicId.trim();
 
-  const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toLowerCase() === cleanId.toLowerCase());
-  if (demoItem) return demoItem;
-
-  let serverFound: QRCodeItem | null = null;
-  if (preferServer && db) {
+  const fetchFromFirestore = async (): Promise<QRCodeItem | null> => {
+    if (!db) return null;
     try {
-      const cardRef = doc(db, 'cards', cleanId);
-      const cardSnap = await getDoc(cardRef);
-      if (cardSnap.exists()) {
-        serverFound = {
-          ...cardSnap.data() as QRCodeItem,
-          updatedAt: cardSnap.data().updatedAt?.toDate?.()?.toISOString() || cardSnap.data().updatedAt
-        };
-      }
+      const cardSnap = await getDoc(doc(db, 'cards', cleanId));
+      return cardSnap.exists() ? normalizeFirestoreCard(cardSnap.data()) : null;
     } catch (err) {
-      console.warn("Firestore fetch failed", err);
+      console.warn('Firestore fetch failed', err);
+      return null;
     }
-  }
+  };
 
-  if (serverFound) return serverFound;
+  // Dynamic cards must prefer the cloud so published changes are immediately visible.
+  if (preferServer) {
+    const serverFound = await fetchFromFirestore();
+    if (serverFound) return serverFound;
+  }
 
   const localFound = getQRCodeByPublicId(cleanId);
   if (localFound) return localFound;
 
-  if (!preferServer && db && !serverFound) {
-    try {
-      const cardRef = doc(db, 'cards', cleanId);
-      const cardSnap = await getDoc(cardRef);
-      if (cardSnap.exists()) return cardSnap.data() as QRCodeItem;
-    } catch (err) {}
-  }
+  // Demo data is only a fallback. It must never mask a newer cloud version.
+  const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toLowerCase() === cleanId.toLowerCase());
+  if (demoItem) return demoItem;
 
+  if (!preferServer) return fetchFromFirestore();
   return null;
 }
 
@@ -792,6 +783,7 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
     ...item,
     content: cleanedContent,
     userId: auth?.currentUser?.uid || (isUpdate ? (items[existingIdx] as any).userId : item.userId),
+    createdAt: isUpdate ? items[existingIdx].createdAt : (item.createdAt || new Date().toISOString()),
     updatedAt: new Date().toISOString()
   };
 
@@ -803,10 +795,11 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
 
   saveQRCodes(items);
 
-  if (syncToServer && db && updatedItem.publicId) {
+  if (syncToServer && db && auth?.currentUser && updatedItem.publicId) {
     const cardRef = doc(db, 'cards', updatedItem.publicId);
+    const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: auth.currentUser.uid });
     setDoc(cardRef, {
-      ...updatedItem,
+      ...cloudItem,
       updatedAt: serverTimestamp()
     }).catch(err => console.error("Firestore sync failed:", err));
   }
@@ -826,7 +819,7 @@ export function deleteQRCode(id: string): void {
       localStorage.setItem(DELETED_CARDS_KEY, JSON.stringify(deletedIds));
     }
     saveQRCodes(items.filter(q => q.id !== id));
-    if (db && target.publicId) {
+    if (db && auth?.currentUser && target.publicId) {
       deleteDoc(doc(db, 'cards', target.publicId)).catch(err => console.error("Firestore delete failed:", err));
     }
   }
@@ -840,29 +833,40 @@ export function duplicateQRCode(id: string): QRCodeItem | null {
     id: `qr_${Date.now()}`,
     publicId: generateSecurePublicId(),
     title: `${original.title} (Copie)`,
-    scanCount: 0
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    scanCount: 0,
+    lastScannedAt: undefined
   };
   saveOrUpdateQRCode(duplicate);
   return duplicate;
 }
 
 export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
-  if (!db || !auth.currentUser) return getStoredQRCodes();
+  if (!db || !auth?.currentUser) return getStoredQRCodes();
 
   try {
     const userId = auth.currentUser.uid;
+    const deletedCardIds = getDeletedIdSet(DELETED_CARDS_KEY);
+    const deletedClientIds = getDeletedIdSet(DELETED_CLIENTS_KEY);
 
     const qCards = query(collection(db, 'cards'), where('userId', '==', userId));
     const cardSnaps = await getDocs(qCards);
-    const serverCards = cardSnaps.docs.map(doc => doc.data() as QRCodeItem);
+    const serverCards = cardSnaps.docs
+      .map(snapshot => normalizeFirestoreCard(snapshot.data()))
+      .filter(card => !deletedCardIds.has(card.id));
 
-    const localCards = getStoredQRCodes();
+    const localCards = getStoredQRCodes().filter(card => !deletedCardIds.has(card.id) && (!card.userId || card.userId === userId));
     const mergedCards = [...localCards];
 
     serverCards.forEach(sCard => {
       const idx = mergedCards.findIndex(lc => lc.id === sCard.id || lc.publicId === sCard.publicId);
       if (idx >= 0) {
-        mergedCards[idx] = { ...mergedCards[idx], ...sCard };
+        const localUpdatedAt = Date.parse(mergedCards[idx].updatedAt || '') || 0;
+        const serverUpdatedAt = Date.parse(sCard.updatedAt || '') || 0;
+        if (serverUpdatedAt >= localUpdatedAt) {
+          mergedCards[idx] = { ...mergedCards[idx], ...sCard };
+        }
       } else {
         mergedCards.push(sCard);
       }
@@ -872,22 +876,27 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
 
     const qClients = query(collection(db, 'clients'), where('userId', '==', userId));
     const clientSnaps = await getDocs(qClients);
-    const serverClients = clientSnaps.docs.map(doc => doc.data() as ClientProfile);
+    const serverClients = clientSnaps.docs
+      .map(snapshot => normalizeFirestoreClient(snapshot.data()))
+      .filter(client => !deletedClientIds.has(client.id));
 
-    const localClients = getStoredClients();
+    const localClients = getStoredClients().filter(client => !deletedClientIds.has(client.id) && (!client.userId || client.userId === userId));
     const mergedClients = [...localClients];
 
     serverClients.forEach(sClient => {
       const idx = mergedClients.findIndex(lc => lc.id === sClient.id);
       if (idx >= 0) {
-        mergedClients[idx] = { ...mergedClients[idx], ...sClient };
+        const localUpdatedAt = Date.parse(mergedClients[idx].updatedAt || '') || 0;
+        const serverUpdatedAt = Date.parse(sClient.updatedAt || '') || 0;
+        if (serverUpdatedAt >= localUpdatedAt) {
+          mergedClients[idx] = { ...mergedClients[idx], ...sClient };
+        }
       } else {
         mergedClients.push(sClient);
       }
     });
 
     saveClients(mergedClients);
-
     return mergedCards;
   } catch (err) {
     console.error('Sync error:', err);
@@ -917,11 +926,10 @@ export function getStoredClients(): ClientProfile[] {
 
     const uniqueMap = new Map<string, ClientProfile>();
     clients.forEach(c => {
-      if (!c || !c.fullName) return;
-      const key = c.fullName.trim().toLowerCase();
-      const existing = uniqueMap.get(key);
+      if (!c || !c.id) return;
+      const existing = uniqueMap.get(c.id);
       if (!existing || new Date(c.updatedAt).getTime() > new Date(existing.updatedAt).getTime()) {
-        uniqueMap.set(key, c);
+        uniqueMap.set(c.id, c);
       }
     });
 
@@ -951,69 +959,77 @@ export function saveClients(clients: ClientProfile[]): void {
 
 export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: string }): { client: ClientProfile, isUpdate: boolean } {
   const clients = getStoredClients();
-  const nameKey = (client.fullName || '').trim().toLowerCase();
-
   if (client.id) {
-    const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
-    if (deletedData) {
-      const deletedIds: string[] = JSON.parse(deletedData);
-      if (deletedIds.includes(client.id)) {
-        localStorage.setItem(DELETED_CLIENTS_KEY, JSON.stringify(deletedIds.filter(id => id !== client.id)));
-      }
+    const deletedIds = getDeletedIdSet(DELETED_CLIENTS_KEY);
+    if (deletedIds.delete(client.id)) {
+      localStorage.setItem(DELETED_CLIENTS_KEY, JSON.stringify(Array.from(deletedIds)));
     }
   }
 
-  let existingIdx = clients.findIndex(c => c.id === client.id);
-  if (existingIdx === -1 && nameKey) {
-    existingIdx = clients.findIndex(c => (c.fullName || '').trim().toLowerCase() === nameKey);
-  }
+  const existingIdx = client.id ? clients.findIndex(c => c.id === client.id) : -1;
 
   const isUpdate = existingIdx >= 0;
-  const id = isUpdate ? clients[existingIdx].id : (client.id || `client_${Date.now()}`);
+  const existing = isUpdate ? clients[existingIdx] : undefined;
+  const id = existing?.id || client.id || `client_${Date.now()}`;
+  const now = new Date().toISOString();
+  const fullName = (client.fullName || `${client.firstName || ''} ${client.lastName || ''}`.trim() || client.company || existing?.fullName || 'Client').trim();
 
   const fullClient: ClientProfile = {
-    ...(isUpdate ? clients[existingIdx] : {}),
-    ...client as ClientProfile,
+    ...(existing || {}),
+    ...client,
     id,
-    userId: auth?.currentUser?.uid || (isUpdate ? (clients[existingIdx] as any).userId : undefined),
-    updatedAt: new Date().toISOString()
+    clientNumber: client.clientNumber || existing?.clientNumber || generateClientNumber(clients.length + 1),
+    firstName: client.firstName ?? existing?.firstName ?? '',
+    lastName: client.lastName ?? existing?.lastName ?? '',
+    fullName,
+    company: client.company ?? existing?.company ?? '',
+    jobTitle: client.jobTitle ?? existing?.jobTitle ?? '',
+    primaryPhone: client.primaryPhone ?? existing?.primaryPhone ?? '',
+    email: client.email ?? existing?.email ?? '',
+    city: client.city ?? existing?.city ?? 'Abidjan',
+    country: client.country ?? existing?.country ?? "Côte d'Ivoire",
+    socialLinks: client.socialLinks ?? existing?.socialLinks ?? [],
+    userId: auth?.currentUser?.uid || existing?.userId,
+    createdAt: existing?.createdAt || client.createdAt || now,
+    updatedAt: now
   };
 
-  if (isUpdate) {
-    clients[existingIdx] = fullClient;
-  } else {
-    clients.unshift(fullClient);
-  }
-
+  if (isUpdate) clients[existingIdx] = fullClient;
+  else clients.unshift(fullClient);
   saveClients(clients);
 
-  if (db && fullClient.id) {
+  if (db && auth?.currentUser && fullClient.id) {
     const clientRef = doc(db, 'clients', fullClient.id);
+    const cloudClient = removeUndefinedDeep({ ...fullClient, userId: auth.currentUser.uid });
     setDoc(clientRef, {
-      ...fullClient,
+      ...cloudClient,
       updatedAt: serverTimestamp()
-    }).catch(err => console.error("Client Firestore sync failed:", err));
+    }).catch(err => console.error('Client Firestore sync failed:', err));
   }
 
   return { client: fullClient, isUpdate };
 }
 
 export function deleteClient(id: string): void {
-  const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
-  const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
-  if (!deletedIds.includes(id)) {
-    deletedIds.push(id);
-    localStorage.setItem(DELETED_CLIENTS_KEY, JSON.stringify(deletedIds));
+  const clients = getStoredClients();
+  const target = clients.find(client => client.id === id);
+  const deletedIds = getDeletedIdSet(DELETED_CLIENTS_KEY);
+  deletedIds.add(id);
+  localStorage.setItem(DELETED_CLIENTS_KEY, JSON.stringify(Array.from(deletedIds)));
+  saveClients(clients.filter(client => client.id !== id));
+
+  if (target && db && auth?.currentUser) {
+    deleteDoc(doc(db, 'clients', target.id)).catch(err => console.error('Client Firestore delete failed:', err));
   }
-  saveClients(getStoredClients().filter(c => c.id !== id));
 }
 
 export function getStoredHistory(): HistoryLogItem[] {
   try {
     const data = localStorage.getItem(HISTORY_STORAGE_KEY);
-    return data ? JSON.parse(data) : INITIAL_HISTORY;
+    const parsed = data ? JSON.parse(data) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
-    return INITIAL_HISTORY;
+    return [];
   }
 }
 
@@ -1039,28 +1055,63 @@ export function saveDesignerProfile(profile: DesignerProfile): void {
 export function getStoredScans(): ScanEvent[] {
   try {
     const data = localStorage.getItem(SCANS_STORAGE_KEY);
-    return data ? JSON.parse(data) : generateSampleScans();
+    const parsed = data ? JSON.parse(data) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
     return [];
   }
 }
 
 export function recordScanEvent(publicId: string): void {
-  const scans = getStoredScans();
-  scans.unshift({
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const deviceType: ScanEvent['deviceType'] = /iPad|Tablet|PlayBook|Silk/i.test(ua)
+    ? 'tablet'
+    : /Mobi|Android|iPhone|iPod/i.test(ua) ? 'mobile' : 'desktop';
+  const os: ScanEvent['os'] = /iPhone|iPad|iPod/i.test(ua) ? 'iOS'
+    : /Android/i.test(ua) ? 'Android'
+    : /Windows/i.test(ua) ? 'Windows'
+    : /Macintosh|Mac OS X/i.test(ua) ? 'macOS'
+    : /Linux/i.test(ua) ? 'Linux' : 'Other';
+  const browser: ScanEvent['browser'] = /SamsungBrowser/i.test(ua) ? 'Samsung Internet'
+    : /Edg\//i.test(ua) ? 'Edge'
+    : /Firefox\//i.test(ua) ? 'Firefox'
+    : /Chrome\//i.test(ua) ? 'Chrome'
+    : /Safari\//i.test(ua) ? 'Safari' : 'Other';
+
+  const scan: ScanEvent = {
     id: `scan_${Date.now()}`,
     qrCodeId: publicId,
     publicId,
     timestamp: new Date().toISOString(),
-    deviceType: 'mobile',
-    os: 'Android',
-    browser: 'Chrome'
-  });
+    deviceType,
+    os,
+    browser,
+    referrer: typeof document !== 'undefined' && document.referrer ? document.referrer : undefined
+  };
+
+  const scans = getStoredScans();
+  scans.unshift(scan);
   localStorage.setItem(SCANS_STORAGE_KEY, JSON.stringify(scans.slice(0, 500)));
+
+  // Public rules only allow an atomic +1 and a server timestamp on active cards.
+  if (db && publicId && publicId !== 'direct_payload') {
+    updateDoc(doc(db, 'cards', publicId), {
+      scanCount: increment(1),
+      lastScannedAt: serverTimestamp()
+    }).catch(() => {
+      // The card may be local-only/offline; the scan still remains in local analytics.
+    });
+  }
 }
 
 export function generateSecurePublicId(): string {
-  return Math.random().toString(36).substring(2, 10).toUpperCase();
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = new Uint8Array(8);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, value => alphabet[value % alphabet.length]).join('');
+  }
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`.slice(-8).toUpperCase();
 }
 
 export function generateCardNumber(sequence: number, type: string = 'BUSINESS_CARD'): string {
@@ -1083,10 +1134,11 @@ export function generateClientNumber(sequence: number): string {
   return `AGB-CLT-${sequence.toString().padStart(6, '0')}`;
 }
 
-export const CANONICAL_GITHUB_PAGES_URL = 'https://agibrico.github.io/agibrico.github.io-/';
+const configuredPublicUrl = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
+export const CANONICAL_GITHUB_PAGES_URL = `${(configuredPublicUrl || 'https://agibrico.github.io/agibrico.github.io-/').replace(/\/+$/, '')}/`;
 
-export function getPublicQRUrl(publicId: string, card?: QRCodeItem): string {
-  return `${CANONICAL_GITHUB_PAGES_URL}#q/${publicId}`;
+export function getPublicQRUrl(publicId: string, _card?: QRCodeItem): string {
+  return `${CANONICAL_GITHUB_PAGES_URL}#q/${encodeURIComponent(publicId.trim())}`;
 }
 
 export function getClientById(id: string): ClientProfile | undefined {
@@ -1094,42 +1146,65 @@ export function getClientById(id: string): ClientProfile | undefined {
 }
 
 export async function syncOfficialDataToCloud(): Promise<void> {
-  if (!db) return;
+  const currentUser = auth?.currentUser;
+  if (!db || !currentUser || currentUser.email?.toLowerCase() !== ADMIN_EMAIL) return;
+
   try {
     const cardId = 'EV6MKMQU';
     const officialCard = INITIAL_QR_ITEMS.find(i => i.publicId === cardId);
     const officialClient = INITIAL_CLIENTS.find(c => c.id === 'client_005');
+
     if (officialCard) {
       const cardRef = doc(db, 'cards', cardId);
-      await setDoc(cardRef, { ...officialCard, updatedAt: serverTimestamp() });
+      const existingCard = await getDoc(cardRef);
+      if (!existingCard.exists()) {
+        await setDoc(cardRef, {
+          ...removeUndefinedDeep(officialCard),
+          userId: currentUser.uid,
+          updatedAt: serverTimestamp()
+        });
+      } else if (existingCard.data().userId !== currentUser.uid) {
+        await setDoc(cardRef, { userId: currentUser.uid }, { merge: true });
+      }
     }
+
     if (officialClient) {
       const clientRef = doc(db, 'clients', officialClient.id);
-      await setDoc(clientRef, { ...officialClient, updatedAt: serverTimestamp() });
+      const existingClient = await getDoc(clientRef);
+      if (!existingClient.exists()) {
+        await setDoc(clientRef, {
+          ...removeUndefinedDeep(officialClient),
+          userId: currentUser.uid,
+          updatedAt: serverTimestamp()
+        });
+      } else if (existingClient.data().userId !== currentUser.uid) {
+        await setDoc(clientRef, { userId: currentUser.uid }, { merge: true });
+      }
     }
   } catch (err) {
-    console.error("Official data sync failed:", err);
+    console.error('Official data sync failed:', err);
   }
 }
 
 export async function syncAllToCloud(): Promise<{ cards: number, clients: number }> {
-  if (!db || !auth.currentUser) throw new Error("Authentification requise.");
-  const cards = getStoredQRCodes();
-  const clients = getStoredClients();
+  if (!db || !auth?.currentUser) throw new Error("Authentification requise.");
   const userId = auth.currentUser.uid;
+  // Do not claim data that already belongs to another authenticated account.
+  const cards = getStoredQRCodes().filter(card => !card.userId || card.userId === userId);
+  const clients = getStoredClients().filter(client => !client.userId || client.userId === userId);
   let cardsSynced = 0;
   let clientsSynced = 0;
   for (const card of cards) {
     if (card.publicId) {
       const cardRef = doc(db, 'cards', card.publicId);
-      await setDoc(cardRef, { ...card, userId, updatedAt: serverTimestamp() });
+      await setDoc(cardRef, { ...removeUndefinedDeep(card), userId, updatedAt: serverTimestamp() });
       cardsSynced++;
     }
   }
   for (const client of clients) {
     if (client.id) {
       const clientRef = doc(db, 'clients', client.id);
-      await setDoc(clientRef, { ...client, userId, updatedAt: serverTimestamp() });
+      await setDoc(clientRef, { ...removeUndefinedDeep(client), userId, updatedAt: serverTimestamp() });
       clientsSynced++;
     }
   }
@@ -1152,11 +1227,13 @@ export function exportFullDatabaseJSON(): string {
 export function importFullDatabaseJSON(jsonStr: string): boolean {
   try {
     const data = JSON.parse(jsonStr);
-    if (!data.cards || !data.clients) return false;
-    saveQRCodes(data.cards);
-    saveClients(data.clients);
-    if (data.scans) localStorage.setItem(SCANS_STORAGE_KEY, JSON.stringify(data.scans));
-    if (data.history) localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(data.history));
+    if (!Array.isArray(data.cards) || !Array.isArray(data.clients)) return false;
+    const cards = data.cards.filter((card: any) => card && typeof card.id === 'string' && typeof card.publicId === 'string');
+    const clients = data.clients.filter((client: any) => client && typeof client.id === 'string');
+    saveQRCodes(cards);
+    saveClients(clients);
+    if (Array.isArray(data.scans)) localStorage.setItem(SCANS_STORAGE_KEY, JSON.stringify(data.scans));
+    if (Array.isArray(data.history)) localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(data.history));
     if (data.designer) saveDesignerProfile(data.designer);
     return true;
   } catch (e) {

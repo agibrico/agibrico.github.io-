@@ -80,10 +80,10 @@ export const BackupView: React.FC<BackupViewProps> = ({
     setSyncResult(null);
     try {
       const merged = await syncCardsWithServer();
-      setSyncResult(`Synchronisation réussie : ${merged.length} cartes actives et à jour sur le serveur API.`);
+      setSyncResult(`Synchronisation réussie : ${merged.length} cartes actives et à jour dans Firebase.`);
       onDataRestored();
     } catch (e) {
-      setSyncResult("Erreur lors de la communication avec le serveur API.");
+      setSyncResult("Erreur lors de la communication avec Firebase.");
     } finally {
       setSyncingServer(false);
     }

@@ -29,6 +29,8 @@ import { exportDirectCardPDF } from '../../utils/pdfExport';
 interface QRListViewProps {
   items: QRCodeItem[];
   clients?: ClientProfile[];
+  filterClientId?: string | null;
+  onClearClientFilter?: () => void;
   onCreateNew: () => void;
   onEdit: (item: QRCodeItem) => void;
   onDuplicate: (id: string) => void;
@@ -42,6 +44,8 @@ interface QRListViewProps {
 export const QRListView: React.FC<QRListViewProps> = ({
   items,
   clients = [],
+  filterClientId = null,
+  onClearClientFilter,
   onCreateNew,
   onEdit,
   onDuplicate,
@@ -87,7 +91,8 @@ export const QRListView: React.FC<QRListViewProps> = ({
     );
 
     const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
-    return matchesSearch && matchesStatus;
+    const matchesClient = !filterClientId || item.clientId === filterClientId;
+    return matchesSearch && matchesStatus && matchesClient;
   });
 
   const handleCopyLink = (publicId: string) => {
@@ -136,6 +141,21 @@ export const QRListView: React.FC<QRListViewProps> = ({
           <span>Nouvelle Carte</span>
         </button>
       </div>
+
+      {filterClientId && (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3">
+          <div className="text-xs font-bold text-purple-800">
+            Cartes du client : {allClients.find(client => client.id === filterClientId)?.fullName || filterClientId}
+          </div>
+          <button
+            type="button"
+            onClick={onClearClientFilter}
+            className="rounded-full bg-white px-3 py-1.5 text-[10px] font-black uppercase text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors"
+          >
+            Afficher toutes
+          </button>
+        </div>
+      )}
 
       {/* Search & Filter Bar */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col md:flex-row items-center gap-3">

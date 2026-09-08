@@ -249,14 +249,22 @@ export async function exportDirectCardPDF(item: QRCodeItem): Promise<boolean> {
     rectoEl.style.fontFamily = 'system-ui, -apple-system, sans-serif';
     rectoEl.style.textAlign = 'center';
 
-    rectoEl.innerHTML = `
-      <div style="margin-bottom: 12px;">
-        <h2 style="font-size:16px;font-weight:900;margin:0;line-height:1.1;text-transform:uppercase;letter-spacing:1px;">${displayName}</h2>
-      </div>
-      <div style="padding-top:12px;border-top:2px solid rgba(128,128,128,0.2);width:80%;">
-        <span style="font-size:14px;font-weight:800;letter-spacing:1px;">${emergencyPhone}</span>
-      </div>
-    `;
+    const nameWrap = document.createElement('div');
+    nameWrap.style.marginBottom = '12px';
+    const nameEl = document.createElement('h2');
+    nameEl.style.cssText = 'font-size:16px;font-weight:900;margin:0;line-height:1.1;text-transform:uppercase;letter-spacing:1px;';
+    nameEl.textContent = displayName;
+    nameWrap.appendChild(nameEl);
+
+    const phoneWrap = document.createElement('div');
+    phoneWrap.style.cssText = 'padding-top:12px;border-top:2px solid rgba(128,128,128,0.2);width:80%;';
+    const phoneEl = document.createElement('span');
+    phoneEl.style.cssText = 'font-size:14px;font-weight:800;letter-spacing:1px;';
+    phoneEl.textContent = emergencyPhone;
+    phoneWrap.appendChild(phoneEl);
+
+    rectoEl.appendChild(nameWrap);
+    rectoEl.appendChild(phoneWrap);
 
     // Build VERSO element
     const versoEl = document.createElement('div');
@@ -274,11 +282,14 @@ export async function exportDirectCardPDF(item: QRCodeItem): Promise<boolean> {
     versoEl.style.border = '2px solid rgba(0,0,0,0.15)';
     versoEl.style.fontFamily = 'system-ui, -apple-system, sans-serif';
 
-    versoEl.innerHTML = `
-      <div style="background:white;padding:12px;border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
-        <img src="${qrDataUrl}" style="width:130px;height:130px;object-fit:contain;" />
-      </div>
-    `;
+    const qrWrap = document.createElement('div');
+    qrWrap.style.cssText = 'background:white;padding:12px;border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+    const qrImg = document.createElement('img');
+    qrImg.src = qrDataUrl;
+    qrImg.alt = 'QR Code';
+    qrImg.style.cssText = 'width:130px;height:130px;object-fit:contain;';
+    qrWrap.appendChild(qrImg);
+    versoEl.appendChild(qrWrap);
 
     offscreen.appendChild(rectoEl);
     offscreen.appendChild(versoEl);

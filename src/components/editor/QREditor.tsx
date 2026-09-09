@@ -201,9 +201,9 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                   {/* --- 1. BUSINESS CARD --- */}
                   {type === 'BUSINESS_CARD' && (
                     <div className="space-y-10">
-                      {/* IDENTITY */}
+                      {/* BUSINESS CARD IDENTITY */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><User className="w-4 h-4 text-slate-600"/> Identité</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><User className="w-4 h-4 text-slate-600"/> Identité Professionnelle</h4>
 
                         <div className="grid grid-cols-2 gap-4">
                            <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
@@ -265,7 +265,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                         <textarea placeholder="Biographie professionnelle..." value={content.bio || ''} onChange={e => updateContentField('bio', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
                       </div>
 
-                      {/* CONTACT */}
+                      {/* BUSINESS CARD CONTACT */}
                       <div className="space-y-6">
                         <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Phone className="w-4 h-4 text-emerald-600"/> Coordonnées</h4>
                         <div className="grid grid-cols-3 gap-4">
@@ -304,7 +304,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                         </div>
                       </div>
 
-                      {/* ADDRESS */}
+                      {/* BUSINESS CARD ADDRESS */}
                       <div className="space-y-6">
                         <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPinned className="w-4 h-4 text-rose-600"/> Adresse & Localisation</h4>
                         <textarea placeholder="Adresse complète / Rue" value={content.address || ''} onChange={e => updateContentField('address', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
@@ -410,9 +410,9 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                   {/* --- 2. BOOK --- */}
                   {type === 'BOOK' && (
                     <div className="space-y-10">
-                      {/* 1. Identification */}
+                      {/* BOOK IDENTIFICATION */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><BookOpen className="w-4 h-4 text-indigo-600"/> 1. Identification</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><BookOpen className="w-4 h-4 text-indigo-600"/> Identification de l'ouvrage</h4>
 
                         <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50 relative group mb-6">
                           {content.photoUrl ? (
@@ -581,9 +581,9 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                         </div>
                       </div>
 
-                      {/* 4. Presentation */}
+                      {/* BOOK PRESENTATION */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><LayoutList className="w-4 h-4 text-slate-500"/> 4. Présentation</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><LayoutList className="w-4 h-4 text-slate-500"/> Présentation de l'ouvrage</h4>
                         <div className="space-y-4">
                           <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-slate-400">Résumé (Court)</label>
@@ -717,7 +717,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                   {/* --- 3. EVENT --- */}
                   {type === 'EVENT' && (
                     <div className="space-y-10">
-                      {/* IDENTITY */}
+                      {/* BUSINESS CARD IDENTITY */}
                       <div className="space-y-6">
                         <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Calendar className="w-4 h-4 text-rose-600"/> 1. Identité de l'Événement</h4>
 
@@ -953,7 +953,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                         <textarea placeholder="Description du commerce..." value={content.shopDescription || content.bio || ''} onChange={e => updateContentField('shopDescription', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={3} />
                       </div>
 
-                      {/* 2. CONTACT */}
+                      {/* SHOP CONTACT */}
                       <div className="space-y-6">
                         <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Phone className="w-4 h-4 text-blue-600"/> 2. Contact</h4>
                         <div className="grid grid-cols-2 gap-4">
@@ -1077,7 +1077,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                     <div className="space-y-10">
                       {/* 1. IDENTIFICATION */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPin className="w-4 h-4 text-cyan-600"/> 1. Identification</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><MapPin className="w-4 h-4 text-cyan-600"/> Identification du lieu</h4>
 
                         <div className="grid grid-cols-2 gap-4">
                            <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
@@ -1163,7 +1163,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                         <input type="text" placeholder="Accessibilité (PMR, etc.)" value={content.locationAccessibilityInfo || ''} onChange={e => updateContentField('locationAccessibilityInfo', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
                       </div>
 
-                      {/* 5. CONTACT */}
+                      {/* LOCATION CONTACT */}
                       <div className="space-y-6">
                         <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Phone className="w-4 h-4 text-indigo-600"/> 5. Contact du Responsable</h4>
                         <input type="text" placeholder="Nom du responsable / gérant" value={content.locationManagerName || ''} onChange={e => updateContentField('locationManagerName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" />
@@ -1187,7 +1187,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                     <div className="space-y-12">
                       {/* 1. IDENTIFICATION */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Building2 className="w-4 h-4 text-blue-600"/> 1. Identification</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Building2 className="w-4 h-4 text-blue-600"/> Identification de l'entreprise</h4>
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 relative group">
@@ -1261,7 +1261,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
 
                       {/* 4. PRESENTATION */}
                       <div className="space-y-6">
-                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Quote className="w-4 h-4 text-indigo-600"/> 4. Présentation</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2"><Quote className="w-4 h-4 text-indigo-600"/> Présentation institutionnelle</h4>
                         <textarea placeholder="Mission..." value={content.companyMission || ''} onChange={e => updateContentField('companyMission', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
                         <textarea placeholder="Vision..." value={content.companyVision || ''} onChange={e => updateContentField('companyVision', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
                         <textarea placeholder="Valeurs..." value={content.companyValues || ''} onChange={e => updateContentField('companyValues', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold" rows={2} />
@@ -1504,7 +1504,7 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
                         </div>
                       </div>
 
-                      {/* Sub-section 2: Contact */}
+                      {/* SOCIAL CONTACT */}
                       <div className="space-y-6">
                         <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                           <Phone className="w-5 h-5 text-emerald-600" />

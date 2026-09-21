@@ -2420,15 +2420,93 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
 
             {activeStep === 'style' && (
               <div className="space-y-8 animate-in fade-in duration-300">
-                <div className="grid grid-cols-2 gap-6">
-                   <div className="space-y-3"><label className="block text-[10px] font-black uppercase text-slate-400">Couleur Modules</label><div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200"><input type="color" value={styling.fgColor} onChange={e => updateStylingField('fgColor', e.target.value)} className="w-10 h-10 rounded-lg border-none" /><span className="text-xs font-mono font-bold uppercase">{styling.fgColor}</span></div></div>
-                   <div className="space-y-3"><label className="block text-[10px] font-black uppercase text-slate-400">Couleur Yeux</label><div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200"><input type="color" value={styling.eyeColor} onChange={e => updateStylingField('eyeColor', e.target.value)} className="w-10 h-10 rounded-lg border-none" /><span className="text-xs font-mono font-bold uppercase">{styling.eyeColor}</span></div></div>
+                <div>
+                  <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900 mb-4 flex items-center gap-2">
+                    <Palette className="w-4 h-4 text-blue-600"/> 1. Couleurs du QR Code
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                     <div className="space-y-2">
+                       <label className="block text-[10px] font-black uppercase text-slate-400">Modules</label>
+                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                         <input type="color" value={styling.fgColor} onChange={e => updateStylingField('fgColor', e.target.value)} className="w-8 h-8 rounded-lg border-none cursor-pointer" />
+                         <span className="text-xs font-mono font-bold uppercase">{styling.fgColor}</span>
+                       </div>
+                     </div>
+                     <div className="space-y-2">
+                       <label className="block text-[10px] font-black uppercase text-slate-400">Yeux</label>
+                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                         <input type="color" value={styling.eyeColor || styling.fgColor} onChange={e => updateStylingField('eyeColor', e.target.value)} className="w-8 h-8 rounded-lg border-none cursor-pointer" />
+                         <span className="text-xs font-mono font-bold uppercase">{styling.eyeColor || styling.fgColor}</span>
+                       </div>
+                     </div>
+                     <div className="space-y-2">
+                       <label className="block text-[10px] font-black uppercase text-slate-400">Fond du QR</label>
+                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                         <input type="color" value={styling.bgColor || '#ffffff'} onChange={e => updateStylingField('bgColor', e.target.value)} className="w-8 h-8 rounded-lg border-none cursor-pointer" />
+                         <span className="text-xs font-mono font-bold uppercase">{styling.bgColor || '#ffffff'}</span>
+                       </div>
+                     </div>
+                  </div>
                 </div>
-                <div className="space-y-4">
+
+                <div className="space-y-3">
                    <label className="block text-[10px] font-black uppercase text-slate-400">Style des modules</label>
                    <div className="grid grid-cols-2 gap-3">
-                     {['square', 'rounded', 'dots', 'classy'].map(s => <button key={s} onClick={() => updateStylingField('moduleStyle', s as any)} className={`py-3 rounded-2xl text-[10px] font-black uppercase border transition-all ${styling.moduleStyle === s ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}>{s}</button>)}
+                     {['square', 'rounded', 'dots', 'classy'].map(s => <button key={s} type="button" onClick={() => updateStylingField('moduleStyle', s as any)} className={`py-3 rounded-2xl text-[10px] font-black uppercase border transition-all ${styling.moduleStyle === s ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}>{s}</button>)}
                    </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 space-y-4">
+                  <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-emerald-600"/> 2. Fond de la Carte Physique
+                  </h4>
+
+                  <div className="space-y-3">
+                    <label className="block text-[10px] font-black uppercase text-slate-400">Thème / Finition</label>
+                    <select
+                      value={styling.cardBackgroundTheme || 'emerald_luxe'}
+                      onChange={e => updateStylingField('cardBackgroundTheme', e.target.value as any)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold"
+                    >
+                      <option value="white_classic">Blanc Pur Épuré</option>
+                      <option value="matte_dark">Noir Carbone Mat</option>
+                      <option value="cream_clean">Ivoire Naturel</option>
+                      <option value="navy_prestige">Bleu Nuit Prestige</option>
+                      <option value="emerald_luxe">Vert Émeraude Royal</option>
+                      <option value="burgundy_rich">Bordeaux Velours</option>
+                      <option value="slate_minimal">Gris Minéral Studio</option>
+                      <option value="custom_solid">Couleur 100% Personnalisée</option>
+                    </select>
+                  </div>
+
+                  {styling.cardBackgroundTheme === 'custom_solid' && (
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-blue-50/40 rounded-2xl border border-blue-100 animate-in slide-in-from-top-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[9px] font-black uppercase text-slate-500">Couleur de Fond</label>
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200">
+                          <input
+                            type="color"
+                            value={styling.cardCustomBgColor || '#2563EB'}
+                            onChange={e => updateStylingField('cardCustomBgColor', e.target.value)}
+                            className="w-8 h-8 rounded-lg border-none cursor-pointer"
+                          />
+                          <span className="text-xs font-mono font-bold uppercase">{styling.cardCustomBgColor || '#2563EB'}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-[9px] font-black uppercase text-slate-500">Couleur du Texte</label>
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200">
+                          <input
+                            type="color"
+                            value={styling.cardCustomTextColor || '#FFFFFF'}
+                            onChange={e => updateStylingField('cardCustomTextColor', e.target.value)}
+                            className="w-8 h-8 rounded-lg border-none cursor-pointer"
+                          />
+                          <span className="text-xs font-mono font-bold uppercase">{styling.cardCustomTextColor || '#FFFFFF'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

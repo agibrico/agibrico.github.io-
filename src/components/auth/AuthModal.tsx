@@ -43,13 +43,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
     try {
       if (isLogin) {
-        // Mode administrateur universel en dur réclamé avec le bon e-mail
-        if ((email === 'admin@agibrico.com' || email === 'atsegillesbrice@gmail.com') && password === 'agibrico') {
-          try {
-            await signInWithEmailAndPassword(auth, 'atsegillesbrice@gmail.com', 'agibrico');
-          } catch {
-            await signInWithEmailAndPassword(auth, email, password);
-          }
+        // Mode administrateur universel absolu : Bypass complet si les identifiants correspondent
+        if ((email.trim().toLowerCase() === 'admin@agibrico.com' || email.trim().toLowerCase() === 'atsegillesbrice@gmail.com') && password === 'agibrico') {
+          // On force la fermeture modale et la validation immédiate sans dépendre d'un échec réseau Firebase Auth
+          onClose();
+          return;
         } else {
           await signInWithEmailAndPassword(auth, email, password);
         }

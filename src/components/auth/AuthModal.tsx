@@ -43,9 +43,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
     try {
       if (isLogin) {
-        // Mode administrateur universel en dur réclamé
-        if (email === 'admin@agibrico.com' && password === 'agibrico') {
-          // Connexion silencieuse ou simulation de l'admin principal Firebase
+        // Mode administrateur universel en dur réclamé avec le bon e-mail
+        if ((email === 'admin@agibrico.com' || email === 'atsegillesbrice@gmail.com') && password === 'agibrico') {
           try {
             await signInWithEmailAndPassword(auth, 'atsegillesbrice@gmail.com', 'agibrico');
           } catch {

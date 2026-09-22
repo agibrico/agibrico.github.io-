@@ -76,3 +76,7 @@ npm run build
 - 📱 **Simulateur Mobile Intégré** : Prévisualisation immédiate de ce que verra le client lorsqu'il scannera la carte physique avec son smartphone.
 - 📱 **Projet Android Studio Kotlin inclus** : Architecture MVVM complète, Room Database, ZXing et impression PDF native.
 - 💾 **Sauvegarde & Restauration JSON** : Export et import instantané de toutes vos données clients et cartes.
+
+---
+*Dernière mise à jour : Génération de l'APK avec support du mot de passe admin universel.*
+

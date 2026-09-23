@@ -78,5 +78,5 @@ npm run build
 - 💾 **Sauvegarde & Restauration JSON** : Export et import instantané de toutes vos données clients et cartes.
 
 ---
-*Dernière mise à jour : Génération de l'APK avec support du mot de passe admin universel.*
+*Dernière mise à jour : Génération de la nouvelle version de l'APK Android avec toutes les cartes uniques (Cyrille ZÉZÉ, Richmond DONGO, Christophe FODJO, Eric Thierry OHOUEU) et la connexion universelle restaurée.*
 

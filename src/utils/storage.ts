@@ -204,13 +204,13 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     jobTitle: 'Responsable Commercial',
     industry: 'Imprimerie',
     logoUrl: CANAAN_SERVICES_LOGO,
-    primaryPhone: '+225 06 64 41 65 15',
+    primaryPhone: '+225 07 08 07 66 90',
     email: 'richmond.dongo@canaan.ci',
     city: 'Abidjan',
     country: 'Côte d\'Ivoire',
-    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250664416515', displayOrder: 1 }],
+    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250708076690', displayOrder: 1 }],
     createdAt: '2026-08-13T11:00:00.000Z',
-    updatedAt: '2026-08-24T11:00:00.000Z'
+    updatedAt: '2026-09-23T08:30:00.000Z'
   },
   {
     id: 'client_005',
@@ -221,13 +221,13 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     company: 'Canaan Services',
     jobTitle: 'Gérant',
     industry: 'Conseil',
-    primaryPhone: '+225 07 07 12 34 56',
+    primaryPhone: '+225 05 66 41 62 10',
     email: 'c.fodjo@outlook.com',
     city: 'Abidjan',
     country: 'Côte d\'Ivoire',
-    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707123456', displayOrder: 1 }],
+    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250566416210', displayOrder: 1 }],
     createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-08T10:00:00.000Z'
+    updatedAt: '2026-09-23T08:30:00.000Z'
   },
   {
     id: 'client_006',
@@ -390,30 +390,33 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     mode: 'dynamic',
     status: 'active',
     createdAt: '2026-08-13T11:00:00.000Z',
-    updatedAt: '2026-08-24T11:00:00.000Z',
+    updatedAt: '2026-09-23T08:30:00.000Z',
     scanCount: 68,
     content: {
       fullName: 'Richmond DONGO',
       jobTitle: 'Responsable Commercial',
       company: 'Canaan Services',
       logoUrl: CANAAN_SERVICES_LOGO,
-      primaryPhone: '+225 06 64 41 65 15',
+      primaryPhone: '+225 07 08 07 66 90',
+      whatsappNumber: '+225 07 08 07 66 90',
       email: 'richmond.dongo@canaan.ci',
       city: 'Abidjan',
       country: 'Côte d\'Ivoire',
-      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250664416515', displayOrder: 1 }],
+      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250708076690', displayOrder: 1 }],
       privacy: { hideAddress: false }
     },
     styling: {
-      fgColor: '#dc2626',
+      fgColor: '#0f172a',
       bgColor: '#ffffff',
       transparentBg: false,
-      moduleStyle: 'dots',
-      eyeStyle: 'circle',
+      moduleStyle: 'rounded',
+      eyeStyle: 'rounded',
+      eyeColor: '#d97706',
       errorCorrectionLevel: 'H',
       margin: 3,
       size: 320,
-      cardBackgroundTheme: 'white_classic',
+      bottomText: 'SCANNEZ POUR CONTACTER CANAAN SERVICES',
+      cardBackgroundTheme: 'emerald_luxe',
       logoUrl: CANAAN_SERVICES_LOGO
     }
   },
@@ -503,18 +506,19 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     mode: 'dynamic',
     status: 'active',
     createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-08T10:00:00.000Z',
+    updatedAt: '2026-09-23T08:30:00.000Z',
     scanCount: 12,
     content: {
       fullName: 'Christophe FODJO',
       jobTitle: 'Gérant',
       company: 'Canaan Services',
       logoUrl: CANAAN_SERVICES_LOGO,
-      primaryPhone: '+225 07 07 12 34 56',
+      primaryPhone: '+225 05 66 41 62 10',
+      whatsappNumber: '+225 05 66 41 62 10',
       email: 'c.fodjo@outlook.com',
       city: 'Abidjan',
       country: 'Côte d\'Ivoire',
-      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707123456', displayOrder: 1 }],
+      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250566416210', displayOrder: 1 }],
       privacy: { hideAddress: false }
     },
     styling: {
@@ -523,10 +527,12 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       transparentBg: false,
       moduleStyle: 'rounded',
       eyeStyle: 'rounded',
+      eyeColor: '#6366f1',
       errorCorrectionLevel: 'H',
       margin: 3,
       size: 320,
-      cardBackgroundTheme: 'matte_dark',
+      bottomText: 'SCANNEZ POUR ENREGISTRER',
+      cardBackgroundTheme: 'white_classic',
       logoUrl: CANAAN_SERVICES_LOGO
     }
   },
@@ -540,14 +546,37 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     mode: 'dynamic',
     status: 'active',
     createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-07T18:00:00.000Z',
+    updatedAt: '2026-09-23T08:30:00.000Z',
     scanCount: 0,
     content: {
       fullName: 'Eric Thierry OHOUEU',
       jobTitle: 'Administrateur du Travail et des Lois Sociales',
       company: 'MINISTÈRE DE L\'EMPLOI, DE LA PROTECTION SOCIALE ET DE LA FORMATION PROFESSIONNELLE',
       primaryPhone: '+225 05 05 09 36 76',
+      whatsappNumber: '+225 05 05 09 36 76',
       email: 'eric.ohoueu@travail.gouv.ci',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      socialLinks: [
+        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505093676', displayOrder: 1 },
+        { id: 's2', platform: 'phone', url: 'tel:+2250101202909', displayOrder: 2 }
+      ],
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#0f172a',
+      bgColor: '#ffffff',
+      transparentBg: false,
+      moduleStyle: 'rounded',
+      eyeStyle: 'rounded',
+      eyeColor: '#6366f1',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      bottomText: 'SCANNEZ POUR ENREGISTRER',
+      cardBackgroundTheme: 'navy_prestige'
+    }
+  },
       city: 'Abidjan',
       country: 'Côte d\'Ivoire',
       socialLinks: [
@@ -633,16 +662,29 @@ export function getStoredQRCodes(): QRCodeItem[] {
 
     const uniqueMap = new Map<string, QRCodeItem>();
     items.forEach(item => {
-      if (!item || !item.publicId) return;
-      const key = item.publicId.trim().toUpperCase();
-      const existing = uniqueMap.get(key);
-      if (!existing || new Date(item.updatedAt).getTime() > new Date(existing.updatedAt).getTime()) {
-        uniqueMap.set(key, item);
+      if (!item) return;
+      const idKey = (item.publicId || item.id).trim().toUpperCase();
+      const personKey = item.type === 'BUSINESS_CARD' && (item.content?.fullName || item.title)
+        ? `PERSON_${(item.content?.fullName || item.title).trim().toLowerCase()}`
+        : null;
+
+      const existingById = uniqueMap.get(idKey);
+      const existingByPerson = personKey ? uniqueMap.get(personKey) : null;
+      const existing = existingById || existingByPerson;
+
+      if (!existing || new Date(item.updatedAt).getTime() >= new Date(existing.updatedAt).getTime()) {
+        if (existingByPerson && existingByPerson.publicId && existingByPerson.publicId !== item.publicId) {
+          uniqueMap.delete(existingByPerson.publicId.trim().toUpperCase());
+        }
+        uniqueMap.set(idKey, item);
+        if (personKey) uniqueMap.set(personKey, item);
       }
     });
 
-    if (uniqueMap.size < items.length) {
-      items = Array.from(uniqueMap.values());
+    const deduplicated = Array.from(new Set(uniqueMap.values()));
+
+    if (deduplicated.length !== items.length) {
+      items = deduplicated;
       changed = true;
     }
 
@@ -1002,15 +1044,27 @@ export function getStoredClients(): ClientProfile[] {
 
     const uniqueMap = new Map<string, ClientProfile>();
     clients.forEach(c => {
-      if (!c || !c.id) return;
-      const existing = uniqueMap.get(c.id);
-      if (!existing || new Date(c.updatedAt).getTime() > new Date(existing.updatedAt).getTime()) {
-        uniqueMap.set(c.id, c);
+      if (!c) return;
+      const idKey = c.id;
+      const nameKey = (c.fullName || `${c.firstName || ''} ${c.lastName || ''}`).trim().toLowerCase();
+
+      const existingById = uniqueMap.get(idKey);
+      const existingByName = nameKey ? uniqueMap.get(`NAME_${nameKey}`) : null;
+      const existing = existingById || existingByName;
+
+      if (!existing || new Date(c.updatedAt).getTime() >= new Date(existing.updatedAt).getTime()) {
+        if (existingByName && existingByName.id !== c.id) {
+          uniqueMap.delete(existingByName.id);
+        }
+        uniqueMap.set(idKey, c);
+        if (nameKey) uniqueMap.set(`NAME_${nameKey}`, c);
       }
     });
 
-    if (uniqueMap.size < clients.length) {
-      clients = Array.from(uniqueMap.values());
+    const deduplicated = Array.from(new Set(uniqueMap.values()));
+
+    if (deduplicated.length !== clients.length) {
+      clients = deduplicated;
       changed = true;
     }
 

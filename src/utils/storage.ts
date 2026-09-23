@@ -577,26 +577,6 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       cardBackgroundTheme: 'navy_prestige'
     }
   },
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [
-        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505093676', displayOrder: 1 },
-        { id: 's2', platform: 'phone', url: 'tel:+2250101202909', displayOrder: 2 }
-      ],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#1e293b',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      cardBackgroundTheme: 'navy_prestige'
-    }
-  },
   {
     id: 'qr_demo_11',
     cardNumber: 'CARD-2026-0011',

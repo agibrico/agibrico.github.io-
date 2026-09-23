@@ -49,16 +49,30 @@ export const QREditor: React.FC<QREditorProps> = ({ initialItem, onSave, onCance
   };
 
   const updateFieldProperty = (sIdx: number, fIdx: number, key: string, value: any) => {
-    const ns = [...(content.customSections || [])];
-    (ns[sIdx].fields[fIdx] as any)[key] = value;
+    const ns = (content.customSections || []).map((sec, sI) => {
+      if (sI !== sIdx) return sec;
+      return {
+        ...sec,
+        fields: sec.fields.map((fld, fI) => {
+          if (fI !== fIdx) return fld;
+          return { ...fld, [key]: value };
+        })
+      };
+    });
     updateContentField('customSections', ns);
   };
 
   const duplicateField = (sIdx: number, fIdx: number) => {
-    const ns = [...(content.customSections || [])];
-    const original = ns[sIdx].fields[fIdx];
-    const duplicate = { ...original, id: `f_${Date.now()}`, order: ns[sIdx].fields.length + 1 };
-    ns[sIdx].fields.push(duplicate);
+    const ns = (content.customSections || []).map((sec, sI) => {
+      if (sI !== sIdx) return sec;
+      const original = sec.fields[fIdx];
+      if (!original) return sec;
+      const duplicate = { ...original, id: `f_${Date.now()}`, order: sec.fields.length + 1 };
+      return {
+        ...sec,
+        fields: [...sec.fields, duplicate]
+      };
+    });
     updateContentField('customSections', ns);
   };
 

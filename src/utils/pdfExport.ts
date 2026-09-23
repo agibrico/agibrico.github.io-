@@ -294,6 +294,13 @@ export async function exportDirectCardPDF(item: QRCodeItem): Promise<boolean> {
     offscreen.appendChild(rectoEl);
     offscreen.appendChild(versoEl);
 
+    if (!qrImg.complete) {
+      await new Promise((resolve) => {
+        qrImg.onload = resolve;
+        qrImg.onerror = resolve;
+      });
+    }
+
     const safeName = (displayName || 'Carte_Visite').replace(/[^a-zA-Z0-9_-]/g, '_');
     const filename = `Carte_Visite_${safeName}_Recto_Verso.pdf`;
 

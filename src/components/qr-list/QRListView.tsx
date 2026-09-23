@@ -80,14 +80,15 @@ export const QRListView: React.FC<QRListViewProps> = ({
   const allClients = clients.length > 0 ? clients : getStoredClients();
 
   const filteredItems = items.filter(item => {
+    if (!item) return false;
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q || (
-      item.title.toLowerCase().includes(q) ||
-      item.publicId.toLowerCase().includes(q) ||
+      (item.title || '').toLowerCase().includes(q) ||
+      (item.publicId || '').toLowerCase().includes(q) ||
       (item.cardNumber || '').toLowerCase().includes(q) ||
-      (item.content.fullName || '').toLowerCase().includes(q) ||
-      (item.content.company || '').toLowerCase().includes(q) ||
-      (item.content.primaryPhone || '').toLowerCase().includes(q)
+      (item.content?.fullName || '').toLowerCase().includes(q) ||
+      (item.content?.company || '').toLowerCase().includes(q) ||
+      (item.content?.primaryPhone || '').toLowerCase().includes(q)
     );
 
     const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;

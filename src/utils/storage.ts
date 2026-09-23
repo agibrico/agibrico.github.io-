@@ -596,7 +596,10 @@ export function getQRCodeById(id: string): QRCodeItem | undefined {
 export function getQRCodeByPublicId(publicId: string): QRCodeItem | undefined {
   if (!publicId) return undefined;
   const cleanId = publicId.trim().toLowerCase();
-  return getStoredQRCodes().find(q => (q.publicId && q.publicId.toLowerCase() === cleanId) || q.id.toLowerCase() === cleanId);
+  return getStoredQRCodes().find(q =>
+    (q && q.publicId && q.publicId.toLowerCase() === cleanId) ||
+    (q && q.id && q.id.toLowerCase() === cleanId)
+  );
 }
 
 export function encodeCardPayload(item: QRCodeItem): string {

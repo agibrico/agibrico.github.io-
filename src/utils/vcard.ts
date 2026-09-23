@@ -185,8 +185,8 @@ export function downloadVCard(content: QRContent, filename?: string): void {
   URL.revokeObjectURL(url);
 }
 
-function escapeVCardText(str: string): string {
-  return str
+function escapeVCardText(str: any): string {
+  return String(str || '')
     .replace(/\\/g, '\\\\')
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')

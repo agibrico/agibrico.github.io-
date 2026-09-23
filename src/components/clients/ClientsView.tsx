@@ -68,17 +68,18 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
 
   // Search filtering
   const filteredClients = clients.filter(c => {
+    if (!c) return false;
     const q = searchTerm.toLowerCase().trim();
     if (!q) return true;
     return (
-      c.fullName.toLowerCase().includes(q) ||
-      c.firstName.toLowerCase().includes(q) ||
-      c.lastName.toLowerCase().includes(q) ||
-      c.company.toLowerCase().includes(q) ||
-      (c.clientNumber && c.clientNumber.toLowerCase().includes(q)) ||
-      c.primaryPhone.toLowerCase().includes(q) ||
-      c.email.toLowerCase().includes(q) ||
-      c.city.toLowerCase().includes(q)
+      (c.fullName || '').toLowerCase().includes(q) ||
+      (c.firstName || '').toLowerCase().includes(q) ||
+      (c.lastName || '').toLowerCase().includes(q) ||
+      (c.company || '').toLowerCase().includes(q) ||
+      (c.clientNumber || '').toLowerCase().includes(q) ||
+      (c.primaryPhone || '').toLowerCase().includes(q) ||
+      (c.email || '').toLowerCase().includes(q) ||
+      (c.city || '').toLowerCase().includes(q)
     );
   });
 

@@ -86,7 +86,8 @@ const normalizeHttpUrl = (value?: string): string | null => {
 const normalizeActionHref = (value?: string): string | null => {
   if (!value) return null;
   const trimmed = value.trim();
-  if (/^(?:mailto|tel):/i.test(trimmed) && !/[\r\n]/.test(trimmed)) return trimmed;
+  if (/^tel:[+\d\s().-]+$/i.test(trimmed)) return trimmed;
+  if (/^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/i.test(trimmed)) return trimmed;
   return normalizeHttpUrl(trimmed);
 };
 
@@ -233,6 +234,13 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       invitationTitle, invitationDate, invitationTime, invitationLocationName, invitationAddress
     } = item.content;
 
+    const escapeIcs = (str: string) =>
+      String(str || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\n/g, '\\n');
+
     const calTitle = eventTitle || invitationTitle || item.title || 'Événement';
     const startDate = eventStartDate || invitationDate;
     const startTime = eventStartTime || invitationTime;
@@ -251,11 +259,11 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'BEGIN:VEVENT',
-      `SUMMARY:${calTitle}`,
+      `SUMMARY:${escapeIcs(calTitle)}`,
       `DTSTART:${startDateStr}T${startTimeStr}00`,
       `DTEND:${endDateStr}T${endTimeStr}00`,
-      `LOCATION:${location}`,
-      `DESCRIPTION:${description}`,
+      `LOCATION:${escapeIcs(location)}`,
+      `DESCRIPTION:${escapeIcs(description)}`,
       'END:VEVENT',
       'END:VCALENDAR'
     ].join('\n');

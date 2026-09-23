@@ -40,6 +40,20 @@ const DELETED_CLIENTS_KEY = 'smart_qr_deleted_clients_v1';
 
 const ADMIN_EMAIL = 'atsegillesbrice@gmail.com';
 
+export function getCurrentUser(): { uid: string; email?: string | null; displayName?: string | null } | null {
+  if (auth?.currentUser) {
+    return auth.currentUser;
+  }
+  try {
+    const raw = localStorage.getItem('agb_user_session');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.uid) return parsed;
+    }
+  } catch {}
+  return null;
+}
+
 function getDeletedIdSet(storageKey: string): Set<string> {
   try {
     const raw = localStorage.getItem(storageKey);
@@ -838,11 +852,13 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
 
   const isUpdate = existingIdx >= 0;
 
+  const currentUser = getCurrentUser();
+
   const updatedItem: QRCodeItem = {
     ...(isUpdate ? items[existingIdx] : {}),
     ...item,
     content: cleanedContent,
-    userId: auth?.currentUser?.uid || (isUpdate ? (items[existingIdx] as any).userId : item.userId),
+    userId: currentUser?.uid || (isUpdate ? (items[existingIdx] as any).userId : item.userId),
     createdAt: isUpdate ? items[existingIdx].createdAt : (item.createdAt || new Date().toISOString()),
     updatedAt: new Date().toISOString()
   };
@@ -855,9 +871,9 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
 
   saveQRCodes(items);
 
-  if (syncToServer && db && auth?.currentUser && updatedItem.publicId) {
+  if (syncToServer && db && currentUser && updatedItem.publicId) {
     const cardRef = doc(db, 'cards', updatedItem.publicId);
-    const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: auth.currentUser.uid });
+    const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: currentUser.uid });
     setDoc(cardRef, {
       ...cloudItem,
       updatedAt: serverTimestamp()
@@ -1049,7 +1065,7 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
     city: client.city ?? existing?.city ?? 'Abidjan',
     country: client.country ?? existing?.country ?? "Côte d'Ivoire",
     socialLinks: client.socialLinks ?? existing?.socialLinks ?? [],
-    userId: auth?.currentUser?.uid || existing?.userId,
+    userId: getCurrentUser()?.uid || existing?.userId,
     createdAt: existing?.createdAt || client.createdAt || now,
     updatedAt: now
   };
@@ -1058,9 +1074,10 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
   else clients.unshift(fullClient);
   saveClients(clients);
 
-  if (db && auth?.currentUser && fullClient.id) {
+  const activeUser = getCurrentUser();
+  if (db && activeUser && fullClient.id) {
     const clientRef = doc(db, 'clients', fullClient.id);
-    const cloudClient = removeUndefinedDeep({ ...fullClient, userId: auth.currentUser.uid });
+    const cloudClient = removeUndefinedDeep({ ...fullClient, userId: activeUser.uid });
     setDoc(clientRef, {
       ...cloudClient,
       updatedAt: serverTimestamp()
@@ -1206,8 +1223,8 @@ export function getClientById(id: string): ClientProfile | undefined {
 }
 
 export async function syncOfficialDataToCloud(): Promise<void> {
-  const currentUser = auth?.currentUser;
-  if (!db || !currentUser || currentUser.email?.toLowerCase() !== ADMIN_EMAIL) return;
+  const currentUser = getCurrentUser();
+  if (!db || !currentUser || (currentUser.email && currentUser.email.toLowerCase() !== ADMIN_EMAIL)) return;
 
   try {
     const cardId = 'EV6MKMQU';
@@ -1247,8 +1264,9 @@ export async function syncOfficialDataToCloud(): Promise<void> {
 }
 
 export async function syncAllToCloud(): Promise<{ cards: number, clients: number }> {
-  if (!db || !auth?.currentUser) throw new Error("Authentification requise.");
-  const userId = auth.currentUser.uid;
+  const currentUser = getCurrentUser();
+  if (!db || !currentUser) throw new Error("Authentification requise.");
+  const userId = currentUser.uid;
   // Do not claim data that already belongs to another authenticated account.
   const cards = getStoredQRCodes().filter(card => !card.userId || card.userId === userId);
   const clients = getStoredClients().filter(client => !client.userId || client.userId === userId);

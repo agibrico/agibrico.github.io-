@@ -8,12 +8,7 @@ import {
   AlertCircle,
   Loader2
 } from 'lucide-react';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile
-} from 'firebase/auth';
-import { auth } from '../../firebase';
+import { useAuth } from '../../context/AuthContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -21,6 +16,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+  const { login, signup } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,39 +31,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError(null);
     setLoading(true);
 
-    if (!auth) {
-      setError('Firebase n’est pas configuré sur cette installation.');
-      setLoading(false);
-      return;
-    }
-
     try {
       if (isLogin) {
-        // Mode administrateur universel absolu : Bypass complet si les identifiants correspondent
-        if ((email.trim().toLowerCase() === 'admin@agibrico.com' || email.trim().toLowerCase() === 'atsegillesbrice@gmail.com') && password === 'agibrico') {
-          // On force la fermeture modale et la validation immédiate sans dépendre d'un échec réseau Firebase Auth
-          onClose();
-          return;
-        } else {
-          await signInWithEmailAndPassword(auth, email, password);
-        }
+        await login(email, password);
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        if (displayName) {
-          await updateProfile(userCredential.user, { displayName });
-        }
+        await signup(email, password, displayName);
       }
       onClose();
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setError('E-mail ou mot de passe incorrect.');
       } else if (err.code === 'auth/email-already-in-use') {
         setError('Cet e-mail est déjà utilisé.');
       } else if (err.code === 'auth/weak-password') {
         setError('Le mot de passe doit contenir au moins 6 caractères.');
       } else {
-        setError('Une erreur est survenue. Veuillez réessayer.');
+        setError('E-mail ou mot de passe incorrect. Vérifiez vos identifiants.');
       }
     } finally {
       setLoading(false);

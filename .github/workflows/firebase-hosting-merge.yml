@@ -59,6 +59,7 @@ jobs:
           force_orphan: true
 
       - name: Capacitor Android Build
+        if: ${{ !contains(github.event.head_commit.message, '[skip-apk]') }}
         run: |
           # Initialize Android project if missing
           if [ ! -d android ]; then npx cap add android; fi
@@ -72,6 +73,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload Debug APK
+        if: ${{ !contains(github.event.head_commit.message, '[skip-apk]') }}
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk

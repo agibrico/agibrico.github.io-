@@ -234,6 +234,23 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     ],
     createdAt: '2026-09-07T18:00:00.000Z',
     updatedAt: '2026-09-07T18:00:00.000Z'
+  },
+  {
+    id: 'client_007',
+    clientNumber: 'CLT-2026-0007',
+    firstName: 'Cyrille',
+    lastName: 'ZÉZÉ',
+    fullName: 'Cyrille ZÉZÉ',
+    company: 'Cyrille ZÉZÉ Services',
+    jobTitle: 'Professionnel',
+    industry: 'Services',
+    primaryPhone: '+225 07 07 35 52 41',
+    email: 'cyrille.zeze@gmail.com',
+    city: 'Abidjan',
+    country: 'Côte d\'Ivoire',
+    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707355241', displayOrder: 1 }],
+    createdAt: '2026-09-23T08:00:00.000Z',
+    updatedAt: '2026-09-23T08:00:00.000Z'
   }
 ];
 
@@ -535,6 +552,46 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       margin: 3,
       size: 320,
       cardBackgroundTheme: 'navy_prestige'
+    }
+  },
+  {
+    id: 'qr_demo_11',
+    cardNumber: 'CARD-2026-0011',
+    publicId: 'CYR2026Z',
+    clientId: 'client_007',
+    title: 'Cyrille ZÉZÉ — +225 07 07 35 52 41',
+    type: 'BUSINESS_CARD',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-09-23T08:00:00.000Z',
+    updatedAt: '2026-09-23T08:00:00.000Z',
+    scanCount: 0,
+    content: {
+      firstName: 'Cyrille',
+      lastName: 'ZÉZÉ',
+      fullName: 'Cyrille ZÉZÉ',
+      jobTitle: 'Professionnel',
+      primaryPhone: '+225 07 07 35 52 41',
+      whatsappNumber: '+225 07 07 35 52 41',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      socialLinks: [
+        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707355241', displayOrder: 1 }
+      ],
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#0f172a',
+      bgColor: '#ffffff',
+      transparentBg: false,
+      moduleStyle: 'rounded',
+      eyeStyle: 'rounded',
+      eyeColor: '#2563eb',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      bottomText: 'SCANNEZ MOI',
+      cardBackgroundTheme: 'white_classic'
     }
   }
 ];

@@ -513,8 +513,8 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button onClick={handleDownloadContact} className="col-span-2 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all active:scale-95"><UserPlus className="w-4 h-4" /> {savedContact ? 'Fiche Enregistrée' : 'Ajouter aux contacts'}</button>
-                {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><Phone className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">Appel</span></a>}
-                {content.whatsappNumber && <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors"><MessageSquare className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">WhatsApp</span></a>}
+                {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className={`flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors ${!content.whatsappNumber ? 'col-span-2' : ''}`}><Phone className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">Appel</span></a>}
+                {content.whatsappNumber && <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g,'')}`} className={`flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors ${!content.primaryPhone ? 'col-span-2' : ''}`}><MessageSquare className="w-5 h-5 text-emerald-400" /><span className="text-[8px] font-black uppercase">WhatsApp</span></a>}
               </div>
             </div>
 
@@ -896,18 +896,24 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 </div>
 
                 {/* QUICK DATE/PLACE TILE */}
-                <div className="grid grid-cols-2 gap-3 p-5 bg-white/5 backdrop-blur-md rounded-[32px] border border-white/10 shadow-2xl text-left">
-                  <div className="space-y-1 border-r border-white/10 pr-3">
-                    <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest block">Quand</span>
-                    <p className="text-xs font-black text-white">{content.eventStartDate}</p>
-                    <p className="text-[10px] font-bold text-slate-400">{content.eventStartTime} {content.eventTimezone ? `(${content.eventTimezone})` : ''}</p>
+                {(content.eventStartDate || content.eventLocationName) && (
+                  <div className={`grid ${content.eventStartDate && content.eventLocationName ? 'grid-cols-2' : 'grid-cols-1'} gap-3 p-5 bg-white/5 backdrop-blur-md rounded-[32px] border border-white/10 shadow-2xl text-left`}>
+                    {content.eventStartDate && (
+                      <div className={`space-y-1 ${content.eventLocationName ? 'border-r border-white/10 pr-3' : ''}`}>
+                        <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest block">Quand</span>
+                        <p className="text-xs font-black text-white">{content.eventStartDate}</p>
+                        {content.eventStartTime && <p className="text-[10px] font-bold text-slate-400">{content.eventStartTime} {content.eventTimezone ? `(${content.eventTimezone})` : ''}</p>}
+                      </div>
+                    )}
+                    {content.eventLocationName && (
+                      <div className={`space-y-1 ${content.eventStartDate ? 'pl-3' : ''}`}>
+                        <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest block">Où</span>
+                        <p className="text-xs font-black text-white truncate">{content.eventLocationName}</p>
+                        {(content.eventCity || content.eventCountry) && <p className="text-[9px] font-bold text-slate-400 truncate">{[content.eventCity, content.eventCountry].filter(Boolean).join(', ')}</p>}
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-1 pl-3">
-                    <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest block">Où</span>
-                    <p className="text-xs font-black text-white truncate">{content.eventLocationName}</p>
-                    <p className="text-[9px] font-bold text-slate-400 truncate">{content.eventCity}, {content.eventCountry}</p>
-                  </div>
-                </div>
+                )}
 
                 {/* MAIN ACTIONS */}
                 <div className="grid grid-cols-2 gap-3 pt-4">
@@ -1535,12 +1541,14 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
                 </div>
 
                 {/* QUICK ACTIONS */}
-                <div className="grid grid-cols-4 gap-3 pt-4">
-                  {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Phone className="w-4 h-4 text-emerald-400" /><span className="text-[7px] font-black uppercase">Appel</span></a>}
-                  {content.whatsappNumber && <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><MessageSquare className="w-4 h-4 text-emerald-400" /><span className="text-[7px] font-black uppercase">WhatsApp</span></a>}
-                  {content.email && <a href={`mailto:${content.email}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Mail className="w-4 h-4 text-blue-400" /><span className="text-[7px] font-black uppercase">Email</span></a>}
-                  {content.websiteUrl && <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Globe className="w-4 h-4 text-indigo-400" /><span className="text-[7px] font-black uppercase">Site</span></a>}
-                </div>
+                {(content.primaryPhone || content.whatsappNumber || content.email || content.websiteUrl) && (
+                  <div className="grid grid-cols-4 gap-3 pt-4">
+                    {content.primaryPhone && <a href={`tel:${content.primaryPhone}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Phone className="w-4 h-4 text-emerald-400" /><span className="text-[7px] font-black uppercase">Appel</span></a>}
+                    {content.whatsappNumber && <a href={`https://wa.me/${content.whatsappNumber.replace(/[^\d]/g,'')}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><MessageSquare className="w-4 h-4 text-emerald-400" /><span className="text-[7px] font-black uppercase">WhatsApp</span></a>}
+                    {content.email && <a href={`mailto:${content.email}`} className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Mail className="w-4 h-4 text-blue-400" /><span className="text-[7px] font-black uppercase">Email</span></a>}
+                    {content.websiteUrl && <a href={content.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 p-3 bg-slate-800 rounded-2xl text-slate-200 hover:bg-slate-700 transition-colors border border-slate-700"><Globe className="w-4 h-4 text-indigo-400" /><span className="text-[7px] font-black uppercase">Site</span></a>}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   {content.companyCatalogueUrl && (

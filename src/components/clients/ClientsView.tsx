@@ -217,8 +217,18 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
     e.preventDefault();
     if (!editingClient) return;
 
-    if (!editingClient.firstName && !editingClient.lastName && !editingClient.company) {
-      alert("Veuillez saisir au moins un nom, prénom ou raison sociale.");
+    const hasAnyField = Boolean(
+      (editingClient.firstName && editingClient.firstName.trim()) ||
+      (editingClient.lastName && editingClient.lastName.trim()) ||
+      (editingClient.fullName && editingClient.fullName.trim()) ||
+      (editingClient.company && editingClient.company.trim()) ||
+      (editingClient.primaryPhone && editingClient.primaryPhone.trim()) ||
+      (editingClient.email && editingClient.email.trim()) ||
+      (editingClient.jobTitle && editingClient.jobTitle.trim())
+    );
+
+    if (!hasAnyField) {
+      alert("Veuillez remplir au moins un champ (Nom, Prénom, Entreprise, Téléphone ou E-mail) pour enregistrer.");
       return;
     }
 
@@ -229,8 +239,8 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
 
     // Show confirmation with specific message for update vs creation
     const msg = isUpdate
-      ? `Mise à jour de la fiche de ${saved.fullName} effectuée !`
-      : `Fiche de ${saved.fullName} créée avec succès !`;
+      ? `Mise à jour de la fiche de ${saved.fullName || 'client'} effectuée !`
+      : `Fiche de ${saved.fullName || 'client'} créée avec succès !`;
 
     setSaveSuccessMessage(`${msg} Le QR Code associé diffusera automatiquement ces coordonnées.`);
     setTimeout(() => setSaveSuccessMessage(null), 6000);
@@ -524,10 +534,9 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Prénom *</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Prénom</label>
                     <input
                       type="text"
-                      required
                       value={editingClient.firstName || ''}
                       onChange={e => setEditingClient({ ...editingClient, firstName: e.target.value, fullName: `${e.target.value} ${editingClient.lastName || ''}`.trim() })}
                       placeholder="Ex: Gilles Brice"
@@ -536,10 +545,9 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Nom *</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Nom</label>
                     <input
                       type="text"
-                      required
                       value={editingClient.lastName || ''}
                       onChange={e => setEditingClient({ ...editingClient, lastName: e.target.value, fullName: `${editingClient.firstName || ''} ${e.target.value}`.trim() })}
                       placeholder="Ex: ATSÉ"
@@ -550,10 +558,9 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Entreprise / Société *</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Entreprise / Société</label>
                     <input
                       type="text"
-                      required
                       value={editingClient.company || ''}
                       onChange={e => setEditingClient({ ...editingClient, company: e.target.value })}
                       placeholder="Ex: AGB"
@@ -562,10 +569,9 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Fonction / Titre professionnel *</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Fonction / Titre professionnel</label>
                     <input
                       type="text"
-                      required
                       value={editingClient.jobTitle || ''}
                       onChange={e => setEditingClient({ ...editingClient, jobTitle: e.target.value })}
                       placeholder="Ex: Concepteur d'applications mobiles"
@@ -662,10 +668,9 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Téléphone Principal *</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">Téléphone Principal</label>
                     <input
                       type="text"
-                      required
                       value={editingClient.primaryPhone || ''}
                       onChange={e => setEditingClient({ ...editingClient, primaryPhone: e.target.value })}
                       placeholder="+225 01 04 00 00 00"
@@ -711,10 +716,9 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">E-mail Principal *</label>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">E-mail Principal</label>
                     <input
                       type="email"
-                      required
                       value={editingClient.email || ''}
                       onChange={e => setEditingClient({ ...editingClient, email: e.target.value })}
                       placeholder="client@domaine.com"

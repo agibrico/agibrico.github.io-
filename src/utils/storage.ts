@@ -736,35 +736,46 @@ export function decodeCardPayload(payload: string): QRCodeItem | null {
   }
 }
 
-export async function fetchQRCodeByPublicId(publicId: string, preferServer = true): Promise<QRCodeItem | null> {
+export async function fetchQRCodeByPublicId(publicId: string, _preferServer = true): Promise<QRCodeItem | null> {
   if (!publicId) return null;
   const cleanId = publicId.trim();
+  const upperDocId = cleanId.toUpperCase();
 
   const fetchFromFirestore = async (): Promise<QRCodeItem | null> => {
     if (!db) return null;
     try {
-      const cardSnap = await getDoc(doc(db, 'cards', cleanId));
-      return cardSnap.exists() ? normalizeFirestoreCard(cardSnap.data()) : null;
+      const cardSnap = await getDoc(doc(db, 'cards', upperDocId));
+      if (cardSnap.exists()) {
+        return normalizeFirestoreCard(cardSnap.data());
+      }
+      if (cleanId !== upperDocId) {
+        const altSnap = await getDoc(doc(db, 'cards', cleanId));
+        if (altSnap.exists()) {
+          return normalizeFirestoreCard(altSnap.data());
+        }
+      }
+      return null;
     } catch (err) {
       console.warn('Firestore fetch failed', err);
       return null;
     }
   };
 
-  // Dynamic cards must prefer the cloud so published changes are immediately visible.
-  if (preferServer) {
-    const serverFound = await fetchFromFirestore();
-    if (serverFound) return serverFound;
+  const serverFound = await fetchFromFirestore();
+  const localFound = getQRCodeByPublicId(cleanId);
+
+  if (serverFound && localFound) {
+    const serverTime = Date.parse(serverFound.updatedAt || '') || 0;
+    const localTime = Date.parse(localFound.updatedAt || '') || 0;
+    return localTime > serverTime ? localFound : serverFound;
   }
 
-  const localFound = getQRCodeByPublicId(cleanId);
+  if (serverFound) return serverFound;
   if (localFound) return localFound;
 
-  // Demo data is only a fallback. It must never mask a newer cloud version.
-  const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toLowerCase() === cleanId.toLowerCase());
+  const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toUpperCase() === upperDocId);
   if (demoItem) return demoItem;
 
-  if (!preferServer) return fetchFromFirestore();
   return null;
 }
 
@@ -893,9 +904,11 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
 
   saveQRCodes(items);
 
-  if (syncToServer && db && currentUser && updatedItem.publicId) {
-    const cardRef = doc(db, 'cards', updatedItem.publicId);
-    const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: currentUser.uid });
+  if (syncToServer && db && updatedItem.publicId) {
+    const firestoreUid = auth?.currentUser?.uid || currentUser?.uid || 'admin_agb_001';
+    const cleanPublicId = updatedItem.publicId.trim().toUpperCase();
+    const cardRef = doc(db, 'cards', cleanPublicId);
+    const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: firestoreUid });
     setDoc(cardRef, {
       ...cloudItem,
       updatedAt: serverTimestamp()
@@ -964,9 +977,24 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
         const serverUpdatedAt = Date.parse(sCard.updatedAt || '') || 0;
         if (serverUpdatedAt >= localUpdatedAt) {
           mergedCards[idx] = { ...mergedCards[idx], ...sCard };
+        } else {
+          // Push newer local card from APK to Cloud Firestore
+          if (db && mergedCards[idx].publicId) {
+            const cleanPublicId = mergedCards[idx].publicId.trim().toUpperCase();
+            setDoc(doc(db, 'cards', cleanPublicId), removeUndefinedDeep({ ...mergedCards[idx], userId })).catch(() => {});
+          }
         }
       } else {
         mergedCards.push(sCard);
+      }
+    });
+
+    // Push any local-only card created in APK to Cloud Firestore
+    localCards.forEach(lCard => {
+      const existsOnServer = serverCards.some(sc => sc.id === lCard.id || sc.publicId === lCard.publicId);
+      if (!existsOnServer && lCard.publicId && db) {
+        const cleanPublicId = lCard.publicId.trim().toUpperCase();
+        setDoc(doc(db, 'cards', cleanPublicId), removeUndefinedDeep({ ...lCard, userId })).catch(() => {});
       }
     });
 
@@ -1108,10 +1136,51 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
   else clients.unshift(fullClient);
   saveClients(clients);
 
+  // Propagate updated client details to associated cards and sync to Cloud Firestore
+  try {
+    const allCards = getStoredQRCodes();
+    allCards.forEach(card => {
+      if (
+        card.clientId === fullClient.id ||
+        (card.content?.fullName && card.content.fullName.trim().toLowerCase() === fullClient.fullName.trim().toLowerCase())
+      ) {
+        const updatedCard: QRCodeItem = {
+          ...card,
+          clientId: fullClient.id,
+          title: `${fullClient.fullName} — ${fullClient.jobTitle || fullClient.company || 'Carte Pro'}`,
+          content: {
+            ...card.content,
+            firstName: fullClient.firstName || card.content.firstName,
+            lastName: fullClient.lastName || card.content.lastName,
+            fullName: fullClient.fullName || card.content.fullName,
+            company: fullClient.company || card.content.company,
+            jobTitle: fullClient.jobTitle || card.content.jobTitle,
+            primaryPhone: fullClient.primaryPhone || card.content.primaryPhone,
+            secondaryPhone: fullClient.secondaryPhone || card.content.secondaryPhone,
+            whatsappNumber: fullClient.whatsappNumber || card.content.whatsappNumber,
+            workPhone: fullClient.workPhone || card.content.workPhone,
+            email: fullClient.email || card.content.email,
+            city: fullClient.city || card.content.city,
+            country: fullClient.country || card.content.country,
+            logoUrl: fullClient.logoUrl || card.content.logoUrl,
+            photoUrl: fullClient.photoUrl || card.content.photoUrl,
+            socialLinks: fullClient.socialLinks?.length ? fullClient.socialLinks : card.content.socialLinks,
+            servicesOffered: fullClient.servicesList?.length ? fullClient.servicesList : card.content.servicesOffered
+          },
+          updatedAt: now
+        };
+        saveOrUpdateQRCode(updatedCard, true);
+      }
+    });
+  } catch (err) {
+    console.warn("Card propagation error:", err);
+  }
+
   const activeUser = getCurrentUser();
-  if (db && activeUser && fullClient.id) {
+  if (db && fullClient.id) {
+    const firestoreUid = auth?.currentUser?.uid || activeUser?.uid || 'admin_agb_001';
     const clientRef = doc(db, 'clients', fullClient.id);
-    const cloudClient = removeUndefinedDeep({ ...fullClient, userId: activeUser.uid });
+    const cloudClient = removeUndefinedDeep({ ...fullClient, userId: firestoreUid });
     setDoc(clientRef, {
       ...cloudClient,
       updatedAt: serverTimestamp()

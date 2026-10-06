@@ -182,18 +182,33 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
 
     if (publicId) {
       setLoading(true);
-      fetchQRCodeByPublicId(publicId).then(found => {
-        if (found) {
-          setItem(normalizeItem(found));
-          if (!isSimulator) recordScanEvent(publicId);
-        } else {
-          setError("Cette fiche est introuvable.");
-        }
-        setLoading(false);
-      }).catch(() => {
-        setError("Erreur de connexion.");
-        setLoading(false);
-      });
+      setError(null);
+
+      let attempts = 0;
+      const tryFetch = () => {
+        attempts++;
+        fetchQRCodeByPublicId(publicId).then(found => {
+          if (found) {
+            setItem(normalizeItem(found));
+            setLoading(false);
+            if (!isSimulator) recordScanEvent(publicId);
+          } else if (attempts < 3) {
+            setTimeout(tryFetch, 1000);
+          } else {
+            setError("Cette fiche est introuvable.");
+            setLoading(false);
+          }
+        }).catch(() => {
+          if (attempts < 3) {
+            setTimeout(tryFetch, 1000);
+          } else {
+            setError("Erreur de connexion.");
+            setLoading(false);
+          }
+        });
+      };
+
+      tryFetch();
     }
   }, [publicId, propQrItem, isSimulator]);
 

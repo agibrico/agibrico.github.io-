@@ -58,11 +58,12 @@ export default function App() {
     refreshData();
     syncOfficialDataToCloud().catch(() => {});
 
-    // Accept both hash links (#q/ID) and clean routes (/q/ID).
+    // Accept hash links (#q/ID), clean routes (/q/ID) and query params (?id=ID).
     const checkPublicRoute = () => {
       const hashMatch = window.location.hash.match(/#(?:q|c|card)\/([a-zA-Z0-9_-]+)/i);
       const pathMatch = window.location.pathname.match(/\/(?:q|c|card)\/([a-zA-Z0-9_-]+)(?:\/|$)/i);
-      const match = hashMatch || pathMatch;
+      const searchMatch = window.location.search.match(/[?&](?:q|c|id|publicId)=([a-zA-Z0-9_-]+)/i);
+      const match = hashMatch || pathMatch || searchMatch;
       setPublicScanId(match?.[1] || null);
     };
 

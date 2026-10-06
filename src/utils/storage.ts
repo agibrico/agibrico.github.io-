@@ -788,6 +788,25 @@ export async function fetchQRCodeByPublicId(publicId: string, _preferServer = tr
     return latestItem;
   }
 
+  // Universal alias fallback for Cyrille ZÉZÉ
+  if (
+    upperDocId === 'CYR2026Z' ||
+    upperDocId === 'CYRILLEZEZE' ||
+    upperDocId === 'ZEZE' ||
+    upperDocId.includes('ZEZE') ||
+    upperDocId.includes('CYRILLE') ||
+    upperDocId === 'CARD-2026-0011'
+  ) {
+    const cyrilleItem = INITIAL_QR_ITEMS.find(i => i.publicId === 'CYR2026Z');
+    if (cyrilleItem) {
+      if (db) {
+        setDoc(doc(db, 'cards', upperDocId), removeUndefinedDeep(cyrilleItem), { merge: true }).catch(() => {});
+        setDoc(doc(db, 'cards', 'CYR2026Z'), removeUndefinedDeep(cyrilleItem), { merge: true }).catch(() => {});
+      }
+      return cyrilleItem;
+    }
+  }
+
   return null;
 }
 
@@ -1347,12 +1366,23 @@ export async function syncOfficialDataToCloud(): Promise<void> {
       const card = INITIAL_QR_ITEMS.find(i => i.publicId === pid);
       if (card) {
         const cleanPid = pid.trim().toUpperCase();
-        const cardRef = doc(db, 'cards', cleanPid);
-        await setDoc(cardRef, {
+        await setDoc(doc(db, 'cards', cleanPid), {
           ...removeUndefinedDeep(card),
           userId: currentUser?.uid || 'admin_agb_001',
           updatedAt: serverTimestamp()
         }, { merge: true });
+
+        // Synchroniser également les alias de la carte de Cyrille ZÉZÉ
+        if (cleanPid === 'CYR2026Z') {
+          const aliases = ['CYRILLEZEZE', 'ZEZE', 'CARD-2026-0011'];
+          for (const alias of aliases) {
+            await setDoc(doc(db, 'cards', alias), {
+              ...removeUndefinedDeep(card),
+              userId: currentUser?.uid || 'admin_agb_001',
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+          }
+        }
       }
     }
   } catch (err) {

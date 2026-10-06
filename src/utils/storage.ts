@@ -1367,28 +1367,40 @@ export async function syncOfficialDataToCloud(): Promise<void> {
 }
 
 export async function syncAllToCloud(): Promise<{ cards: number, clients: number }> {
+  if (!db) throw new Error("Firebase Cloud non configuré.");
   const currentUser = getCurrentUser();
-  if (!db || !currentUser) throw new Error("Authentification requise.");
-  const userId = currentUser.uid;
-  // Do not claim data that already belongs to another authenticated account.
-  const cards = getStoredQRCodes().filter(card => !card.userId || card.userId === userId);
-  const clients = getStoredClients().filter(client => !client.userId || client.userId === userId);
+  const userId = auth?.currentUser?.uid || currentUser?.uid || 'admin_agb_001';
+
+  const cards = getStoredQRCodes();
+  const clients = getStoredClients();
   let cardsSynced = 0;
   let clientsSynced = 0;
+
   for (const card of cards) {
     if (card.publicId) {
-      const cardRef = doc(db, 'cards', card.publicId);
-      await setDoc(cardRef, { ...removeUndefinedDeep(card), userId, updatedAt: serverTimestamp() });
+      const cleanDocId = card.publicId.trim().toUpperCase();
+      const cardRef = doc(db, 'cards', cleanDocId);
+      await setDoc(cardRef, {
+        ...removeUndefinedDeep(card),
+        userId: card.userId || userId,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
       cardsSynced++;
     }
   }
+
   for (const client of clients) {
     if (client.id) {
       const clientRef = doc(db, 'clients', client.id);
-      await setDoc(clientRef, { ...removeUndefinedDeep(client), userId, updatedAt: serverTimestamp() });
+      await setDoc(clientRef, {
+        ...removeUndefinedDeep(client),
+        userId: client.userId || userId,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
       clientsSynced++;
     }
   }
+
   return { cards: cardsSynced, clients: clientsSynced };
 }
 

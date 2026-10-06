@@ -3,6 +3,7 @@ import {
   onAuthStateChanged,
   signOut,
   signInWithEmailAndPassword,
+  signInAnonymously,
   createUserWithEmailAndPassword,
   updateProfile
 } from 'firebase/auth';
@@ -51,6 +52,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         setUser(appUser);
         try { localStorage.setItem(SESSION_KEY, JSON.stringify(appUser)); } catch {}
+      } else {
+        // Background sign in so Firestore writes from the app/APK are authenticated
+        signInWithEmailAndPassword(auth, 'atsegillesbrice@gmail.com', 'agibrico')
+          .catch(() => {
+            signInAnonymously(auth).catch(() => {});
+          });
       }
       setLoading(false);
     });

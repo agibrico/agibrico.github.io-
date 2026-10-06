@@ -256,15 +256,16 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     lastName: 'ZÉZÉ',
     fullName: 'Cyrille ZÉZÉ',
     company: 'Cyrille ZÉZÉ Services',
-    jobTitle: 'Professionnel',
-    industry: 'Services',
+    jobTitle: 'CADREUR-PHOTOGRAPHE PROFESSIONNEL ET IMPRESSION SUR TOUS TYPES DE SUPPORTS',
+    industry: 'Services & Photographie',
     primaryPhone: '+225 07 07 35 52 41',
+    whatsappNumber: '+225 07 07 35 52 41',
     email: 'cyrille.zeze@gmail.com',
     city: 'Abidjan',
     country: 'Côte d\'Ivoire',
     socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707355241', displayOrder: 1 }],
     createdAt: '2026-09-23T08:00:00.000Z',
-    updatedAt: '2026-09-23T08:00:00.000Z'
+    updatedAt: '2026-10-06T09:30:00.000Z'
   }
 ];
 
@@ -582,20 +583,22 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     cardNumber: 'CARD-2026-0011',
     publicId: 'CYR2026Z',
     clientId: 'client_007',
-    title: 'Cyrille ZÉZÉ — +225 07 07 35 52 41',
+    title: 'Cyrille ZÉZÉ — Cadreur-Photographe',
     type: 'BUSINESS_CARD',
     mode: 'dynamic',
     status: 'active',
     createdAt: '2026-09-23T08:00:00.000Z',
-    updatedAt: '2026-09-23T08:00:00.000Z',
+    updatedAt: '2026-10-06T09:30:00.000Z',
     scanCount: 0,
     content: {
       firstName: 'Cyrille',
       lastName: 'ZÉZÉ',
       fullName: 'Cyrille ZÉZÉ',
-      jobTitle: 'Professionnel',
+      jobTitle: 'CADREUR-PHOTOGRAPHE PROFESSIONNEL ET IMPRESSION SUR TOUS TYPES DE SUPPORTS',
+      company: 'Cyrille ZÉZÉ Services',
       primaryPhone: '+225 07 07 35 52 41',
       whatsappNumber: '+225 07 07 35 52 41',
+      email: 'cyrille.zeze@gmail.com',
       city: 'Abidjan',
       country: 'Côte d\'Ivoire',
       socialLinks: [

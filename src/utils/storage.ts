@@ -256,7 +256,7 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     lastName: 'ZÉZÉ',
     fullName: 'Cyrille ZÉZÉ',
     company: 'Cyrille ZÉZÉ Services',
-    jobTitle: 'CADREUR-PHOTOGRAPHE PROFESSIONNEL ET IMPRESSION SUR TOUS TYPES DE SUPPORTS',
+    jobTitle: 'CADREUR - PHOTOGRAPHE - VIDÉASTE PROFESSIONNEL ET IMPRESSION SUR TOUS TYPES DE SUPPORTS',
     industry: 'Services & Photographie',
     primaryPhone: '+225 07 07 35 52 41',
     whatsappNumber: '+225 07 07 35 52 41',
@@ -265,7 +265,7 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     country: 'Côte d\'Ivoire',
     socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707355241', displayOrder: 1 }],
     createdAt: '2026-09-23T08:00:00.000Z',
-    updatedAt: '2026-10-06T09:30:00.000Z'
+    updatedAt: '2026-10-06T10:10:00.000Z'
   }
 ];
 
@@ -583,18 +583,18 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
     cardNumber: 'CARD-2026-0011',
     publicId: 'CYR2026Z',
     clientId: 'client_007',
-    title: 'Cyrille ZÉZÉ — Cadreur-Photographe',
+    title: 'Cyrille ZÉZÉ — Cadreur - Photographe - Vidéaste',
     type: 'BUSINESS_CARD',
     mode: 'dynamic',
     status: 'active',
     createdAt: '2026-09-23T08:00:00.000Z',
-    updatedAt: '2026-10-06T09:30:00.000Z',
+    updatedAt: '2026-10-06T10:10:00.000Z',
     scanCount: 0,
     content: {
       firstName: 'Cyrille',
       lastName: 'ZÉZÉ',
       fullName: 'Cyrille ZÉZÉ',
-      jobTitle: 'CADREUR-PHOTOGRAPHE PROFESSIONNEL ET IMPRESSION SUR TOUS TYPES DE SUPPORTS',
+      jobTitle: 'CADREUR - PHOTOGRAPHE - VIDÉASTE PROFESSIONNEL ET IMPRESSION SUR TOUS TYPES DE SUPPORTS',
       company: 'Cyrille ZÉZÉ Services',
       primaryPhone: '+225 07 07 35 52 41',
       whatsappNumber: '+225 07 07 35 52 41',
@@ -1330,38 +1330,20 @@ export function getClientById(id: string): ClientProfile | undefined {
 
 export async function syncOfficialDataToCloud(): Promise<void> {
   const currentUser = getCurrentUser();
-  if (!db || !currentUser || (currentUser.email && currentUser.email.toLowerCase() !== ADMIN_EMAIL)) return;
+  if (!db) return;
 
   try {
-    const cardId = 'EV6MKMQU';
-    const officialCard = INITIAL_QR_ITEMS.find(i => i.publicId === cardId);
-    const officialClient = INITIAL_CLIENTS.find(c => c.id === 'client_005');
-
-    if (officialCard) {
-      const cardRef = doc(db, 'cards', cardId);
-      const existingCard = await getDoc(cardRef);
-      if (!existingCard.exists()) {
+    const officialPublicIds = ['CYR2026Z', 'CAN2026R', 'GPKNURUP', 'EV6MKMQU', 'AGB2026X'];
+    for (const pid of officialPublicIds) {
+      const card = INITIAL_QR_ITEMS.find(i => i.publicId === pid);
+      if (card) {
+        const cleanPid = pid.trim().toUpperCase();
+        const cardRef = doc(db, 'cards', cleanPid);
         await setDoc(cardRef, {
-          ...removeUndefinedDeep(officialCard),
-          userId: currentUser.uid,
+          ...removeUndefinedDeep(card),
+          userId: currentUser?.uid || 'admin_agb_001',
           updatedAt: serverTimestamp()
-        });
-      } else if (existingCard.data().userId !== currentUser.uid) {
-        await setDoc(cardRef, { userId: currentUser.uid }, { merge: true });
-      }
-    }
-
-    if (officialClient) {
-      const clientRef = doc(db, 'clients', officialClient.id);
-      const existingClient = await getDoc(clientRef);
-      if (!existingClient.exists()) {
-        await setDoc(clientRef, {
-          ...removeUndefinedDeep(officialClient),
-          userId: currentUser.uid,
-          updatedAt: serverTimestamp()
-        });
-      } else if (existingClient.data().userId !== currentUser.uid) {
-        await setDoc(clientRef, { userId: currentUser.uid }, { merge: true });
+        }, { merge: true });
       }
     }
   } catch (err) {

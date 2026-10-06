@@ -766,18 +766,27 @@ export async function fetchQRCodeByPublicId(publicId: string, _preferServer = tr
 
   const serverFound = await fetchFromFirestore();
   const localFound = getQRCodeByPublicId(cleanId);
-
-  if (serverFound && localFound) {
-    const serverTime = Date.parse(serverFound.updatedAt || '') || 0;
-    const localTime = Date.parse(localFound.updatedAt || '') || 0;
-    return localTime > serverTime ? localFound : serverFound;
-  }
-
-  if (serverFound) return serverFound;
-  if (localFound) return localFound;
-
   const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toUpperCase() === upperDocId);
-  if (demoItem) return demoItem;
+
+  const candidateList = [serverFound, localFound, demoItem].filter((c): c is QRCodeItem => c != null);
+
+  if (candidateList.length > 0) {
+    const latestItem = candidateList.reduce((newest, current) => {
+      const newestTime = Date.parse(newest.updatedAt || '') || 0;
+      const currentTime = Date.parse(current.updatedAt || '') || 0;
+      return currentTime > newestTime ? current : newest;
+    });
+
+    if (db && latestItem && serverFound && latestItem !== serverFound) {
+      const cardRef = doc(db, 'cards', upperDocId);
+      setDoc(cardRef, {
+        ...removeUndefinedDeep(latestItem),
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(() => {});
+    }
+
+    return latestItem;
+  }
 
   return null;
 }

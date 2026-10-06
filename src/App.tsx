@@ -56,6 +56,7 @@ export default function App() {
   useEffect(() => {
     // Load initial data
     refreshData();
+    syncOfficialDataToCloud().catch(() => {});
 
     // Accept both hash links (#q/ID) and clean routes (/q/ID).
     const checkPublicRoute = () => {

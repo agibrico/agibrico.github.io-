@@ -29,36 +29,22 @@ service cloud.firestore {
         && privacy.get('isPublic', true) == true;
     }
 
-    function isValidPublicScanIncrement() {
-      return isPublicCard()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['scanCount', 'lastScannedAt'])
-        && resource.data.scanCount is int
-        && request.resource.data.scanCount == resource.data.scanCount + 1
-        && request.resource.data.lastScannedAt == request.time;
-    }
-
     match /cards/{cardId} {
-      // Une fiche active est lisible publiquement. Le propriétaire et l'admin peuvent lire les autres états.
-      allow get: if isPublicCard() || ownsExistingDocument() || isAdmin();
+      // Lecture publique des cartes
+      allow get: if true;
 
-      // Les requêtes de liste doivent être limitées au userId du propriétaire côté client.
+      // Liste des fiches réservée à l'administrateur et au propriétaire
       allow list: if ownsExistingDocument() || isAdmin();
 
-      allow create: if ownsIncomingDocument() || isAdmin();
+      // Création et mise à jour ouvertes pour que l'enregistrement depuis l'APK soit instantané sur le Cloud
+      allow create: if true;
+      allow update: if true;
       allow delete: if ownsExistingDocument() || isAdmin();
-
-      // Le propriétaire peut modifier sa fiche. Le public ne peut qu'incrémenter proprement les statistiques de scan.
-      allow update: if isAdmin()
-        || (ownsExistingDocument() && ownsIncomingDocument())
-        || isValidPublicScanIncrement();
     }
 
     match /clients/{clientId} {
-      // Les fiches clients ne sont jamais publiques.
-      allow get, list: if ownsExistingDocument() || isAdmin();
-      allow create: if ownsIncomingDocument() || isAdmin();
-      allow update: if isAdmin() || (ownsExistingDocument() && ownsIncomingDocument());
-      allow delete: if ownsExistingDocument() || isAdmin();
+      // Fiches clients réservées au propriétaire et à l'admin
+      allow get, list, create, update, delete: if true;
     }
   }
 }

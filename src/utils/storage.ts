@@ -938,12 +938,19 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
   if (syncToServer && db && updatedItem.publicId) {
     const firestoreUid = auth?.currentUser?.uid || currentUser?.uid || 'admin_agb_001';
     const cleanPublicId = updatedItem.publicId.trim().toUpperCase();
-    const cardRef = doc(db, 'cards', cleanPublicId);
     const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: firestoreUid });
-    setDoc(cardRef, {
+
+    setDoc(doc(db, 'cards', cleanPublicId), {
       ...cloudItem,
       updatedAt: serverTimestamp()
     }).catch(err => console.error("Firestore sync failed:", err));
+
+    if (updatedItem.publicId.trim() !== cleanPublicId) {
+      setDoc(doc(db, 'cards', updatedItem.publicId.trim()), {
+        ...cloudItem,
+        updatedAt: serverTimestamp()
+      }).catch(() => {});
+    }
   }
 
   return { item: updatedItem, isUpdate };
@@ -1348,8 +1355,16 @@ export function generateClientNumber(sequence: number): string {
 const configuredPublicUrl = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
 export const CANONICAL_GITHUB_PAGES_URL = `${(configuredPublicUrl || 'https://agibrico.github.io/agibrico.github.io-/').replace(/\/+$/, '')}/`;
 
-export function getPublicQRUrl(publicId: string, _card?: QRCodeItem): string {
-  return `${CANONICAL_GITHUB_PAGES_URL}#q/${encodeURIComponent(publicId.trim())}`;
+export function getPublicQRUrl(publicId: string, card?: QRCodeItem): string {
+  const cleanId = (publicId || '').trim();
+  const targetCard = card || getQRCodeByPublicId(cleanId);
+  if (targetCard) {
+    const payload = encodeCardPayload(targetCard);
+    if (payload && payload.length < 1800) {
+      return `${CANONICAL_GITHUB_PAGES_URL}#q/${encodeURIComponent(cleanId)}?d=${payload}`;
+    }
+  }
+  return `${CANONICAL_GITHUB_PAGES_URL}#q/${encodeURIComponent(cleanId)}`;
 }
 
 export function getClientById(id: string): ClientProfile | undefined {

@@ -700,13 +700,26 @@ export function getQRCodeByPublicId(publicId: string): QRCodeItem | undefined {
 
 export function encodeCardPayload(item: QRCodeItem): string {
   try {
+    const cleanContent = { ...(item.content || {}) };
+    if (cleanContent.photoUrl && cleanContent.photoUrl.startsWith('data:')) {
+      delete cleanContent.photoUrl;
+    }
+    if (cleanContent.logoUrl && cleanContent.logoUrl.startsWith('data:')) {
+      delete cleanContent.logoUrl;
+    }
+
+    const cleanStyling = { ...(item.styling || {}) };
+    if (cleanStyling.logoUrl && cleanStyling.logoUrl.startsWith('data:')) {
+      delete cleanStyling.logoUrl;
+    }
+
     const compact: any = {
       id: item.id,
       pid: item.publicId,
       tt: item.title,
       tp: item.type,
-      c: item.content,
-      st: item.styling
+      c: cleanContent,
+      st: cleanStyling
     };
     const jsonStr = JSON.stringify(compact);
     return encodeURIComponent(btoa(unescape(encodeURIComponent(jsonStr))));
@@ -1429,7 +1442,7 @@ export function getPublicQRUrl(publicId: string, card?: QRCodeItem): string {
   const targetCard = card || getQRCodeByPublicId(cleanId);
   if (targetCard) {
     const payload = encodeCardPayload(targetCard);
-    if (payload && payload.length < 1800) {
+    if (payload && payload.length < 2800) {
       return `${CANONICAL_GITHUB_PAGES_URL}#q/${encodeURIComponent(cleanId)}?d=${payload}`;
     }
   }

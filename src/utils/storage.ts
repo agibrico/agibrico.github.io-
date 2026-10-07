@@ -619,6 +619,97 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       bottomText: 'SCANNEZ MOI',
       cardBackgroundTheme: 'white_classic'
     }
+  },
+  {
+    id: 'qr_demo_12',
+    cardNumber: 'CARD-2026-0012',
+    publicId: 'ABD2026L',
+    clientId: 'client_008',
+    title: 'ABDOUL — Lunetterie',
+    type: 'BUSINESS_CARD',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-10-07T07:30:00.000Z',
+    updatedAt: '2026-10-07T07:30:00.000Z',
+    scanCount: 0,
+    tags: ['Carte Pro', 'ABDOUL', 'Lunetterie'],
+    content: {
+      firstName: 'ABDOUL',
+      fullName: 'ABDOUL',
+      jobTitle: 'Lunetterie',
+      company: 'Lunetterie Abdoul',
+      workPhone: '+225 07 48 80 68 68',
+      primaryPhone: '+225 07 48 80 68 68',
+      whatsappNumber: '+225 07 48 80 68 68',
+      address: 'YOPOUGON NON LOIN DE LA PHARMACIE SAINT ANDRÉ',
+      neighborhood: 'YOPOUGON NON LOIN DE LA PHARMACIE SAINT ANDRÉ',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      socialLinks: [
+        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250748806868', displayOrder: 1 },
+        { id: 's2', platform: 'phone', url: 'tel:+2250748806868', displayOrder: 2 }
+      ],
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#0f172a',
+      bgColor: '#ffffff',
+      transparentBg: false,
+      moduleStyle: 'rounded',
+      eyeStyle: 'rounded',
+      eyeColor: '#2563eb',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      bottomText: 'SCANNEZ MOI',
+      cardBackgroundTheme: 'matte_dark'
+    }
+  },
+  {
+    id: 'qr_demo_13',
+    cardNumber: 'CARD-2026-0013',
+    publicId: 'MOI2026S',
+    clientId: 'client_009',
+    title: 'MOÏSE DEBLOWAD SAHOU — Administrateur Principal des Services Financiers',
+    type: 'BUSINESS_CARD',
+    mode: 'dynamic',
+    status: 'active',
+    createdAt: '2026-10-07T07:30:00.000Z',
+    updatedAt: '2026-10-07T07:30:00.000Z',
+    scanCount: 0,
+    tags: ['Carte Pro', 'MOÏSE DEBLOWAD SAHOU', 'DGI'],
+    content: {
+      firstName: 'MOÏSE DEBLOWAD',
+      lastName: 'SAHOU',
+      fullName: 'MOÏSE DEBLOWAD SAHOU',
+      jobTitle: 'ADMINISTRATEUR PRINCIPAL DES SERVICES FINANCIERS',
+      company: 'Direction Générale des Impôts',
+      commercialName: 'Direction Générale des Impôts (DGI)',
+      department: 'Direction Générale des Impôts',
+      email: 'moisesahou@gmail.com',
+      workEmail: 'moisesahou@gmail.com',
+      city: 'Abidjan',
+      country: 'Côte d\'Ivoire',
+      operatingZone: 'Abidjan, Côte d\'Ivoire',
+      socialLinks: [
+        { id: 's1', platform: 'email', url: 'mailto:moisesahou@gmail.com', displayOrder: 1 }
+      ],
+      privacy: { hideAddress: false }
+    },
+    styling: {
+      fgColor: '#0f172a',
+      bgColor: '#ffffff',
+      transparentBg: false,
+      moduleStyle: 'rounded',
+      eyeStyle: 'rounded',
+      eyeColor: '#2563eb',
+      errorCorrectionLevel: 'H',
+      margin: 3,
+      size: 320,
+      bottomText: 'SCANNEZ MOI',
+      cardBackgroundTheme: 'navy_prestige'
+    }
+  }
   }
 ];
 
@@ -879,6 +970,44 @@ export async function fetchQRCodeByPublicId(publicId: string, _preferServer = tr
         setDoc(doc(db, 'cards', 'CYR2026Z'), removeUndefinedDeep(cyrilleItem), { merge: true }).catch(() => {});
       }
       return cyrilleItem;
+    }
+  }
+
+  // Universal alias fallback for ABDOUL
+  if (
+    upperDocId === 'ABD2026L' ||
+    upperDocId === 'ABDOUL' ||
+    upperDocId.includes('ABDOUL') ||
+    upperDocId.includes('LUNETTERIE') ||
+    upperDocId === 'CARD-2026-0012'
+  ) {
+    const abdoulItem = INITIAL_QR_ITEMS.find(i => i.publicId === 'ABD2026L');
+    if (abdoulItem) {
+      if (db) {
+        setDoc(doc(db, 'cards', upperDocId), removeUndefinedDeep(abdoulItem), { merge: true }).catch(() => {});
+        setDoc(doc(db, 'cards', 'ABD2026L'), removeUndefinedDeep(abdoulItem), { merge: true }).catch(() => {});
+      }
+      return abdoulItem;
+    }
+  }
+
+  // Universal alias fallback for MOÏSE DEBLOWAD SAHOU
+  if (
+    upperDocId === 'MOI2026S' ||
+    upperDocId === 'MOISE' ||
+    upperDocId === 'SAHOU' ||
+    upperDocId.includes('MOISE') ||
+    upperDocId.includes('SAHOU') ||
+    upperDocId.includes('DEBLOWAD') ||
+    upperDocId === 'CARD-2026-0013'
+  ) {
+    const moiseItem = INITIAL_QR_ITEMS.find(i => i.publicId === 'MOI2026S');
+    if (moiseItem) {
+      if (db) {
+        setDoc(doc(db, 'cards', upperDocId), removeUndefinedDeep(moiseItem), { merge: true }).catch(() => {});
+        setDoc(doc(db, 'cards', 'MOI2026S'), removeUndefinedDeep(moiseItem), { merge: true }).catch(() => {});
+      }
+      return moiseItem;
     }
   }
 

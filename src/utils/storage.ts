@@ -710,7 +710,6 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       cardBackgroundTheme: 'navy_prestige'
     }
   }
-  }
 ];
 
 export function getStoredQRCodes(): QRCodeItem[] {

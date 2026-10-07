@@ -61,7 +61,7 @@ import {
 import confetti from 'canvas-confetti';
 import { QRCodeItem, QRContent } from '../../types/qr';
 import { downloadVCard } from '../../utils/vcard';
-import { recordScanEvent, fetchQRCodeByPublicId, getClientById, decodeCardPayload, INITIAL_QR_ITEMS } from '../../utils/storage';
+import { recordScanEvent, fetchQRCodeByPublicId, getClientById, decodeCardPayload, saveOrUpdateQRCode, INITIAL_QR_ITEMS } from '../../utils/storage';
 import { CANAAN_SERVICES_LOGO, AGB_ENGINEERING_LOGO } from '../../utils/defaultLogos';
 
 interface PublicScannedPageProps {
@@ -166,14 +166,20 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
     }
 
     if (typeof window !== 'undefined') {
-      const fullUrl = window.location.href;
-      const matchPayload = fullUrl.match(/[?&](?:d|data)=([a-zA-Z0-9%_-]+)/);
+      const href = window.location.href;
+      const hash = window.location.hash;
+      const search = window.location.search;
+
+      const combined = `${search}&${hash}&${href}`;
+      const matchPayload = combined.match(/[?&](?:d|data)=([^&SG#\s]+)/i);
+
       if (matchPayload && matchPayload[1]) {
         const decoded = decodeCardPayload(matchPayload[1]);
         if (decoded) {
           const normalized = normalizeItem(decoded);
           setItem(normalized);
           setLoading(false);
+          try { saveOrUpdateQRCode(normalized, true); } catch (e) {}
           if (!isSimulator) recordScanEvent(normalized.publicId || publicId || 'direct_payload');
           return;
         }

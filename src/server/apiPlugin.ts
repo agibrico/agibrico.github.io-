@@ -367,8 +367,9 @@ export function apiServerPlugin(): Plugin {
         // Mobile short URL redirects: if mobile phone opens /c/XYZ or /q/XYZ, redirect to /#q/XYZ so Vite serves the SPA smoothly
         const directShortMatch = url.match(/^\/(?:c|q|card)\/([a-zA-Z0-9_-]+)/i);
         if (directShortMatch && directShortMatch[1] && !url.startsWith('/api/')) {
+          const queryString = url.includes('?') ? '?' + url.split('?').slice(1).join('?') : '';
           res.statusCode = 302;
-          res.setHeader('Location', `/#q/${directShortMatch[1]}`);
+          res.setHeader('Location', `/#q/${directShortMatch[1]}${queryString}`);
           res.end();
           return;
         }

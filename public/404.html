@@ -13,9 +13,11 @@
       // Match public card ID if accessed directly via /q/ID or /c/ID
       var qMatch = pathname.match(/\/(?:c|q|card)\/([a-zA-Z0-9_-]+)/i);
       if (qMatch && qMatch[1]) {
+        var searchStr = l.search ? l.search : '';
+        var hashStr = l.hash ? l.hash : '';
         l.replace(
           l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-          l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/#q/' + qMatch[1]
+          l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/#q/' + qMatch[1] + searchStr + hashStr
         );
       } else {
         l.replace(

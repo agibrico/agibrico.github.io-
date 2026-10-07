@@ -716,25 +716,61 @@ export function encodeCardPayload(item: QRCodeItem): string {
 }
 
 export function decodeCardPayload(payload: string): QRCodeItem | null {
+  if (!payload || typeof payload !== 'string') return null;
   try {
-    const raw = decodeURIComponent(escape(atob(decodeURIComponent(payload))));
-    const compact = JSON.parse(raw);
+    let cleanStr = payload.trim();
+
+    // First, try decoding URL percent-encoding if needed
+    try {
+      if (cleanStr.includes('%')) {
+        cleanStr = decodeURIComponent(cleanStr);
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    // Convert URL-safe base64 characters back to standard base64
+    cleanStr = cleanStr.replace(/-/g, '+').replace(/_/g, '/');
+
+    // Restore missing base64 padding '='
+    const mod = cleanStr.length % 4;
+    if (mod === 2) cleanStr += '==';
+    else if (mod === 3) cleanStr += '=';
+
+    // Decode base64 to string
+    let rawStr = '';
+    try {
+      rawStr = atob(cleanStr);
+    } catch (e) {
+      rawStr = atob(cleanStr.replace(/\s/g, ''));
+    }
+
+    // Try converting base64 string to UTF-8
+    let jsonStr = rawStr;
+    try {
+      jsonStr = decodeURIComponent(escape(rawStr));
+    } catch (e) {
+      jsonStr = rawStr;
+    }
+
+    const compact = JSON.parse(jsonStr);
     if (!compact) return null;
 
     return {
-      id: compact.id,
-      publicId: compact.pid,
-      title: compact.tt,
-      type: compact.tp,
+      id: compact.id || `qr_${(compact.pid || Date.now()).toString().toLowerCase()}`,
+      publicId: compact.pid || compact.publicId || 'PUBLIC_CARD',
+      title: compact.tt || compact.title || 'Fiche Visite',
+      type: compact.tp || compact.type || 'BUSINESS_CARD',
       mode: 'dynamic',
       status: 'active',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       scanCount: 0,
-      content: compact.c,
-      styling: compact.st
+      content: compact.c || compact.content || {},
+      styling: compact.st || compact.styling || {}
     };
   } catch (e) {
+    console.warn('Failed to decode card payload:', e);
     return null;
   }
 }
@@ -747,16 +783,38 @@ export async function fetchQRCodeByPublicId(publicId: string, _preferServer = tr
   const fetchFromFirestore = async (): Promise<QRCodeItem | null> => {
     if (!db) return null;
     try {
-      const cardSnap = await getDoc(doc(db, 'cards', upperDocId));
+      // 1. Direct doc by upperDocId
+      let cardSnap = await getDoc(doc(db, 'cards', upperDocId));
       if (cardSnap.exists()) {
         return normalizeFirestoreCard(cardSnap.data());
       }
+      // 2. Direct doc by cleanId
       if (cleanId !== upperDocId) {
-        const altSnap = await getDoc(doc(db, 'cards', cleanId));
-        if (altSnap.exists()) {
-          return normalizeFirestoreCard(altSnap.data());
+        cardSnap = await getDoc(doc(db, 'cards', cleanId));
+        if (cardSnap.exists()) {
+          return normalizeFirestoreCard(cardSnap.data());
         }
       }
+      // 3. Query collection where publicId == cleanId or upperDocId
+      const qPublic = query(collection(db, 'cards'), where('publicId', '==', cleanId));
+      const snapPublic = await getDocs(qPublic);
+      if (!snapPublic.empty) {
+        return normalizeFirestoreCard(snapPublic.docs[0].data());
+      }
+
+      const qPublicUpper = query(collection(db, 'cards'), where('publicId', '==', upperDocId));
+      const snapPublicUpper = await getDocs(qPublicUpper);
+      if (!snapPublicUpper.empty) {
+        return normalizeFirestoreCard(snapPublicUpper.docs[0].data());
+      }
+
+      // 4. Query collection where cardNumber == upperDocId
+      const qCardNo = query(collection(db, 'cards'), where('cardNumber', '==', upperDocId));
+      const snapCardNo = await getDocs(qCardNo);
+      if (!snapCardNo.empty) {
+        return normalizeFirestoreCard(snapCardNo.docs[0].data());
+      }
+
       return null;
     } catch (err) {
       console.warn('Firestore fetch failed', err);
@@ -766,7 +824,11 @@ export async function fetchQRCodeByPublicId(publicId: string, _preferServer = tr
 
   const serverFound = await fetchFromFirestore();
   const localFound = getQRCodeByPublicId(cleanId);
-  const demoItem = INITIAL_QR_ITEMS.find(i => i.publicId.toUpperCase() === upperDocId);
+  const demoItem = INITIAL_QR_ITEMS.find(i =>
+    i.publicId.toUpperCase() === upperDocId ||
+    (i.cardNumber && i.cardNumber.toUpperCase() === upperDocId) ||
+    i.id.toUpperCase() === upperDocId
+  );
 
   const candidateList = [serverFound, localFound, demoItem].filter((c): c is QRCodeItem => c != null);
 
@@ -777,7 +839,7 @@ export async function fetchQRCodeByPublicId(publicId: string, _preferServer = tr
       return currentTime > newestTime ? current : newest;
     });
 
-    if (db && latestItem && serverFound && latestItem !== serverFound) {
+    if (db && latestItem) {
       const cardRef = doc(db, 'cards', upperDocId);
       setDoc(cardRef, {
         ...removeUndefinedDeep(latestItem),
@@ -947,6 +1009,13 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
 
     if (updatedItem.publicId.trim() !== cleanPublicId) {
       setDoc(doc(db, 'cards', updatedItem.publicId.trim()), {
+        ...cloudItem,
+        updatedAt: serverTimestamp()
+      }).catch(() => {});
+    }
+
+    if (updatedItem.cardNumber) {
+      setDoc(doc(db, 'cards', updatedItem.cardNumber.trim().toUpperCase()), {
         ...cloudItem,
         updatedAt: serverTimestamp()
       }).catch(() => {});
@@ -1374,26 +1443,33 @@ export function getClientById(id: string): ClientProfile | undefined {
 export async function syncOfficialDataToCloud(): Promise<void> {
   const currentUser = getCurrentUser();
   if (!db) return;
+  const userId = auth?.currentUser?.uid || currentUser?.uid || 'admin_agb_001';
 
   try {
-    const officialPublicIds = ['CYR2026Z', 'CAN2026R', 'GPKNURUP', 'EV6MKMQU', 'AGB2026X'];
-    for (const pid of officialPublicIds) {
-      const card = INITIAL_QR_ITEMS.find(i => i.publicId === pid);
-      if (card) {
-        const cleanPid = pid.trim().toUpperCase();
+    const allCards = getStoredQRCodes();
+    for (const card of allCards) {
+      if (card.publicId) {
+        const cleanPid = card.publicId.trim().toUpperCase();
         await setDoc(doc(db, 'cards', cleanPid), {
           ...removeUndefinedDeep(card),
-          userId: currentUser?.uid || 'admin_agb_001',
+          userId: card.userId || userId,
           updatedAt: serverTimestamp()
         }, { merge: true });
 
-        // Synchroniser également les alias de la carte de Cyrille ZÉZÉ
+        if (card.cardNumber) {
+          await setDoc(doc(db, 'cards', card.cardNumber.trim().toUpperCase()), {
+            ...removeUndefinedDeep(card),
+            userId: card.userId || userId,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        }
+
         if (cleanPid === 'CYR2026Z') {
           const aliases = ['CYRILLEZEZE', 'ZEZE', 'CARD-2026-0011'];
           for (const alias of aliases) {
             await setDoc(doc(db, 'cards', alias), {
               ...removeUndefinedDeep(card),
-              userId: currentUser?.uid || 'admin_agb_001',
+              userId: userId,
               updatedAt: serverTimestamp()
             }, { merge: true });
           }
@@ -1401,7 +1477,7 @@ export async function syncOfficialDataToCloud(): Promise<void> {
       }
     }
   } catch (err) {
-    console.error('Official data sync failed:', err);
+    console.error('Data cloud sync failed:', err);
   }
 }
 

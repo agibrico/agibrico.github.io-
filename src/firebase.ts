@@ -1,6 +1,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
 
 const DEFAULT_FIREBASE_CONFIG = {
@@ -9,7 +10,7 @@ const DEFAULT_FIREBASE_CONFIG = {
   projectId: "agb-vcard-studio",
   storageBucket: "agb-vcard-studio.firebasestorage.app",
   messagingSenderId: "745747813194",
-  appId: "1:745747813194:android:ced0da8e7e33610d3827b3",
+  appId: "1:745747813194:web:agbvcardstudio001",
   measurementId: "G-745747813194"
 };
 
@@ -33,6 +34,7 @@ const isFirebaseConfigured = Boolean(
 let app: FirebaseApp | undefined;
 let db: Firestore | undefined;
 let auth: Auth | undefined;
+let storage: FirebaseStorage | undefined;
 let analytics: Analytics | null = null;
 
 try {
@@ -40,8 +42,8 @@ try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
+    storage = getStorage(app);
 
-    // Analytics is optional and is not supported in every browser/WebView.
     if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
       void isSupported()
         .then(supported => {
@@ -56,5 +58,5 @@ try {
   console.error('Initialisation Firebase impossible :', error);
 }
 
-export { db, auth, analytics, isFirebaseConfigured };
+export { db, auth, storage, analytics, isFirebaseConfigured };
 export default app;

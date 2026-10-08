@@ -148,25 +148,13 @@ export const QRScannabilityCheck: React.FC<QRScannabilityCheckProps> = ({
       content: content || {},
       styling: styling
     };
-    const url = getPublicQRUrl(publicId, currentItem);
+    const url = getPublicQRUrl(publicId);
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const publicUrl = publicId ? getPublicQRUrl(publicId, {
-    id: `qr_${publicId.toLowerCase()}`,
-    publicId,
-    title: title || 'Carte de Visite',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    scanCount: 0,
-    content: content || {},
-    styling: styling
-  }) : dataUrl;
+  const publicUrl = publicId ? getPublicQRUrl(publicId) : dataUrl;
 
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-xs space-y-5 sticky top-20 flex flex-col">

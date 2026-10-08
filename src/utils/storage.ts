@@ -15,7 +15,7 @@ import {
   ICG_AFRICA_LOGO, 
   SAINTE_VICTOIRE_LOGO, 
 } from './defaultLogos';
-import { db, auth } from '../firebase';
+import { db, auth, storage } from '../firebase';
 import {
   doc,
   setDoc,
@@ -27,18 +27,19 @@ import {
   deleteDoc,
   serverTimestamp
 } from 'firebase/firestore';
+import { processAndUploadCardMedia } from '../services/mediaStorage';
 
-const CARDS_STORAGE_KEY = 'smart_qr_items_v2';
-const CLIENTS_STORAGE_KEY = 'smart_qr_clients_v2';
-const SCANS_STORAGE_KEY = 'smart_qr_scans_v2';
-const HISTORY_STORAGE_KEY = 'smart_qr_history_v2';
 const DESIGNER_STORAGE_KEY = 'smart_qr_designer_v2';
 const DELETED_CARDS_KEY = 'smart_qr_deleted_ids_v1';
 const DELETED_CLIENTS_KEY = 'smart_qr_deleted_clients_v1';
 
 export function getCurrentUser(): { uid: string; email?: string | null; displayName?: string | null } | null {
   if (auth?.currentUser) {
-    return auth.currentUser;
+    return {
+      uid: auth.currentUser.uid,
+      email: auth.currentUser.email,
+      displayName: auth.currentUser.displayName
+    };
   }
   try {
     const raw = localStorage.getItem('agb_user_session');
@@ -48,6 +49,18 @@ export function getCurrentUser(): { uid: string; email?: string | null; displayN
     }
   } catch {}
   return null;
+}
+
+function getCardsStorageKey(): string {
+  const user = getCurrentUser();
+  const uid = user?.uid ? user.uid : 'anonymous';
+  return `smart_qr_items_v3_${uid}`;
+}
+
+function getClientsStorageKey(): string {
+  const user = getCurrentUser();
+  const uid = user?.uid ? user.uid : 'anonymous';
+  return `smart_qr_clients_v3_${uid}`;
 }
 
 function getDeletedIdSet(storageKey: string): Set<string> {
@@ -111,10 +124,8 @@ function removeUndefinedDeep<T>(value: T): T {
 
 export function resetLocalAppData(): void {
   [
-    CARDS_STORAGE_KEY,
-    CLIENTS_STORAGE_KEY,
-    SCANS_STORAGE_KEY,
-    HISTORY_STORAGE_KEY,
+    getCardsStorageKey(),
+    getClientsStorageKey(),
     DESIGNER_STORAGE_KEY,
     DELETED_CARDS_KEY,
     DELETED_CLIENTS_KEY
@@ -197,19 +208,16 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = import.meta.env.DEV ? [
 
 export function getStoredQRCodes(): QRCodeItem[] {
   try {
-    const data = localStorage.getItem(CARDS_STORAGE_KEY);
+    const key = getCardsStorageKey();
+    const data = localStorage.getItem(key);
     const deletedData = localStorage.getItem(DELETED_CARDS_KEY);
     const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
 
     let items: QRCodeItem[] = data ? JSON.parse(data) : [];
-
-    if (!Array.isArray(items)) {
-      items = [];
-    }
+    if (!Array.isArray(items)) items = [];
 
     let changed = false;
-
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV && items.length === 0) {
       INITIAL_QR_ITEMS.forEach(initItem => {
         if (!items.find(i => i && i.id === initItem.id) && !deletedIds.includes(initItem.id)) {
           items.push(initItem);
@@ -222,9 +230,7 @@ export function getStoredQRCodes(): QRCodeItem[] {
     items.forEach(item => {
       if (!item) return;
       const idKey = (item.publicId || item.id).trim().toUpperCase();
-      if (!uniqueMap.has(idKey)) {
-        uniqueMap.set(idKey, item);
-      }
+      if (!uniqueMap.has(idKey)) uniqueMap.set(idKey, item);
     });
 
     const deduplicated = Array.from(new Set(uniqueMap.values()));
@@ -238,13 +244,13 @@ export function getStoredQRCodes(): QRCodeItem[] {
     }
 
     return items;
-  } catch (e) {
+  } catch {
     return import.meta.env.DEV ? INITIAL_QR_ITEMS : [];
   }
 }
 
 export function saveQRCodes(items: QRCodeItem[]): void {
-  localStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(items));
+  localStorage.setItem(getCardsStorageKey(), JSON.stringify(items));
 }
 
 export function getQRCodeById(id: string): QRCodeItem | undefined {
@@ -258,29 +264,6 @@ export function getQRCodeByPublicId(publicId: string): QRCodeItem | undefined {
     (q && q.publicId && q.publicId.toLowerCase() === cleanId) ||
     (q && q.id && q.id.toLowerCase() === cleanId)
   );
-}
-
-export function encodeCardPayload(item: QRCodeItem): string {
-  try {
-    const cleanContent = { ...(item.content || {}) };
-    if (cleanContent.photoUrl && cleanContent.photoUrl.startsWith('data:')) delete cleanContent.photoUrl;
-    if (cleanContent.logoUrl && cleanContent.logoUrl.startsWith('data:')) delete cleanContent.logoUrl;
-
-    const cleanStyling = { ...(item.styling || {}) };
-    if (cleanStyling.logoUrl && cleanStyling.logoUrl.startsWith('data:')) delete cleanStyling.logoUrl;
-
-    const compact: any = {
-      id: item.id,
-      pid: item.publicId,
-      tt: item.title,
-      tp: item.type,
-      c: cleanContent,
-      st: cleanStyling
-    };
-    return encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(compact)))));
-  } catch (e) {
-    return '';
-  }
 }
 
 export function decodeCardPayload(payload: string): QRCodeItem | null {
@@ -321,7 +304,39 @@ export function decodeCardPayload(payload: string): QRCodeItem | null {
   }
 }
 
-// STRICT READ-ONLY fetch from Firestore
+export async function syncOfficialDataToCloud(): Promise<void> {
+  await syncAllToCloud();
+}
+
+export function buildPublicCardPayload(card: QRCodeItem): any {
+  const cloned = JSON.parse(JSON.stringify(card));
+  delete cloned.userId;
+  delete cloned.clientId;
+
+  if (cloned.content) {
+    delete cloned.content.accessPin;
+    delete cloned.content.accessMode;
+
+    const privacy = cloned.content.privacy || {};
+    if (privacy.hideAddress || privacy.isPublic === false) {
+      delete cloned.content.address;
+      delete cloned.content.neighborhood;
+      delete cloned.content.commune;
+    }
+    if (privacy.hideTaxInfo) {
+      delete cloned.content.businessTaxId;
+      delete cloned.content.businessRegisterNumber;
+    }
+  }
+
+  return removeUndefinedDeep({
+    ...cloned,
+    status: 'active',
+    publishedAt: new Date().toISOString()
+  });
+}
+
+// STRICT READ-ONLY fetch from publicCards
 export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeItem | null> {
   if (!publicId) return null;
   const cleanId = publicId.trim();
@@ -336,52 +351,31 @@ export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeIte
         if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", cleanId);
         return local;
       }
-      if (import.meta.env.DEV) console.warn("QR_PUBLIC_FETCH_NOT_FOUND", cleanId);
       return null;
     }
 
-    // 1. Direct getDoc
-    let cardSnap = await getDoc(doc(db, 'cards', upperDocId));
-    if (cardSnap.exists()) {
+    const pubSnap = await getDoc(doc(db, 'publicCards', upperDocId));
+    if (pubSnap.exists()) {
       if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", upperDocId);
-      return normalizeFirestoreCard(cardSnap.data());
+      return normalizeFirestoreCard(pubSnap.data());
     }
 
     if (cleanId !== upperDocId) {
-      cardSnap = await getDoc(doc(db, 'cards', cleanId));
-      if (cardSnap.exists()) {
+      const pubSnapClean = await getDoc(doc(db, 'publicCards', cleanId));
+      if (pubSnapClean.exists()) {
         if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", cleanId);
-        return normalizeFirestoreCard(cardSnap.data());
+        return normalizeFirestoreCard(pubSnapClean.data());
       }
     }
 
-    // 2. Query collection where publicId == cleanId
-    const qPublic = query(collection(db, 'cards'), where('publicId', '==', cleanId));
-    const snapPublic = await getDocs(qPublic);
-    if (!snapPublic.empty) {
-      if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", cleanId);
-      return normalizeFirestoreCard(snapPublic.docs[0].data());
-    }
-
-    const qPublicUpper = query(collection(db, 'cards'), where('publicId', '==', upperDocId));
-    const snapPublicUpper = await getDocs(qPublicUpper);
-    if (!snapPublicUpper.empty) {
-      if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", upperDocId);
-      return normalizeFirestoreCard(snapPublicUpper.docs[0].data());
-    }
-
     const localFallback = getQRCodeByPublicId(cleanId);
-    if (localFallback) {
-      if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", cleanId);
-      return localFallback;
-    }
+    if (localFallback) return localFallback;
 
     if (import.meta.env.DEV) console.warn("QR_PUBLIC_FETCH_NOT_FOUND", cleanId);
     return null;
   } catch (err) {
     if (import.meta.env.DEV) console.warn("QR_PUBLIC_FETCH_FAILED", err);
-    const localFallback = getQRCodeByPublicId(cleanId);
-    return localFallback || null;
+    return getQRCodeByPublicId(cleanId) || null;
   }
 }
 
@@ -418,10 +412,45 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
 export async function saveOrUpdateQRCode(
   item: QRCodeItem,
   syncToServer = true
-): Promise<{ item: QRCodeItem, isUpdate: boolean, cloudSynced: boolean, error?: any }> {
+): Promise<{
+  item: QRCodeItem;
+  isUpdate: boolean;
+  localSaved: boolean;
+  mediaUploaded: boolean;
+  cloudSynced: boolean;
+  publicPublished: boolean;
+  error?: any;
+}> {
   if (import.meta.env.DEV) console.log("QR_SAVE_LOCAL_OK", item.id);
+
+  let localSaved = false;
+  let mediaUploaded = false;
+  let cloudSynced = false;
+  let publicPublished = false;
+  let syncError: any = null;
+
   const items = getStoredQRCodes();
-  const cleanedContent = cleanQRCodeContent(item.content, item.type);
+  let existingIdx = items.findIndex(q => q.id === item.id);
+  if (existingIdx === -1 && item.publicId) {
+    existingIdx = items.findIndex(q => q.publicId === item.publicId);
+  }
+
+  const isUpdate = existingIdx >= 0;
+  const currentUser = getCurrentUser();
+  const uid = currentUser?.uid || auth?.currentUser?.uid;
+
+  let processedItem = item;
+  if (uid && storage) {
+    try {
+      if (import.meta.env.DEV) console.log("QR_FIRESTORE_SAVE_START - Uploading media");
+      processedItem = await processAndUploadCardMedia(item, uid);
+      mediaUploaded = true;
+    } catch (e) {
+      console.warn("Échec upload storage médias, conservation originaux:", e);
+    }
+  }
+
+  const cleanedContent = cleanQRCodeContent(processedItem.content, processedItem.type);
 
   const deletedData = localStorage.getItem(DELETED_CARDS_KEY);
   if (deletedData) {
@@ -431,20 +460,12 @@ export async function saveOrUpdateQRCode(
     }
   }
 
-  let existingIdx = items.findIndex(q => q.id === item.id);
-  if (existingIdx === -1 && item.publicId) {
-    existingIdx = items.findIndex(q => q.publicId === item.publicId);
-  }
-
-  const isUpdate = existingIdx >= 0;
-  const currentUser = getCurrentUser();
-
   const updatedItem: QRCodeItem = {
     ...(isUpdate ? items[existingIdx] : {}),
-    ...item,
+    ...processedItem,
     content: cleanedContent,
-    userId: currentUser?.uid || (isUpdate ? (items[existingIdx] as any).userId : item.userId),
-    createdAt: isUpdate ? items[existingIdx].createdAt : (item.createdAt || new Date().toISOString()),
+    userId: uid || (isUpdate ? (items[existingIdx] as any).userId : processedItem.userId),
+    createdAt: isUpdate ? items[existingIdx].createdAt : (processedItem.createdAt || new Date().toISOString()),
     updatedAt: new Date().toISOString()
   };
 
@@ -454,48 +475,82 @@ export async function saveOrUpdateQRCode(
     items.unshift(updatedItem);
   }
 
-  saveQRCodes(items);
+  try {
+    saveQRCodes(items);
+    localSaved = true;
+  } catch (e) {
+    syncError = e;
+  }
 
-  let cloudSynced = false;
-  let syncError: any = null;
+  // Size limit validation (< 900 KB)
+  const jsonString = JSON.stringify(updatedItem);
+  if (jsonString.length > 900 * 1024) {
+    return {
+      item: updatedItem,
+      isUpdate,
+      localSaved,
+      mediaUploaded,
+      cloudSynced: false,
+      publicPublished: false,
+      error: new Error("La taille de la carte dépasse la limite autorisée (~900 Ko). Réduisez la taille des images.")
+    };
+  }
 
   if (syncToServer && db && updatedItem.publicId) {
     if (import.meta.env.DEV) console.log("QR_FIRESTORE_SAVE_START", updatedItem.publicId);
     try {
-      const firestoreUid = auth?.currentUser?.uid || currentUser?.uid;
-      if (!firestoreUid) {
+      if (!uid) {
         throw new Error("Utilisateur non authentifié pour la synchronisation Cloud.");
       }
       const cleanPublicId = updatedItem.publicId.trim().toUpperCase();
-      const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: firestoreUid });
-      const cardRef = doc(db, 'cards', cleanPublicId);
+      const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: uid });
 
+      // 1. Save private card
+      const cardRef = doc(db, 'cards', cleanPublicId);
       await setDoc(cardRef, {
         ...cloudItem,
         updatedAt: serverTimestamp()
       });
+      cloudSynced = true;
 
-      // Verification after publication
-      const snap = await getDoc(cardRef);
+      // 2. Save public card payload in publicCards
+      const publicPayload = buildPublicCardPayload(updatedItem);
+      const publicRef = doc(db, 'publicCards', cleanPublicId);
+      await setDoc(publicRef, {
+        ...publicPayload,
+        updatedAt: serverTimestamp()
+      });
+
+      // 3. Verify publication
+      const snap = await getDoc(publicRef);
       if (snap.exists() && (snap.data()?.publicId?.toUpperCase() === cleanPublicId || snap.data()?.publicId === updatedItem.publicId)) {
-        cloudSynced = true;
+        publicPublished = true;
         if (import.meta.env.DEV) console.log("QR_FIRESTORE_SAVE_OK", cleanPublicId);
       } else {
-        cloudSynced = false;
-        syncError = new Error("Vérification Firestore échouée (document introuvable après setDoc)");
+        publicPublished = false;
+        syncError = new Error("Vérification Firestore échouée (publicCards introuvable après setDoc)");
         if (import.meta.env.DEV) console.warn("QR_FIRESTORE_SAVE_FAILED", syncError);
       }
     } catch (err) {
       cloudSynced = false;
+      publicPublished = false;
       syncError = err;
       if (import.meta.env.DEV) console.warn("QR_FIRESTORE_SAVE_FAILED", err);
     }
   }
 
-  return { item: updatedItem, isUpdate, cloudSynced, error: syncError };
+  return {
+    item: updatedItem,
+    isUpdate,
+    localSaved,
+    mediaUploaded,
+    cloudSynced,
+    publicPublished,
+    error: syncError
+  };
 }
 
-export function deleteQRCode(id: string): void {
+export async function deleteQRCodeAsync(id: string): Promise<void> {
   const items = getStoredQRCodes();
   const target = items.find(q => q.id === id);
 
@@ -507,10 +562,17 @@ export function deleteQRCode(id: string): void {
       localStorage.setItem(DELETED_CARDS_KEY, JSON.stringify(deletedIds));
     }
     saveQRCodes(items.filter(q => q.id !== id));
+
     if (db && auth?.currentUser && target.publicId) {
-      deleteDoc(doc(db, 'cards', target.publicId)).catch(err => console.error("Firestore delete failed:", err));
+      const cleanPid = target.publicId.trim().toUpperCase();
+      await deleteDoc(doc(db, 'cards', cleanPid)).catch(() => {});
+      await deleteDoc(doc(db, 'publicCards', cleanPid)).catch(() => {});
     }
   }
+}
+
+export function deleteQRCode(id: string): void {
+  void deleteQRCodeAsync(id);
 }
 
 export function duplicateQRCode(id: string): QRCodeItem | null {
@@ -536,7 +598,6 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
   try {
     const userId = auth.currentUser.uid;
     const deletedCardIds = getDeletedIdSet(DELETED_CARDS_KEY);
-    const deletedClientIds = getDeletedIdSet(DELETED_CLIENTS_KEY);
 
     const qCards = query(collection(db, 'cards'), where('userId', '==', userId));
     const cardSnaps = await getDocs(qCards);
@@ -558,6 +619,7 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
           if (db && mergedCards[idx].publicId) {
             const cleanPublicId = mergedCards[idx].publicId.trim().toUpperCase();
             setDoc(doc(db, 'cards', cleanPublicId), removeUndefinedDeep({ ...mergedCards[idx], userId })).catch(() => {});
+            setDoc(doc(db, 'publicCards', cleanPublicId), removeUndefinedDeep(buildPublicCardPayload(mergedCards[idx]))).catch(() => {});
           }
         }
       } else {
@@ -575,16 +637,15 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
 
 export function getStoredClients(): ClientProfile[] {
   try {
-    const data = localStorage.getItem(CLIENTS_STORAGE_KEY);
+    const data = localStorage.getItem(getClientsStorageKey());
     const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
     const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
 
     let clients: ClientProfile[] = data ? JSON.parse(data) : [];
-
     if (!Array.isArray(clients)) clients = [];
 
     let changed = false;
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV && clients.length === 0) {
       INITIAL_CLIENTS.forEach(initClient => {
         if (!clients.find(c => c && c.id === initClient.id) && !deletedIds.includes(initClient.id)) {
           clients.push(initClient);
@@ -610,16 +671,18 @@ export function getStoredClients(): ClientProfile[] {
     }
 
     return clients;
-  } catch (e) {
+  } catch {
     return import.meta.env.DEV ? INITIAL_CLIENTS : [];
   }
 }
 
 export function saveClients(clients: ClientProfile[]): void {
-  localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clients));
+  localStorage.setItem(getClientsStorageKey(), JSON.stringify(clients));
 }
 
-export async function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: string }): Promise<{ client: ClientProfile, isUpdate: boolean }> {
+export async function saveOrUpdateClient(
+  client: Partial<ClientProfile> & { id?: string }
+): Promise<{ client: ClientProfile; isUpdate: boolean }> {
   const clients = getStoredClients();
   if (client.id) {
     const deletedIds = getDeletedIdSet(DELETED_CLIENTS_KEY);
@@ -690,7 +753,7 @@ export function deleteClient(id: string): void {
 
 export function getStoredHistory(): HistoryLogItem[] {
   try {
-    const data = localStorage.getItem(HISTORY_STORAGE_KEY);
+    const data = localStorage.getItem('smart_qr_history_v2');
     const parsed = data ? JSON.parse(data) : [];
     return Array.isArray(parsed) ? parsed : [];
   } catch {
@@ -701,7 +764,7 @@ export function getStoredHistory(): HistoryLogItem[] {
 export function addHistoryLog(log: Omit<HistoryLogItem, 'id' | 'timestamp'>): void {
   const history = getStoredHistory();
   history.unshift({ ...log, id: `hist_${Date.now()}`, timestamp: new Date().toISOString() });
-  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history.slice(0, 100)));
+  localStorage.setItem('smart_qr_history_v2', JSON.stringify(history.slice(0, 100)));
 }
 
 export function getDesignerProfile(): DesignerProfile {
@@ -719,7 +782,7 @@ export function saveDesignerProfile(profile: DesignerProfile): void {
 
 export function getStoredScans(): ScanEvent[] {
   try {
-    const data = localStorage.getItem(SCANS_STORAGE_KEY);
+    const data = localStorage.getItem('smart_qr_scans_v2');
     const parsed = data ? JSON.parse(data) : [];
     return Array.isArray(parsed) ? parsed : [];
   } catch {
@@ -746,7 +809,7 @@ export function recordScanEvent(publicId: string): void {
 
   const scans = getStoredScans();
   scans.unshift(scan);
-  localStorage.setItem(SCANS_STORAGE_KEY, JSON.stringify(scans.slice(0, 500)));
+  localStorage.setItem('smart_qr_scans_v2', JSON.stringify(scans.slice(0, 500)));
 }
 
 export function generateSecurePublicId(): string {
@@ -780,9 +843,13 @@ if (import.meta.env.PROD && !configuredPublicUrl) {
 }
 const baseUrl = configuredPublicUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://agb-vcard-studio.web.app/');
 export const CANONICAL_PUBLIC_URL = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+export const CANONICAL_GITHUB_PAGES_URL = CANONICAL_PUBLIC_URL;
 
 export function getPublicQRUrl(publicId: string): string {
   const cleanId = (publicId || '').trim();
+  if (!cleanId) {
+    throw new Error("Identifiant public invalide pour le QR code dynamique.");
+  }
   return `${CANONICAL_PUBLIC_URL}#q/${encodeURIComponent(cleanId)}`;
 }
 
@@ -790,26 +857,45 @@ export function getClientById(id: string): ClientProfile | undefined {
   return getStoredClients().find(c => c.id === id);
 }
 
-export async function syncOfficialDataToCloud(): Promise<void> {
-  const currentUser = getCurrentUser();
-  if (!db || !currentUser) return;
-  const userId = auth?.currentUser?.uid || currentUser.uid;
+export async function syncAllToCloud(): Promise<{ cards: number, clients: number }> {
+  if (!db || !auth?.currentUser) throw new Error("Firebase non configuré ou utilisateur non authentifié.");
+  const userId = auth.currentUser.uid;
+  const cards = getStoredQRCodes();
+  const clients = getStoredClients();
+  let cardsSynced = 0;
+  let clientsSynced = 0;
 
-  try {
-    const allCards = getStoredQRCodes();
-    for (const card of allCards) {
-      if (card.publicId) {
-        const cleanPid = card.publicId.trim().toUpperCase();
-        await setDoc(doc(db, 'cards', cleanPid), {
-          ...removeUndefinedDeep(card),
-          userId: card.userId || userId,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-      }
+  for (const card of cards) {
+    if (card.publicId) {
+      const cleanPid = card.publicId.trim().toUpperCase();
+      await setDoc(doc(db, 'cards', cleanPid), {
+        ...removeUndefinedDeep(card),
+        userId,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      const publicPayload = buildPublicCardPayload(card);
+      await setDoc(doc(db, 'publicCards', cleanPid), {
+        ...publicPayload,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      cardsSynced++;
     }
-  } catch (err) {
-    console.error('Data cloud sync failed:', err);
   }
+
+  for (const client of clients) {
+    if (client.id) {
+      await setDoc(doc(db, 'clients', client.id), {
+        ...removeUndefinedDeep(client),
+        userId,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      clientsSynced++;
+    }
+  }
+
+  return { cards: cardsSynced, clients: clientsSynced };
 }
 
 export function exportFullDatabaseJSON(): string {
@@ -820,7 +906,7 @@ export function exportFullDatabaseJSON(): string {
     history: getStoredHistory(),
     designer: getDesignerProfile(),
     exportDate: new Date().toISOString(),
-    version: '2.0'
+    version: '3.0'
   };
   return JSON.stringify(dbExport, null, 2);
 }

@@ -213,7 +213,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
     reader.readAsDataURL(file);
   };
 
-  const handleSaveClientForm = (e: React.FormEvent) => {
+  const handleSaveClientForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingClient) return;
 
@@ -232,7 +232,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
       return;
     }
 
-    const { client: saved, isUpdate } = saveOrUpdateClient(editingClient);
+    const { client: saved, isUpdate } = await saveOrUpdateClient(editingClient);
     setIsModalOpen(false);
     setEditingClient(null);
     onRefresh();

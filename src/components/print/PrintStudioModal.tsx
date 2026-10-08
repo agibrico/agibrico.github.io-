@@ -47,7 +47,7 @@ export const PrintStudioModal: React.FC<PrintStudioModalProps> = ({
     if (!item) return;
 
     const canvas = document.createElement('canvas');
-    const encoded = item.mode === 'dynamic' ? getPublicQRUrl(item.publicId, item) : (item.content.websiteUrl || getPublicQRUrl(item.publicId, item));
+    const encoded = item.mode === 'dynamic' ? getPublicQRUrl(item.publicId) : (item.content.websiteUrl || getPublicQRUrl(item.publicId));
     
     renderQRToCanvas(canvas, encoded, item.styling, 3).then(() => {
       setQrDataUrl(canvas.toDataURL('image/png'));

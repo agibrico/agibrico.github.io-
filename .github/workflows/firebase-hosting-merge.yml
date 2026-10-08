@@ -43,7 +43,7 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.APPID }}
           VITE_PUBLIC_APP_URL: ${{ secrets.VITE_PUBLIC_APP_URL || 'https://agb-vcard-studio.web.app/' }}
 
-      - name: Deploy to Firebase Hosting & Firestore Rules
+      - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' }}
         with:
@@ -51,13 +51,14 @@ jobs:
           firebaseServiceAccount: ${{ env.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           projectId: agb-vcard-studio
-          target: hosting
 
       - name: Deploy Firestore Rules explicitly
         if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' }}
-        run: npx firebase-tools deploy --only firestore:rules --project agb-vcard-studio --non-interactive
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AGB_VCARD_STUDIO || secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > firebase-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=firebase-key.json
+          npx firebase-tools deploy --only firestore:rules --project agb-vcard-studio --non-interactive
+          rm -f firebase-key.json
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

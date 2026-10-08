@@ -56,7 +56,6 @@ export default function App() {
   useEffect(() => {
     // Load initial data
     refreshData();
-    syncOfficialDataToCloud().catch(() => {});
 
     // Accept hash links (#q/ID), clean routes (/q/ID) and query params (?id=ID).
     const checkPublicRoute = () => {
@@ -218,11 +217,16 @@ export default function App() {
     setCurrentTab('create');
   };
 
-  const handleSaveQR = (item: QRCodeItem) => {
-    saveOrUpdateQRCode(item);
+  const handleSaveQR = async (item: QRCodeItem) => {
+    const result = await saveOrUpdateQRCode(item);
     refreshData();
     setCurrentTab('cards');
     setEditingItem(null);
+    if (result.cloudSynced) {
+      alert("Carte enregistrée et publiée avec succès");
+    } else {
+      alert("Carte enregistrée localement, mais publication Cloud impossible. Vérifiez Internet puis réessayez.");
+    }
   };
 
   const handleDuplicateQR = (id: string) => {

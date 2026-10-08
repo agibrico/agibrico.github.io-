@@ -3,7 +3,6 @@ import {
   onAuthStateChanged,
   signOut,
   signInWithEmailAndPassword,
-  signInAnonymously,
   createUserWithEmailAndPassword,
   updateProfile
 } from 'firebase/auth';
@@ -48,16 +47,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const appUser: AppUser = {
           uid: currentUser.uid,
           email: currentUser.email,
-          displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Utilisateur'
+          displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Utilisateur',
+          isAdmin: currentUser.email === 'atsegillesbrice@gmail.com'
         };
         setUser(appUser);
         try { localStorage.setItem(SESSION_KEY, JSON.stringify(appUser)); } catch {}
       } else {
-        // Background sign in so Firestore writes from the app/APK are authenticated
-        signInWithEmailAndPassword(auth, 'atsegillesbrice@gmail.com', 'agibrico')
-          .catch(() => {
-            signInAnonymously(auth).catch(() => {});
-          });
+        setUser(null);
+        try { localStorage.removeItem(SESSION_KEY); } catch {}
       }
       setLoading(false);
     });
@@ -66,76 +63,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, pass: string) => {
-    const cleanEmail = email.trim().toLowerCase();
-
-    // Admin universal bypass check
-    if ((cleanEmail === 'admin@agibrico.com' || cleanEmail === 'atsegillesbrice@gmail.com' || cleanEmail === 'admin') && pass === 'agibrico') {
-      const adminUser: AppUser = {
-        uid: 'admin_agb_001',
-        email: cleanEmail.includes('@') ? cleanEmail : 'atsegillesbrice@gmail.com',
-        displayName: 'Gilles Brice ATSÉ (Admin)',
-        isAdmin: true
-      };
-      setUser(adminUser);
-      try { localStorage.setItem(SESSION_KEY, JSON.stringify(adminUser)); } catch {}
-
-      if (auth) {
-        signInWithEmailAndPassword(auth, 'atsegillesbrice@gmail.com', pass).catch(() => {});
-      }
-      return;
+    if (!auth) {
+      throw new Error("Firebase Auth non initialisé.");
     }
-
-    // Standard Firebase Auth login
-    if (auth) {
-      try {
-        const res = await signInWithEmailAndPassword(auth, email, pass);
-        const appUser: AppUser = {
-          uid: res.user.uid,
-          email: res.user.email,
-          displayName: res.user.displayName || res.user.email?.split('@')[0] || 'Utilisateur'
-        };
-        setUser(appUser);
-        try { localStorage.setItem(SESSION_KEY, JSON.stringify(appUser)); } catch {}
-        return;
-      } catch (err) {
-        console.warn('Firebase login failed, trying local fallback:', err);
-        throw err;
-      }
-    }
-
-    // Local user session fallback if auth is not initialized
-    const localUser: AppUser = {
-      uid: `user_${Date.now()}`,
-      email: email,
-      displayName: email.split('@')[0] || 'Utilisateur'
+    const res = await signInWithEmailAndPassword(auth, email.trim(), pass);
+    const appUser: AppUser = {
+      uid: res.user.uid,
+      email: res.user.email,
+      displayName: res.user.displayName || res.user.email?.split('@')[0] || 'Utilisateur',
+      isAdmin: res.user.email === 'atsegillesbrice@gmail.com'
     };
-    setUser(localUser);
-    try { localStorage.setItem(SESSION_KEY, JSON.stringify(localUser)); } catch {}
+    setUser(appUser);
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(appUser)); } catch {}
   };
 
   const signup = async (email: string, pass: string, name?: string) => {
-    if (auth) {
-      const res = await createUserWithEmailAndPassword(auth, email, pass);
-      if (name) {
-        await updateProfile(res.user, { displayName: name }).catch(() => {});
-      }
-      const appUser: AppUser = {
-        uid: res.user.uid,
-        email: res.user.email,
-        displayName: name || res.user.displayName || res.user.email?.split('@')[0] || 'Utilisateur'
-      };
-      setUser(appUser);
-      try { localStorage.setItem(SESSION_KEY, JSON.stringify(appUser)); } catch {}
-      return;
+    if (!auth) {
+      throw new Error("Firebase Auth non initialisé.");
     }
-
-    const localUser: AppUser = {
-      uid: `user_${Date.now()}`,
-      email,
-      displayName: name || email.split('@')[0] || 'Utilisateur'
+    const res = await createUserWithEmailAndPassword(auth, email.trim(), pass);
+    if (name) {
+      await updateProfile(res.user, { displayName: name }).catch(() => {});
+    }
+    const appUser: AppUser = {
+      uid: res.user.uid,
+      email: res.user.email,
+      displayName: name || res.user.displayName || res.user.email?.split('@')[0] || 'Utilisateur',
+      isAdmin: res.user.email === 'atsegillesbrice@gmail.com'
     };
-    setUser(localUser);
-    try { localStorage.setItem(SESSION_KEY, JSON.stringify(localUser)); } catch {}
+    setUser(appUser);
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(appUser)); } catch {}
   };
 
   const logout = async () => {

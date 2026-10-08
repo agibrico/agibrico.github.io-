@@ -25,9 +25,7 @@ import {
   query,
   where,
   deleteDoc,
-  updateDoc,
-  serverTimestamp,
-  increment
+  serverTimestamp
 } from 'firebase/firestore';
 
 const CARDS_STORAGE_KEY = 'smart_qr_items_v2';
@@ -37,8 +35,6 @@ const HISTORY_STORAGE_KEY = 'smart_qr_history_v2';
 const DESIGNER_STORAGE_KEY = 'smart_qr_designer_v2';
 const DELETED_CARDS_KEY = 'smart_qr_deleted_ids_v1';
 const DELETED_CLIENTS_KEY = 'smart_qr_deleted_clients_v1';
-
-const ADMIN_EMAIL = 'atsegillesbrice@gmail.com';
 
 export function getCurrentUser(): { uid: string; email?: string | null; displayName?: string | null } | null {
   if (auth?.currentUser) {
@@ -113,7 +109,6 @@ function removeUndefinedDeep<T>(value: T): T {
   return value;
 }
 
-
 export function resetLocalAppData(): void {
   [
     CARDS_STORAGE_KEY,
@@ -139,7 +134,7 @@ export const DEFAULT_DESIGNER_PROFILE: DesignerProfile = {
   defaultFormat: '85x55'
 };
 
-export const INITIAL_CLIENTS: ClientProfile[] = [
+export const INITIAL_CLIENTS: ClientProfile[] = import.meta.env.DEV ? [
   {
     id: 'client_001',
     clientNumber: 'CLT-2026-0001',
@@ -157,119 +152,10 @@ export const INITIAL_CLIENTS: ClientProfile[] = [
     socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250104000000', displayOrder: 1 }],
     createdAt: '2026-08-10T08:00:00.000Z',
     updatedAt: '2026-08-21T08:00:00.000Z'
-  },
-  {
-    id: 'client_002',
-    clientNumber: 'CLT-2026-0002',
-    firstName: 'Sarah',
-    lastName: 'KOUASSI',
-    fullName: 'Sarah KOUASSI',
-    company: 'ICG Africa',
-    jobTitle: 'Consultante en Stratégie & Finance',
-    industry: 'Finance',
-    logoUrl: ICG_AFRICA_LOGO,
-    primaryPhone: '+225 07 07 00 00 00',
-    email: 's.kouassi@icg-africa.com',
-    city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
-    socialLinks: [{ id: 's1', platform: 'linkedin', url: 'https://linkedin.com', displayOrder: 1 }],
-    createdAt: '2026-08-11T09:00:00.000Z',
-    updatedAt: '2026-08-22T09:00:00.000Z'
-  },
-  {
-    id: 'client_003',
-    clientNumber: 'CLT-2026-0003',
-    firstName: 'Marc',
-    lastName: 'BAMBA',
-    fullName: 'Dr. Marc BAMBA',
-    company: 'Centre Médical Sainte-Victoire',
-    jobTitle: 'Médecin Cardiologue',
-    industry: 'Santé',
-    logoUrl: SAINTE_VICTOIRE_LOGO,
-    primaryPhone: '+225 05 05 00 00 00',
-    email: 'dr.bamba@sainte-victoire.ci',
-    city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
-    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505000000', displayOrder: 1 }],
-    createdAt: '2026-08-12T10:00:00.000Z',
-    updatedAt: '2026-08-23T10:00:00.000Z'
-  },
-  {
-    id: 'client_004',
-    clientNumber: 'CLT-2026-0004',
-    firstName: 'Richmond',
-    lastName: 'DONGO',
-    fullName: 'Richmond DONGO',
-    company: 'Canaan Services',
-    jobTitle: 'Responsable Commercial',
-    industry: 'Imprimerie',
-    logoUrl: CANAAN_SERVICES_LOGO,
-    primaryPhone: '+225 07 08 07 66 90',
-    email: 'richmond.dongo@canaan.ci',
-    city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
-    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250708076690', displayOrder: 1 }],
-    createdAt: '2026-08-13T11:00:00.000Z',
-    updatedAt: '2026-09-23T08:30:00.000Z'
-  },
-  {
-    id: 'client_005',
-    clientNumber: 'CLT-2026-0005',
-    firstName: 'Christophe',
-    lastName: 'FODJO',
-    fullName: 'Christophe FODJO',
-    company: 'Canaan Services',
-    jobTitle: 'Gérant',
-    industry: 'Conseil',
-    primaryPhone: '+225 05 66 41 62 10',
-    email: 'c.fodjo@outlook.com',
-    city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
-    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250566416210', displayOrder: 1 }],
-    createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-23T08:30:00.000Z'
-  },
-  {
-    id: 'client_006',
-    clientNumber: 'CLT-2026-0006',
-    firstName: 'Eric Thierry',
-    lastName: 'OHOUEU',
-    fullName: 'Eric Thierry OHOUEU',
-    company: 'MINISTÈRE DE L\'EMPLOI, DE LA PROTECTION SOCIALE ET DE LA FORMATION PROFESSIONNELLE',
-    jobTitle: 'Administrateur du Travail et des Lois Sociales',
-    industry: 'Administration Publique',
-    primaryPhone: '+225 05 05 09 36 76',
-    email: 'eric.ohoueu@travail.gouv.ci',
-    city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
-    socialLinks: [
-      { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505093676', displayOrder: 1 },
-      { id: 's2', platform: 'phone', url: 'tel:+2250101202909', displayOrder: 2 }
-    ],
-    createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-07T18:00:00.000Z'
-  },
-  {
-    id: 'client_007',
-    clientNumber: 'CLT-2026-0007',
-    firstName: 'Cyrille',
-    lastName: 'ZÉZÉ',
-    fullName: 'Cyrille ZÉZÉ',
-    company: 'Cyrille ZÉZÉ Services',
-    jobTitle: 'CADREUR - PHOTOGRAPHE - VIDÉASTE PROFESSIONNEL ET IMPRESSION SUR TOUS TYPES DE SUPPORTS',
-    industry: 'Services & Photographie',
-    primaryPhone: '+225 07 07 35 52 41',
-    whatsappNumber: '+225 07 07 35 52 41',
-    email: 'cyrille.zeze@gmail.com',
-    city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
-    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707355241', displayOrder: 1 }],
-    createdAt: '2026-09-23T08:00:00.000Z',
-    updatedAt: '2026-10-06T10:10:00.000Z'
   }
-];
+] : [];
 
-export const INITIAL_QR_ITEMS: QRCodeItem[] = [
+export const INITIAL_QR_ITEMS: QRCodeItem[] = import.meta.env.DEV ? [
   {
     id: 'qr_demo_01',
     cardNumber: 'CARD-2026-0001',
@@ -306,411 +192,8 @@ export const INITIAL_QR_ITEMS: QRCodeItem[] = [
       cardBackgroundTheme: 'matte_dark',
       logoUrl: AGB_ENGINEERING_LOGO
     }
-  },
-  {
-    id: 'qr_demo_02',
-    cardNumber: 'CARD-2026-0002',
-    publicId: 'ICG2026S',
-    clientId: 'client_002',
-    title: 'Sarah KOUASSI — Consultante Finance',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-08-11T09:00:00.000Z',
-    updatedAt: '2026-08-22T09:00:00.000Z',
-    scanCount: 45,
-    content: {
-      fullName: 'Sarah KOUASSI',
-      jobTitle: 'Consultante en Stratégie & Finance',
-      company: 'ICG Africa',
-      logoUrl: ICG_AFRICA_LOGO,
-      primaryPhone: '+225 07 07 00 00 00',
-      email: 's.kouassi@icg-africa.com',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [{ id: 's1', platform: 'linkedin', url: 'https://linkedin.com', displayOrder: 1 }],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#1e293b',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'classy',
-      eyeStyle: 'square',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      cardBackgroundTheme: 'navy_prestige',
-      logoUrl: ICG_AFRICA_LOGO
-    }
-  },
-  {
-    id: 'qr_demo_03',
-    cardNumber: 'CARD-2026-0003',
-    publicId: 'MED2026M',
-    clientId: 'client_003',
-    title: 'Dr. Marc BAMBA — Cardiologie',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-08-12T10:00:00.000Z',
-    updatedAt: '2026-08-23T10:00:00.000Z',
-    scanCount: 120,
-    content: {
-      fullName: 'Dr. Marc BAMBA',
-      jobTitle: 'Médecin Cardiologue',
-      company: 'Centre Médical Sainte-Victoire',
-      logoUrl: SAINTE_VICTOIRE_LOGO,
-      primaryPhone: '+225 05 05 00 00 00',
-      email: 'dr.bamba@sainte-victoire.ci',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505000000', displayOrder: 1 }],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#0f766e',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      cardBackgroundTheme: 'emerald_luxe',
-      logoUrl: SAINTE_VICTOIRE_LOGO
-    }
-  },
-  {
-    id: 'qr_demo_04',
-    cardNumber: 'CARD-2026-0004',
-    publicId: 'CAN2026R',
-    clientId: 'client_004',
-    title: 'Richmond DONGO — Responsable Commercial',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-08-13T11:00:00.000Z',
-    updatedAt: '2026-09-23T08:30:00.000Z',
-    scanCount: 68,
-    content: {
-      fullName: 'Richmond DONGO',
-      jobTitle: 'Responsable Commercial',
-      company: 'Canaan Services',
-      logoUrl: CANAAN_SERVICES_LOGO,
-      primaryPhone: '+225 07 08 07 66 90',
-      whatsappNumber: '+225 07 08 07 66 90',
-      email: 'richmond.dongo@canaan.ci',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250708076690', displayOrder: 1 }],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#0f172a',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      eyeColor: '#d97706',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      bottomText: 'SCANNEZ POUR CONTACTER CANAAN SERVICES',
-      cardBackgroundTheme: 'emerald_luxe',
-      logoUrl: CANAAN_SERVICES_LOGO
-    }
-  },
-  {
-    id: 'qr_demo_05',
-    publicId: 'BOOK2026',
-    title: 'Livre Démo — L\'Art du Digital',
-    type: 'BOOK',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-08-14T12:00:00.000Z',
-    updatedAt: '2026-08-25T12:00:00.000Z',
-    scanCount: 12,
-    content: {
-      bookTitle: 'L\'Art du Digital',
-      bookAuthor: 'Gilles Brice ATSÉ',
-      bookSummary: 'Un guide complet sur la transformation digitale en Afrique.',
-      socialLinks: [],
-      privacy: { isPublic: true }
-    },
-    styling: { fgColor: '#2563eb', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', errorCorrectionLevel: 'M', margin: 2, size: 300 }
-  },
-  {
-    id: 'qr_demo_06',
-    publicId: 'EVENT2026',
-    title: 'Invitation — Gala AGB 2026',
-    type: 'EVENT',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-08-15T13:00:00.000Z',
-    updatedAt: '2026-08-26T13:00:00.000Z',
-    scanCount: 89,
-    content: {
-      eventTitle: 'Gala Annuel AGB Digital',
-      eventStartDate: '2026-12-20',
-      eventLocationName: 'Hôtel Ivoire, Abidjan',
-      socialLinks: [],
-      privacy: { isPublic: true }
-    },
-    styling: { fgColor: '#7c3aed', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', errorCorrectionLevel: 'M', margin: 2, size: 300 }
-  },
-  {
-    id: 'qr_demo_07',
-    publicId: 'SHOP2026',
-    title: 'Boutique — Canaan Gadgets',
-    type: 'SHOP',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-08-16T14:00:00.000Z',
-    updatedAt: '2026-08-27T14:00:00.000Z',
-    scanCount: 156,
-    content: {
-      commercialName: 'Canaan Gadgets',
-      shopIndustry: 'E-commerce & Personnalisation',
-      socialLinks: [],
-      privacy: { isPublic: true }
-    },
-    styling: { fgColor: '#059669', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', errorCorrectionLevel: 'M', margin: 2, size: 300 }
-  },
-  {
-    id: 'qr_demo_08',
-    publicId: 'LOC2026',
-    title: 'Localisation — Siège AGB',
-    type: 'LOCATION',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-08-17T15:00:00.000Z',
-    updatedAt: '2026-08-28T15:00:00.000Z',
-    scanCount: 34,
-    content: {
-      locationPlaceName: 'AGB Digital Headquarters',
-      address: 'Riviera 3, Abidjan',
-      latitude: 5.3599,
-      longitude: -3.9870,
-      socialLinks: [],
-      privacy: { isPublic: true }
-    },
-    styling: { fgColor: '#475569', bgColor: '#ffffff', transparentBg: false, moduleStyle: 'rounded', eyeStyle: 'rounded', errorCorrectionLevel: 'M', margin: 2, size: 300 }
-  },
-  {
-    id: 'qr_demo_09',
-    cardNumber: 'CARD-2026-0009',
-    publicId: 'EV6MKMQU',
-    clientId: 'client_005',
-    title: 'Christophe FODJO — Gérant',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-23T08:30:00.000Z',
-    scanCount: 12,
-    content: {
-      fullName: 'Christophe FODJO',
-      jobTitle: 'Gérant',
-      company: 'Canaan Services',
-      logoUrl: CANAAN_SERVICES_LOGO,
-      primaryPhone: '+225 05 66 41 62 10',
-      whatsappNumber: '+225 05 66 41 62 10',
-      email: 'c.fodjo@outlook.com',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250566416210', displayOrder: 1 }],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#0f172a',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      eyeColor: '#6366f1',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      bottomText: 'SCANNEZ POUR ENREGISTRER',
-      cardBackgroundTheme: 'white_classic',
-      logoUrl: CANAAN_SERVICES_LOGO
-    }
-  },
-  {
-    id: 'qr_demo_10',
-    cardNumber: 'CARD-2026-0010',
-    publicId: 'GPKNURUP',
-    clientId: 'client_006',
-    title: 'Eric Thierry OHOUEU — Administrateur du Travail',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-09-07T18:00:00.000Z',
-    updatedAt: '2026-09-23T08:30:00.000Z',
-    scanCount: 0,
-    content: {
-      fullName: 'Eric Thierry OHOUEU',
-      jobTitle: 'Administrateur du Travail et des Lois Sociales',
-      company: 'MINISTÈRE DE L\'EMPLOI, DE LA PROTECTION SOCIALE ET DE LA FORMATION PROFESSIONNELLE',
-      primaryPhone: '+225 05 05 09 36 76',
-      whatsappNumber: '+225 05 05 09 36 76',
-      email: 'eric.ohoueu@travail.gouv.ci',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [
-        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250505093676', displayOrder: 1 },
-        { id: 's2', platform: 'phone', url: 'tel:+2250101202909', displayOrder: 2 }
-      ],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#0f172a',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      eyeColor: '#6366f1',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      bottomText: 'SCANNEZ POUR ENREGISTRER',
-      cardBackgroundTheme: 'navy_prestige'
-    }
-  },
-  {
-    id: 'qr_demo_11',
-    cardNumber: 'CARD-2026-0011',
-    publicId: 'CYR2026Z',
-    clientId: 'client_007',
-    title: 'Cyrille ZÉZÉ — Cadreur - Photographe - Vidéaste',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-09-23T08:00:00.000Z',
-    updatedAt: '2026-10-06T10:10:00.000Z',
-    scanCount: 0,
-    content: {
-      firstName: 'Cyrille',
-      lastName: 'ZÉZÉ',
-      fullName: 'Cyrille ZÉZÉ',
-      jobTitle: 'CADREUR - PHOTOGRAPHE - VIDÉASTE PROFESSIONNEL ET IMPRESSION SUR TOUS TYPES DE SUPPORTS',
-      company: 'Cyrille ZÉZÉ Services',
-      primaryPhone: '+225 07 07 35 52 41',
-      whatsappNumber: '+225 07 07 35 52 41',
-      email: 'cyrille.zeze@gmail.com',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [
-        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250707355241', displayOrder: 1 }
-      ],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#0f172a',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      eyeColor: '#2563eb',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      bottomText: 'SCANNEZ MOI',
-      cardBackgroundTheme: 'white_classic'
-    }
-  },
-  {
-    id: 'qr_demo_12',
-    cardNumber: 'CARD-2026-0012',
-    publicId: 'ABD2026L',
-    clientId: 'client_008',
-    title: 'ABDOUL — Lunetterie',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-10-07T07:30:00.000Z',
-    updatedAt: '2026-10-07T07:30:00.000Z',
-    scanCount: 0,
-    tags: ['Carte Pro', 'ABDOUL', 'Lunetterie'],
-    content: {
-      firstName: 'ABDOUL',
-      fullName: 'ABDOUL',
-      jobTitle: 'Lunetterie',
-      company: 'Lunetterie Abdoul',
-      workPhone: '+225 07 48 80 68 68',
-      primaryPhone: '+225 07 48 80 68 68',
-      whatsappNumber: '+225 07 48 80 68 68',
-      address: 'YOPOUGON NON LOIN DE LA PHARMACIE SAINT ANDRÉ',
-      neighborhood: 'YOPOUGON NON LOIN DE LA PHARMACIE SAINT ANDRÉ',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [
-        { id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250748806868', displayOrder: 1 },
-        { id: 's2', platform: 'phone', url: 'tel:+2250748806868', displayOrder: 2 }
-      ],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#0f172a',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      eyeColor: '#2563eb',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      bottomText: 'SCANNEZ MOI',
-      cardBackgroundTheme: 'matte_dark'
-    }
-  },
-  {
-    id: 'qr_demo_13',
-    cardNumber: 'CARD-2026-0013',
-    publicId: 'MOI2026S',
-    clientId: 'client_009',
-    title: 'MOÏSE DEBLOWAD SAHOU — Administrateur Principal des Services Financiers',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-10-07T07:30:00.000Z',
-    updatedAt: '2026-10-07T07:30:00.000Z',
-    scanCount: 0,
-    tags: ['Carte Pro', 'MOÏSE DEBLOWAD SAHOU', 'DGI'],
-    content: {
-      firstName: 'MOÏSE DEBLOWAD',
-      lastName: 'SAHOU',
-      fullName: 'MOÏSE DEBLOWAD SAHOU',
-      jobTitle: 'ADMINISTRATEUR PRINCIPAL DES SERVICES FINANCIERS',
-      company: 'Direction Générale des Impôts',
-      commercialName: 'Direction Générale des Impôts (DGI)',
-      department: 'Direction Générale des Impôts',
-      email: 'moisesahou@gmail.com',
-      workEmail: 'moisesahou@gmail.com',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      operatingZone: 'Abidjan, Côte d\'Ivoire',
-      socialLinks: [
-        { id: 's1', platform: 'email', url: 'mailto:moisesahou@gmail.com', displayOrder: 1 }
-      ],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#0f172a',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      eyeColor: '#2563eb',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      bottomText: 'SCANNEZ MOI',
-      cardBackgroundTheme: 'navy_prestige'
-    }
   }
-];
+] : [];
 
 export function getStoredQRCodes(): QRCodeItem[] {
   try {
@@ -726,36 +209,25 @@ export function getStoredQRCodes(): QRCodeItem[] {
 
     let changed = false;
 
-    INITIAL_QR_ITEMS.forEach(initItem => {
-      if (!items.find(i => i && i.id === initItem.id) && !deletedIds.includes(initItem.id)) {
-        items.push(initItem);
-        changed = true;
-      }
-    });
+    if (import.meta.env.DEV) {
+      INITIAL_QR_ITEMS.forEach(initItem => {
+        if (!items.find(i => i && i.id === initItem.id) && !deletedIds.includes(initItem.id)) {
+          items.push(initItem);
+          changed = true;
+        }
+      });
+    }
 
     const uniqueMap = new Map<string, QRCodeItem>();
     items.forEach(item => {
       if (!item) return;
       const idKey = (item.publicId || item.id).trim().toUpperCase();
-      const personKey = item.type === 'BUSINESS_CARD' && (item.content?.fullName || item.title)
-        ? `PERSON_${(item.content?.fullName || item.title).trim().toLowerCase()}`
-        : null;
-
-      const existingById = uniqueMap.get(idKey);
-      const existingByPerson = personKey ? uniqueMap.get(personKey) : null;
-      const existing = existingById || existingByPerson;
-
-      if (!existing || new Date(item.updatedAt).getTime() >= new Date(existing.updatedAt).getTime()) {
-        if (existingByPerson && existingByPerson.publicId && existingByPerson.publicId !== item.publicId) {
-          uniqueMap.delete(existingByPerson.publicId.trim().toUpperCase());
-        }
+      if (!uniqueMap.has(idKey)) {
         uniqueMap.set(idKey, item);
-        if (personKey) uniqueMap.set(personKey, item);
       }
     });
 
     const deduplicated = Array.from(new Set(uniqueMap.values()));
-
     if (deduplicated.length !== items.length) {
       items = deduplicated;
       changed = true;
@@ -767,7 +239,7 @@ export function getStoredQRCodes(): QRCodeItem[] {
 
     return items;
   } catch (e) {
-    return INITIAL_QR_ITEMS;
+    return import.meta.env.DEV ? INITIAL_QR_ITEMS : [];
   }
 }
 
@@ -791,17 +263,11 @@ export function getQRCodeByPublicId(publicId: string): QRCodeItem | undefined {
 export function encodeCardPayload(item: QRCodeItem): string {
   try {
     const cleanContent = { ...(item.content || {}) };
-    if (cleanContent.photoUrl && cleanContent.photoUrl.startsWith('data:')) {
-      delete cleanContent.photoUrl;
-    }
-    if (cleanContent.logoUrl && cleanContent.logoUrl.startsWith('data:')) {
-      delete cleanContent.logoUrl;
-    }
+    if (cleanContent.photoUrl && cleanContent.photoUrl.startsWith('data:')) delete cleanContent.photoUrl;
+    if (cleanContent.logoUrl && cleanContent.logoUrl.startsWith('data:')) delete cleanContent.logoUrl;
 
     const cleanStyling = { ...(item.styling || {}) };
-    if (cleanStyling.logoUrl && cleanStyling.logoUrl.startsWith('data:')) {
-      delete cleanStyling.logoUrl;
-    }
+    if (cleanStyling.logoUrl && cleanStyling.logoUrl.startsWith('data:')) delete cleanStyling.logoUrl;
 
     const compact: any = {
       id: item.id,
@@ -811,8 +277,7 @@ export function encodeCardPayload(item: QRCodeItem): string {
       c: cleanContent,
       st: cleanStyling
     };
-    const jsonStr = JSON.stringify(compact);
-    return encodeURIComponent(btoa(unescape(encodeURIComponent(jsonStr))));
+    return encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(compact)))));
   } catch (e) {
     return '';
   }
@@ -822,39 +287,17 @@ export function decodeCardPayload(payload: string): QRCodeItem | null {
   if (!payload || typeof payload !== 'string') return null;
   try {
     let cleanStr = payload.trim();
-
-    // First, try decoding URL percent-encoding if needed
-    try {
-      if (cleanStr.includes('%')) {
-        cleanStr = decodeURIComponent(cleanStr);
-      }
-    } catch (e) {
-      // ignore
+    if (cleanStr.includes('%')) {
+      try { cleanStr = decodeURIComponent(cleanStr); } catch {}
     }
-
-    // Convert URL-safe base64 characters back to standard base64
     cleanStr = cleanStr.replace(/-/g, '+').replace(/_/g, '/');
-
-    // Restore missing base64 padding '='
     const mod = cleanStr.length % 4;
     if (mod === 2) cleanStr += '==';
     else if (mod === 3) cleanStr += '=';
 
-    // Decode base64 to string
-    let rawStr = '';
-    try {
-      rawStr = atob(cleanStr);
-    } catch (e) {
-      rawStr = atob(cleanStr.replace(/\s/g, ''));
-    }
-
-    // Try converting base64 string to UTF-8
+    let rawStr = atob(cleanStr);
     let jsonStr = rawStr;
-    try {
-      jsonStr = decodeURIComponent(escape(rawStr));
-    } catch (e) {
-      jsonStr = rawStr;
-    }
+    try { jsonStr = decodeURIComponent(escape(rawStr)); } catch {}
 
     const compact = JSON.parse(jsonStr);
     if (!compact) return null;
@@ -878,155 +321,79 @@ export function decodeCardPayload(payload: string): QRCodeItem | null {
   }
 }
 
-export async function fetchQRCodeByPublicId(publicId: string, _preferServer = true): Promise<QRCodeItem | null> {
+// STRICT READ-ONLY fetch from Firestore
+export async function fetchQRCodeByPublicId(publicId: string): Promise<QRCodeItem | null> {
   if (!publicId) return null;
   const cleanId = publicId.trim();
   const upperDocId = cleanId.toUpperCase();
 
-  const fetchFromFirestore = async (): Promise<QRCodeItem | null> => {
-    if (!db) return null;
-    try {
-      // 1. Direct doc by upperDocId
-      let cardSnap = await getDoc(doc(db, 'cards', upperDocId));
+  if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_START", cleanId);
+
+  try {
+    if (!db) {
+      const local = getQRCodeByPublicId(cleanId);
+      if (local) {
+        if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", cleanId);
+        return local;
+      }
+      if (import.meta.env.DEV) console.warn("QR_PUBLIC_FETCH_NOT_FOUND", cleanId);
+      return null;
+    }
+
+    // 1. Direct getDoc
+    let cardSnap = await getDoc(doc(db, 'cards', upperDocId));
+    if (cardSnap.exists()) {
+      if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", upperDocId);
+      return normalizeFirestoreCard(cardSnap.data());
+    }
+
+    if (cleanId !== upperDocId) {
+      cardSnap = await getDoc(doc(db, 'cards', cleanId));
       if (cardSnap.exists()) {
+        if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", cleanId);
         return normalizeFirestoreCard(cardSnap.data());
       }
-      // 2. Direct doc by cleanId
-      if (cleanId !== upperDocId) {
-        cardSnap = await getDoc(doc(db, 'cards', cleanId));
-        if (cardSnap.exists()) {
-          return normalizeFirestoreCard(cardSnap.data());
-        }
-      }
-      // 3. Query collection where publicId == cleanId or upperDocId
-      const qPublic = query(collection(db, 'cards'), where('publicId', '==', cleanId));
-      const snapPublic = await getDocs(qPublic);
-      if (!snapPublic.empty) {
-        return normalizeFirestoreCard(snapPublic.docs[0].data());
-      }
-
-      const qPublicUpper = query(collection(db, 'cards'), where('publicId', '==', upperDocId));
-      const snapPublicUpper = await getDocs(qPublicUpper);
-      if (!snapPublicUpper.empty) {
-        return normalizeFirestoreCard(snapPublicUpper.docs[0].data());
-      }
-
-      // 4. Query collection where cardNumber == upperDocId
-      const qCardNo = query(collection(db, 'cards'), where('cardNumber', '==', upperDocId));
-      const snapCardNo = await getDocs(qCardNo);
-      if (!snapCardNo.empty) {
-        return normalizeFirestoreCard(snapCardNo.docs[0].data());
-      }
-
-      return null;
-    } catch (err) {
-      console.warn('Firestore fetch failed', err);
-      return null;
-    }
-  };
-
-  const serverFound = await fetchFromFirestore();
-  const localFound = getQRCodeByPublicId(cleanId);
-  const demoItem = INITIAL_QR_ITEMS.find(i =>
-    i.publicId.toUpperCase() === upperDocId ||
-    (i.cardNumber && i.cardNumber.toUpperCase() === upperDocId) ||
-    i.id.toUpperCase() === upperDocId
-  );
-
-  const candidateList = [serverFound, localFound, demoItem].filter((c): c is QRCodeItem => c != null);
-
-  if (candidateList.length > 0) {
-    const latestItem = candidateList.reduce((newest, current) => {
-      const newestTime = Date.parse(newest.updatedAt || '') || 0;
-      const currentTime = Date.parse(current.updatedAt || '') || 0;
-      return currentTime > newestTime ? current : newest;
-    });
-
-    if (db && latestItem) {
-      const cardRef = doc(db, 'cards', upperDocId);
-      setDoc(cardRef, {
-        ...removeUndefinedDeep(latestItem),
-        updatedAt: serverTimestamp()
-      }, { merge: true }).catch(() => {});
     }
 
-    return latestItem;
+    // 2. Query collection where publicId == cleanId
+    const qPublic = query(collection(db, 'cards'), where('publicId', '==', cleanId));
+    const snapPublic = await getDocs(qPublic);
+    if (!snapPublic.empty) {
+      if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", cleanId);
+      return normalizeFirestoreCard(snapPublic.docs[0].data());
+    }
+
+    const qPublicUpper = query(collection(db, 'cards'), where('publicId', '==', upperDocId));
+    const snapPublicUpper = await getDocs(qPublicUpper);
+    if (!snapPublicUpper.empty) {
+      if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", upperDocId);
+      return normalizeFirestoreCard(snapPublicUpper.docs[0].data());
+    }
+
+    const localFallback = getQRCodeByPublicId(cleanId);
+    if (localFallback) {
+      if (import.meta.env.DEV) console.log("QR_PUBLIC_FETCH_OK", cleanId);
+      return localFallback;
+    }
+
+    if (import.meta.env.DEV) console.warn("QR_PUBLIC_FETCH_NOT_FOUND", cleanId);
+    return null;
+  } catch (err) {
+    if (import.meta.env.DEV) console.warn("QR_PUBLIC_FETCH_FAILED", err);
+    const localFallback = getQRCodeByPublicId(cleanId);
+    return localFallback || null;
   }
-
-  // Universal alias fallback for Cyrille ZÉZÉ
-  if (
-    upperDocId === 'CYR2026Z' ||
-    upperDocId === 'CYRILLEZEZE' ||
-    upperDocId === 'ZEZE' ||
-    upperDocId.includes('ZEZE') ||
-    upperDocId.includes('CYRILLE') ||
-    upperDocId === 'CARD-2026-0011'
-  ) {
-    const cyrilleItem = INITIAL_QR_ITEMS.find(i => i.publicId === 'CYR2026Z');
-    if (cyrilleItem) {
-      if (db) {
-        setDoc(doc(db, 'cards', upperDocId), removeUndefinedDeep(cyrilleItem), { merge: true }).catch(() => {});
-        setDoc(doc(db, 'cards', 'CYR2026Z'), removeUndefinedDeep(cyrilleItem), { merge: true }).catch(() => {});
-      }
-      return cyrilleItem;
-    }
-  }
-
-  // Universal alias fallback for ABDOUL
-  if (
-    upperDocId === 'ABD2026L' ||
-    upperDocId === 'ABDOUL' ||
-    upperDocId.includes('ABDOUL') ||
-    upperDocId.includes('LUNETTERIE') ||
-    upperDocId === 'CARD-2026-0012'
-  ) {
-    const abdoulItem = INITIAL_QR_ITEMS.find(i => i.publicId === 'ABD2026L');
-    if (abdoulItem) {
-      if (db) {
-        setDoc(doc(db, 'cards', upperDocId), removeUndefinedDeep(abdoulItem), { merge: true }).catch(() => {});
-        setDoc(doc(db, 'cards', 'ABD2026L'), removeUndefinedDeep(abdoulItem), { merge: true }).catch(() => {});
-      }
-      return abdoulItem;
-    }
-  }
-
-  // Universal alias fallback for MOÏSE DEBLOWAD SAHOU
-  if (
-    upperDocId === 'MOI2026S' ||
-    upperDocId === 'MOISE' ||
-    upperDocId === 'SAHOU' ||
-    upperDocId.includes('MOISE') ||
-    upperDocId.includes('SAHOU') ||
-    upperDocId.includes('DEBLOWAD') ||
-    upperDocId === 'CARD-2026-0013'
-  ) {
-    const moiseItem = INITIAL_QR_ITEMS.find(i => i.publicId === 'MOI2026S');
-    if (moiseItem) {
-      if (db) {
-        setDoc(doc(db, 'cards', upperDocId), removeUndefinedDeep(moiseItem), { merge: true }).catch(() => {});
-        setDoc(doc(db, 'cards', 'MOI2026S'), removeUndefinedDeep(moiseItem), { merge: true }).catch(() => {});
-      }
-      return moiseItem;
-    }
-  }
-
-  return null;
 }
 
 export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent {
   if (!content) return {} as QRContent;
-
   const deepClean = (obj: any): any => {
     if (obj === null || obj === undefined) return undefined;
     if (typeof obj !== 'object') return obj === "" ? undefined : obj;
-
     if (Array.isArray(obj)) {
-      const arr = obj.map(deepClean).filter(v =>
-        v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : true)
-      );
+      const arr = obj.map(deepClean).filter(v => v !== undefined && v !== null);
       return arr.length > 0 ? arr : undefined;
     }
-
     const res: any = {};
     let hasKeys = false;
     for (const key in obj) {
@@ -1036,7 +403,6 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
           hasKeys = true;
           continue;
         }
-
         const val = deepClean(obj[key]);
         if (val !== undefined) {
           res[key] = val;
@@ -1046,61 +412,14 @@ export function cleanQRCodeContent(content: QRContent, type: QRType): QRContent 
     }
     return hasKeys ? res : undefined;
   };
-
-  const initialCleaned = deepClean(content) || {};
-  const cleaned: any = {};
-
-  const typePrefixMap: Record<string, string> = {
-    'BOOK': 'book',
-    'EVENT': 'event',
-    'SHOP': 'shop',
-    'COMPANY': 'company',
-    'SOCIAL': 'social',
-    'PRODUCT': 'product',
-    'WEB_LINK': 'link',
-    'LOCATION': 'location',
-  };
-
-  const currentPrefix = typePrefixMap[type];
-  const otherPrefixes = Object.values(typePrefixMap).filter(p => p !== currentPrefix);
-
-  for (const key in initialCleaned) {
-    const value = initialCleaned[key];
-
-    const commonFields = [
-      'firstName', 'lastName', 'fullName', 'civility', 'middleName', 'jobTitle', 'profession',
-      'company', 'department', 'industry', 'slogan', 'bio', 'photoUrl', 'logoUrl', 'bannerUrl',
-      'primaryPhone', 'secondaryPhone', 'workPhone', 'whatsappNumber', 'email', 'workEmail',
-      'websiteUrl', 'address', 'neighborhood', 'commune', 'city', 'region', 'postalCode', 'country',
-      'latitude', 'longitude', 'privacy', 'customSections', 'customFields', 'openingHours', 'socialLinks'
-    ];
-
-    if (commonFields.includes(key)) {
-      cleaned[key] = value;
-      continue;
-    }
-
-    if (key === 'productSheetType' || key === 'menuItems' || key === 'serviceName') {
-      if (type === 'PRODUCT') cleaned[key] = value;
-      continue;
-    }
-
-    if (currentPrefix && key.startsWith(currentPrefix)) {
-      cleaned[key] = value;
-      continue;
-    }
-
-    if (otherPrefixes.some(p => key.startsWith(p))) {
-      continue;
-    }
-
-    cleaned[key] = value;
-  }
-
-  return cleaned as QRContent;
+  return (deepClean(content) || {}) as QRContent;
 }
 
-export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { item: QRCodeItem, isUpdate: boolean } {
+export async function saveOrUpdateQRCode(
+  item: QRCodeItem,
+  syncToServer = true
+): Promise<{ item: QRCodeItem, isUpdate: boolean, cloudSynced: boolean, error?: any }> {
+  if (import.meta.env.DEV) console.log("QR_SAVE_LOCAL_OK", item.id);
   const items = getStoredQRCodes();
   const cleanedContent = cleanQRCodeContent(item.content, item.type);
 
@@ -1118,7 +437,6 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
   }
 
   const isUpdate = existingIdx >= 0;
-
   const currentUser = getCurrentUser();
 
   const updatedItem: QRCodeItem = {
@@ -1138,32 +456,43 @@ export function saveOrUpdateQRCode(item: QRCodeItem, syncToServer = true): { ite
 
   saveQRCodes(items);
 
+  let cloudSynced = false;
+  let syncError: any = null;
+
   if (syncToServer && db && updatedItem.publicId) {
-    const firestoreUid = auth?.currentUser?.uid || currentUser?.uid || 'admin_agb_001';
-    const cleanPublicId = updatedItem.publicId.trim().toUpperCase();
-    const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: firestoreUid });
+    if (import.meta.env.DEV) console.log("QR_FIRESTORE_SAVE_START", updatedItem.publicId);
+    try {
+      const firestoreUid = auth?.currentUser?.uid || currentUser?.uid;
+      if (!firestoreUid) {
+        throw new Error("Utilisateur non authentifié pour la synchronisation Cloud.");
+      }
+      const cleanPublicId = updatedItem.publicId.trim().toUpperCase();
+      const cloudItem = removeUndefinedDeep({ ...updatedItem, userId: firestoreUid });
+      const cardRef = doc(db, 'cards', cleanPublicId);
 
-    setDoc(doc(db, 'cards', cleanPublicId), {
-      ...cloudItem,
-      updatedAt: serverTimestamp()
-    }).catch(err => console.error("Firestore sync failed:", err));
-
-    if (updatedItem.publicId.trim() !== cleanPublicId) {
-      setDoc(doc(db, 'cards', updatedItem.publicId.trim()), {
+      await setDoc(cardRef, {
         ...cloudItem,
         updatedAt: serverTimestamp()
-      }).catch(() => {});
-    }
+      });
 
-    if (updatedItem.cardNumber) {
-      setDoc(doc(db, 'cards', updatedItem.cardNumber.trim().toUpperCase()), {
-        ...cloudItem,
-        updatedAt: serverTimestamp()
-      }).catch(() => {});
+      // Verification after publication
+      const snap = await getDoc(cardRef);
+      if (snap.exists() && (snap.data()?.publicId?.toUpperCase() === cleanPublicId || snap.data()?.publicId === updatedItem.publicId)) {
+        cloudSynced = true;
+        if (import.meta.env.DEV) console.log("QR_FIRESTORE_SAVE_OK", cleanPublicId);
+      } else {
+        cloudSynced = false;
+        syncError = new Error("Vérification Firestore échouée (document introuvable après setDoc)");
+        if (import.meta.env.DEV) console.warn("QR_FIRESTORE_SAVE_FAILED", syncError);
+      }
+    } catch (err) {
+      cloudSynced = false;
+      syncError = err;
+      if (import.meta.env.DEV) console.warn("QR_FIRESTORE_SAVE_FAILED", err);
     }
   }
 
-  return { item: updatedItem, isUpdate };
+  return { item: updatedItem, isUpdate, cloudSynced, error: syncError };
 }
 
 export function deleteQRCode(id: string): void {
@@ -1197,7 +526,7 @@ export function duplicateQRCode(id: string): QRCodeItem | null {
     scanCount: 0,
     lastScannedAt: undefined
   };
-  saveOrUpdateQRCode(duplicate);
+  void saveOrUpdateQRCode(duplicate);
   return duplicate;
 }
 
@@ -1226,7 +555,6 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
         if (serverUpdatedAt >= localUpdatedAt) {
           mergedCards[idx] = { ...mergedCards[idx], ...sCard };
         } else {
-          // Push newer local card from APK to Cloud Firestore
           if (db && mergedCards[idx].publicId) {
             const cleanPublicId = mergedCards[idx].publicId.trim().toUpperCase();
             setDoc(doc(db, 'cards', cleanPublicId), removeUndefinedDeep({ ...mergedCards[idx], userId })).catch(() => {});
@@ -1237,40 +565,7 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
       }
     });
 
-    // Push any local-only card created in APK to Cloud Firestore
-    localCards.forEach(lCard => {
-      const existsOnServer = serverCards.some(sc => sc.id === lCard.id || sc.publicId === lCard.publicId);
-      if (!existsOnServer && lCard.publicId && db) {
-        const cleanPublicId = lCard.publicId.trim().toUpperCase();
-        setDoc(doc(db, 'cards', cleanPublicId), removeUndefinedDeep({ ...lCard, userId })).catch(() => {});
-      }
-    });
-
     saveQRCodes(mergedCards);
-
-    const qClients = query(collection(db, 'clients'), where('userId', '==', userId));
-    const clientSnaps = await getDocs(qClients);
-    const serverClients = clientSnaps.docs
-      .map(snapshot => normalizeFirestoreClient(snapshot.data()))
-      .filter(client => !deletedClientIds.has(client.id));
-
-    const localClients = getStoredClients().filter(client => !deletedClientIds.has(client.id) && (!client.userId || client.userId === userId));
-    const mergedClients = [...localClients];
-
-    serverClients.forEach(sClient => {
-      const idx = mergedClients.findIndex(lc => lc.id === sClient.id);
-      if (idx >= 0) {
-        const localUpdatedAt = Date.parse(mergedClients[idx].updatedAt || '') || 0;
-        const serverUpdatedAt = Date.parse(sClient.updatedAt || '') || 0;
-        if (serverUpdatedAt >= localUpdatedAt) {
-          mergedClients[idx] = { ...mergedClients[idx], ...sClient };
-        }
-      } else {
-        mergedClients.push(sClient);
-      }
-    });
-
-    saveClients(mergedClients);
     return mergedCards;
   } catch (err) {
     console.error('Sync error:', err);
@@ -1286,39 +581,25 @@ export function getStoredClients(): ClientProfile[] {
 
     let clients: ClientProfile[] = data ? JSON.parse(data) : [];
 
-    if (!Array.isArray(clients)) {
-      clients = [];
-    }
+    if (!Array.isArray(clients)) clients = [];
 
     let changed = false;
-    INITIAL_CLIENTS.forEach(initClient => {
-      if (!clients.find(c => c && c.id === initClient.id) && !deletedIds.includes(initClient.id)) {
-        clients.push(initClient);
-        changed = true;
-      }
-    });
+    if (import.meta.env.DEV) {
+      INITIAL_CLIENTS.forEach(initClient => {
+        if (!clients.find(c => c && c.id === initClient.id) && !deletedIds.includes(initClient.id)) {
+          clients.push(initClient);
+          changed = true;
+        }
+      });
+    }
 
     const uniqueMap = new Map<string, ClientProfile>();
     clients.forEach(c => {
       if (!c) return;
-      const idKey = c.id;
-      const nameKey = (c.fullName || `${c.firstName || ''} ${c.lastName || ''}`).trim().toLowerCase();
-
-      const existingById = uniqueMap.get(idKey);
-      const existingByName = nameKey ? uniqueMap.get(`NAME_${nameKey}`) : null;
-      const existing = existingById || existingByName;
-
-      if (!existing || new Date(c.updatedAt).getTime() >= new Date(existing.updatedAt).getTime()) {
-        if (existingByName && existingByName.id !== c.id) {
-          uniqueMap.delete(existingByName.id);
-        }
-        uniqueMap.set(idKey, c);
-        if (nameKey) uniqueMap.set(`NAME_${nameKey}`, c);
-      }
+      if (!uniqueMap.has(c.id)) uniqueMap.set(c.id, c);
     });
 
     const deduplicated = Array.from(new Set(uniqueMap.values()));
-
     if (deduplicated.length !== clients.length) {
       clients = deduplicated;
       changed = true;
@@ -1330,20 +611,15 @@ export function getStoredClients(): ClientProfile[] {
 
     return clients;
   } catch (e) {
-    return INITIAL_CLIENTS;
+    return import.meta.env.DEV ? INITIAL_CLIENTS : [];
   }
-}
-
-export function deduplicateData(): void {
-  getStoredClients();
-  getStoredQRCodes();
 }
 
 export function saveClients(clients: ClientProfile[]): void {
   localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clients));
 }
 
-export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: string }): { client: ClientProfile, isUpdate: boolean } {
+export async function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: string }): Promise<{ client: ClientProfile, isUpdate: boolean }> {
   const clients = getStoredClients();
   if (client.id) {
     const deletedIds = getDeletedIdSet(DELETED_CLIENTS_KEY);
@@ -1353,7 +629,6 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
   }
 
   const existingIdx = client.id ? clients.findIndex(c => c.id === client.id) : -1;
-
   const isUpdate = existingIdx >= 0;
   const existing = isUpdate ? clients[existingIdx] : undefined;
   const id = existing?.id || client.id || `client_${Date.now()}`;
@@ -1384,55 +659,17 @@ export function saveOrUpdateClient(client: Partial<ClientProfile> & { id?: strin
   else clients.unshift(fullClient);
   saveClients(clients);
 
-  // Propagate updated client details to associated cards and sync to Cloud Firestore
-  try {
-    const allCards = getStoredQRCodes();
-    allCards.forEach(card => {
-      if (
-        card.clientId === fullClient.id ||
-        (card.content?.fullName && card.content.fullName.trim().toLowerCase() === fullClient.fullName.trim().toLowerCase())
-      ) {
-        const updatedCard: QRCodeItem = {
-          ...card,
-          clientId: fullClient.id,
-          title: `${fullClient.fullName} — ${fullClient.jobTitle || fullClient.company || 'Carte Pro'}`,
-          content: {
-            ...card.content,
-            firstName: fullClient.firstName || card.content.firstName,
-            lastName: fullClient.lastName || card.content.lastName,
-            fullName: fullClient.fullName || card.content.fullName,
-            company: fullClient.company || card.content.company,
-            jobTitle: fullClient.jobTitle || card.content.jobTitle,
-            primaryPhone: fullClient.primaryPhone || card.content.primaryPhone,
-            secondaryPhone: fullClient.secondaryPhone || card.content.secondaryPhone,
-            whatsappNumber: fullClient.whatsappNumber || card.content.whatsappNumber,
-            workPhone: fullClient.workPhone || card.content.workPhone,
-            email: fullClient.email || card.content.email,
-            city: fullClient.city || card.content.city,
-            country: fullClient.country || card.content.country,
-            logoUrl: fullClient.logoUrl || card.content.logoUrl,
-            photoUrl: fullClient.photoUrl || card.content.photoUrl,
-            socialLinks: fullClient.socialLinks?.length ? fullClient.socialLinks : card.content.socialLinks,
-            servicesOffered: fullClient.servicesList?.length ? fullClient.servicesList : card.content.servicesOffered
-          },
-          updatedAt: now
-        };
-        saveOrUpdateQRCode(updatedCard, true);
-      }
-    });
-  } catch (err) {
-    console.warn("Card propagation error:", err);
-  }
-
   const activeUser = getCurrentUser();
   if (db && fullClient.id) {
-    const firestoreUid = auth?.currentUser?.uid || activeUser?.uid || 'admin_agb_001';
-    const clientRef = doc(db, 'clients', fullClient.id);
-    const cloudClient = removeUndefinedDeep({ ...fullClient, userId: firestoreUid });
-    setDoc(clientRef, {
-      ...cloudClient,
-      updatedAt: serverTimestamp()
-    }).catch(err => console.error('Client Firestore sync failed:', err));
+    const firestoreUid = auth?.currentUser?.uid || activeUser?.uid;
+    if (firestoreUid) {
+      const clientRef = doc(db, 'clients', fullClient.id);
+      const cloudClient = removeUndefinedDeep({ ...fullClient, userId: firestoreUid });
+      await setDoc(clientRef, {
+        ...cloudClient,
+        updatedAt: serverTimestamp()
+      }).catch(err => console.error('Client Firestore sync failed:', err));
+    }
   }
 
   return { client: fullClient, isUpdate };
@@ -1456,7 +693,7 @@ export function getStoredHistory(): HistoryLogItem[] {
     const data = localStorage.getItem(HISTORY_STORAGE_KEY);
     const parsed = data ? JSON.parse(data) : [];
     return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }
@@ -1485,26 +722,16 @@ export function getStoredScans(): ScanEvent[] {
     const data = localStorage.getItem(SCANS_STORAGE_KEY);
     const parsed = data ? JSON.parse(data) : [];
     return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }
 
 export function recordScanEvent(publicId: string): void {
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-  const deviceType: ScanEvent['deviceType'] = /iPad|Tablet|PlayBook|Silk/i.test(ua)
-    ? 'tablet'
-    : /Mobi|Android|iPhone|iPod/i.test(ua) ? 'mobile' : 'desktop';
-  const os: ScanEvent['os'] = /iPhone|iPad|iPod/i.test(ua) ? 'iOS'
-    : /Android/i.test(ua) ? 'Android'
-    : /Windows/i.test(ua) ? 'Windows'
-    : /Macintosh|Mac OS X/i.test(ua) ? 'macOS'
-    : /Linux/i.test(ua) ? 'Linux' : 'Other';
-  const browser: ScanEvent['browser'] = /SamsungBrowser/i.test(ua) ? 'Samsung Internet'
-    : /Edg\//i.test(ua) ? 'Edge'
-    : /Firefox\//i.test(ua) ? 'Firefox'
-    : /Chrome\//i.test(ua) ? 'Chrome'
-    : /Safari\//i.test(ua) ? 'Safari' : 'Other';
+  const deviceType: ScanEvent['deviceType'] = /iPad|Tablet|PlayBook|Silk/i.test(ua) ? 'tablet' : /Mobi|Android|iPhone|iPod/i.test(ua) ? 'mobile' : 'desktop';
+  const os: ScanEvent['os'] = /iPhone|iPad|iPod/i.test(ua) ? 'iOS' : /Android/i.test(ua) ? 'Android' : /Windows/i.test(ua) ? 'Windows' : 'Other';
+  const browser: ScanEvent['browser'] = /Chrome\//i.test(ua) ? 'Chrome' : /Safari\//i.test(ua) ? 'Safari' : 'Other';
 
   const scan: ScanEvent = {
     id: `scan_${Date.now()}`,
@@ -1520,16 +747,6 @@ export function recordScanEvent(publicId: string): void {
   const scans = getStoredScans();
   scans.unshift(scan);
   localStorage.setItem(SCANS_STORAGE_KEY, JSON.stringify(scans.slice(0, 500)));
-
-  // Public rules only allow an atomic +1 and a server timestamp on active cards.
-  if (db && publicId && publicId !== 'direct_payload') {
-    updateDoc(doc(db, 'cards', publicId), {
-      scanCount: increment(1),
-      lastScannedAt: serverTimestamp()
-    }).catch(() => {
-      // The card may be local-only/offline; the scan still remains in local analytics.
-    });
-  }
 }
 
 export function generateSecurePublicId(): string {
@@ -1549,11 +766,6 @@ export function generateCardNumber(sequence: number, type: string = 'BUSINESS_CA
     case 'EVENT': return `AGB-EVT-${seqStr}`;
     case 'SHOP': return `AGB-SHOP-${seqStr}`;
     case 'LOCATION': return `AGB-LOC-${seqStr}`;
-    case 'COMPANY': return `AGB-CO-${seqStr}`;
-    case 'SOCIAL': return `AGB-SOC-${seqStr}`;
-    case 'PRODUCT': return `AGB-PRD-${seqStr}`;
-    case 'WEB_LINK': return `AGB-LNK-${seqStr}`;
-    case 'CUSTOM': return `AGB-CUS-${seqStr}`;
     default: return `AGB-CARD-${seqStr}`;
   }
 }
@@ -1563,18 +775,15 @@ export function generateClientNumber(sequence: number): string {
 }
 
 const configuredPublicUrl = (import.meta.env.VITE_PUBLIC_APP_URL || '').trim();
-export const CANONICAL_GITHUB_PAGES_URL = `${(configuredPublicUrl || 'https://agibrico.github.io/agibrico.github.io-/').replace(/\/+$/, '')}/`;
+if (import.meta.env.PROD && !configuredPublicUrl) {
+  throw new Error("ERREUR DE CONFIGURATION : VITE_PUBLIC_APP_URL est obligatoire en production pour générer les QR codes dynamiques.");
+}
+const baseUrl = configuredPublicUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://agb-vcard-studio.web.app/');
+export const CANONICAL_PUBLIC_URL = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 
-export function getPublicQRUrl(publicId: string, card?: QRCodeItem): string {
+export function getPublicQRUrl(publicId: string): string {
   const cleanId = (publicId || '').trim();
-  const targetCard = card || getQRCodeByPublicId(cleanId);
-  if (targetCard) {
-    const payload = encodeCardPayload(targetCard);
-    if (payload && payload.length < 2800) {
-      return `${CANONICAL_GITHUB_PAGES_URL}#q/${encodeURIComponent(cleanId)}?d=${payload}`;
-    }
-  }
-  return `${CANONICAL_GITHUB_PAGES_URL}#q/${encodeURIComponent(cleanId)}`;
+  return `${CANONICAL_PUBLIC_URL}#q/${encodeURIComponent(cleanId)}`;
 }
 
 export function getClientById(id: string): ClientProfile | undefined {
@@ -1583,8 +792,8 @@ export function getClientById(id: string): ClientProfile | undefined {
 
 export async function syncOfficialDataToCloud(): Promise<void> {
   const currentUser = getCurrentUser();
-  if (!db) return;
-  const userId = auth?.currentUser?.uid || currentUser?.uid || 'admin_agb_001';
+  if (!db || !currentUser) return;
+  const userId = auth?.currentUser?.uid || currentUser.uid;
 
   try {
     const allCards = getStoredQRCodes();
@@ -1596,25 +805,6 @@ export async function syncOfficialDataToCloud(): Promise<void> {
           userId: card.userId || userId,
           updatedAt: serverTimestamp()
         }, { merge: true });
-
-        if (card.cardNumber) {
-          await setDoc(doc(db, 'cards', card.cardNumber.trim().toUpperCase()), {
-            ...removeUndefinedDeep(card),
-            userId: card.userId || userId,
-            updatedAt: serverTimestamp()
-          }, { merge: true });
-        }
-
-        if (cleanPid === 'CYR2026Z') {
-          const aliases = ['CYRILLEZEZE', 'ZEZE', 'CARD-2026-0011'];
-          for (const alias of aliases) {
-            await setDoc(doc(db, 'cards', alias), {
-              ...removeUndefinedDeep(card),
-              userId: userId,
-              updatedAt: serverTimestamp()
-            }, { merge: true });
-          }
-        }
       }
     }
   } catch (err) {
@@ -1622,46 +812,8 @@ export async function syncOfficialDataToCloud(): Promise<void> {
   }
 }
 
-export async function syncAllToCloud(): Promise<{ cards: number, clients: number }> {
-  if (!db) throw new Error("Firebase Cloud non configuré.");
-  const currentUser = getCurrentUser();
-  const userId = auth?.currentUser?.uid || currentUser?.uid || 'admin_agb_001';
-
-  const cards = getStoredQRCodes();
-  const clients = getStoredClients();
-  let cardsSynced = 0;
-  let clientsSynced = 0;
-
-  for (const card of cards) {
-    if (card.publicId) {
-      const cleanDocId = card.publicId.trim().toUpperCase();
-      const cardRef = doc(db, 'cards', cleanDocId);
-      await setDoc(cardRef, {
-        ...removeUndefinedDeep(card),
-        userId: card.userId || userId,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-      cardsSynced++;
-    }
-  }
-
-  for (const client of clients) {
-    if (client.id) {
-      const clientRef = doc(db, 'clients', client.id);
-      await setDoc(clientRef, {
-        ...removeUndefinedDeep(client),
-        userId: client.userId || userId,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-      clientsSynced++;
-    }
-  }
-
-  return { cards: cardsSynced, clients: clientsSynced };
-}
-
 export function exportFullDatabaseJSON(): string {
-  const db = {
+  const dbExport = {
     cards: getStoredQRCodes(),
     clients: getStoredClients(),
     scans: getStoredScans(),
@@ -1670,22 +822,17 @@ export function exportFullDatabaseJSON(): string {
     exportDate: new Date().toISOString(),
     version: '2.0'
   };
-  return JSON.stringify(db, null, 2);
+  return JSON.stringify(dbExport, null, 2);
 }
 
 export function importFullDatabaseJSON(jsonStr: string): boolean {
   try {
     const data = JSON.parse(jsonStr);
     if (!Array.isArray(data.cards) || !Array.isArray(data.clients)) return false;
-    const cards = data.cards.filter((card: any) => card && typeof card.id === 'string' && typeof card.publicId === 'string');
-    const clients = data.clients.filter((client: any) => client && typeof client.id === 'string');
-    saveQRCodes(cards);
-    saveClients(clients);
-    if (Array.isArray(data.scans)) localStorage.setItem(SCANS_STORAGE_KEY, JSON.stringify(data.scans));
-    if (Array.isArray(data.history)) localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(data.history));
-    if (data.designer) saveDesignerProfile(data.designer);
+    saveQRCodes(data.cards);
+    saveClients(data.clients);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

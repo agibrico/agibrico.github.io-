@@ -30,21 +30,25 @@ service cloud.firestore {
     }
 
     match /cards/{cardId} {
-      // Lecture publique des cartes
-      allow get: if true;
+      // Lecture individuelle publique autorisée uniquement pour une carte active et réellement publique
+      allow get: if isPublicCard() || ownsExistingDocument() || isAdmin();
 
       // Liste des fiches réservée à l'administrateur et au propriétaire
       allow list: if ownsExistingDocument() || isAdmin();
 
-      // Création et mise à jour ouvertes pour que l'enregistrement depuis l'APK soit instantané sur le Cloud
-      allow create: if true;
-      allow update: if true;
+      // Création réservée aux utilisateurs authentifiés
+      allow create: if ownsIncomingDocument() || isAdmin();
+
+      // Modification réservée au propriétaire authentifié ou administrateur
+      allow update: if (ownsExistingDocument() && ownsIncomingDocument()) || isAdmin();
+
+      // Suppression réservée au propriétaire ou administrateur
       allow delete: if ownsExistingDocument() || isAdmin();
     }
 
     match /clients/{clientId} {
-      // Fiches clients réservées au propriétaire et à l'admin
-      allow get, list, create, update, delete: if true;
+      // Aucune lecture publique. Lecture/écriture uniquement pour le propriétaire authentifié ou administrateur.
+      allow get, list, create, update, delete: if ownsExistingDocument() || isAdmin();
     }
   }
 }

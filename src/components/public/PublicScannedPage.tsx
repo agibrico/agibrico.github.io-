@@ -165,39 +165,63 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       return;
     }
 
+    let targetPublicId = publicId || null;
+    let payloadParam: string | null = null;
+
     if (typeof window !== 'undefined') {
-      const href = window.location.href;
-      const hash = window.location.hash;
-      const search = window.location.search;
+      try {
+        const url = new URL(window.location.href);
+        const searchParams = url.searchParams;
 
-      const combined = `${search}&${hash}&${href}`;
-      const matchPayload = combined.match(/[?&](?:d|data)=([^&SG#\s]+)/i);
+        targetPublicId = targetPublicId || searchParams.get('q') || searchParams.get('c') || searchParams.get('id') || searchParams.get('publicId');
+        payloadParam = searchParams.get('d') || searchParams.get('data');
 
-      if (matchPayload && matchPayload[1]) {
-        const decoded = decodeCardPayload(matchPayload[1]);
-        if (decoded) {
-          const normalized = normalizeItem(decoded);
-          setItem(normalized);
-          setLoading(false);
-          try { saveOrUpdateQRCode(normalized, true); } catch (e) {}
-          if (!isSimulator) recordScanEvent(normalized.publicId || publicId || 'direct_payload');
-          return;
+        if (!targetPublicId && url.hash) {
+          const hashClean = url.hash.replace(/^#/, '');
+          const parts = hashClean.split('?');
+          const pathPart = parts[0];
+          const matchPath = pathPart.match(/(?:q|c|card)\/([a-zA-Z0-9_-]+)/i);
+          if (matchPath && matchPath[1]) {
+            targetPublicId = matchPath[1];
+          }
+          if (parts[1]) {
+            const hashSearchParams = new URLSearchParams(parts[1]);
+            payloadParam = payloadParam || hashSearchParams.get('d') || hashSearchParams.get('data');
+          }
         }
+
+        const pathnameMatch = url.pathname.match(/\/(?:q|c|card)\/([a-zA-Z0-9_-]+)/i);
+        if (!targetPublicId && pathnameMatch && pathnameMatch[1]) {
+          targetPublicId = pathnameMatch[1];
+        }
+      } catch (e) {
+        console.warn("URL parsing error:", e);
       }
     }
 
-    if (publicId) {
+    if (payloadParam) {
+      const decoded = decodeCardPayload(payloadParam);
+      if (decoded) {
+        const normalized = normalizeItem(decoded);
+        setItem(normalized);
+        setLoading(false);
+        if (!isSimulator) recordScanEvent(normalized.publicId || targetPublicId || 'payload');
+        return;
+      }
+    }
+
+    if (targetPublicId) {
       setLoading(true);
       setError(null);
 
       let attempts = 0;
       const tryFetch = () => {
         attempts++;
-        fetchQRCodeByPublicId(publicId).then(found => {
+        fetchQRCodeByPublicId(targetPublicId!).then(found => {
           if (found) {
             setItem(normalizeItem(found));
             setLoading(false);
-            if (!isSimulator) recordScanEvent(publicId);
+            if (!isSimulator) recordScanEvent(targetPublicId!);
           } else if (attempts < 3) {
             setTimeout(tryFetch, 1000);
           } else {
@@ -215,6 +239,9 @@ export const PublicScannedPage: React.FC<PublicScannedPageProps> = ({
       };
 
       tryFetch();
+    } else {
+      setError("Cette fiche est introuvable.");
+      setLoading(false);
     }
   }, [publicId, propQrItem, isSimulator]);
 

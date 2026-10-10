@@ -145,66 +145,8 @@ export const DEFAULT_DESIGNER_PROFILE: DesignerProfile = {
   defaultFormat: '85x55'
 };
 
-export const INITIAL_CLIENTS: ClientProfile[] = import.meta.env.DEV ? [
-  {
-    id: 'client_001',
-    clientNumber: 'CLT-2026-0001',
-    firstName: 'Gilles Brice',
-    lastName: 'ATSÉ',
-    fullName: 'Gilles Brice ATSÉ',
-    company: 'AGB Digital Engineering',
-    jobTitle: 'Concepteur d\'applications mobiles & Web',
-    industry: 'Technologies',
-    logoUrl: AGB_ENGINEERING_LOGO,
-    primaryPhone: '+225 01 04 00 00 00',
-    email: 'atsegillesbrice@gmail.com',
-    city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
-    socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250104000000', displayOrder: 1 }],
-    createdAt: '2026-08-10T08:00:00.000Z',
-    updatedAt: '2026-08-21T08:00:00.000Z'
-  }
-] : [];
-
-export const INITIAL_QR_ITEMS: QRCodeItem[] = import.meta.env.DEV ? [
-  {
-    id: 'qr_demo_01',
-    cardNumber: 'CARD-2026-0001',
-    publicId: 'AGB2026X',
-    clientId: 'client_001',
-    title: 'Gilles Brice ATSÉ — Concepteur d\'applications',
-    type: 'BUSINESS_CARD',
-    mode: 'dynamic',
-    status: 'active',
-    createdAt: '2026-08-10T08:00:00.000Z',
-    updatedAt: '2026-08-21T08:00:00.000Z',
-    scanCount: 184,
-    content: {
-      fullName: 'Gilles Brice ATSÉ',
-      jobTitle: 'Concepteur d\'applications mobiles & Web',
-      company: 'AGB Digital Engineering',
-      logoUrl: AGB_ENGINEERING_LOGO,
-      primaryPhone: '+225 01 04 00 00 00',
-      email: 'atsegillesbrice@gmail.com',
-      city: 'Abidjan',
-      country: 'Côte d\'Ivoire',
-      socialLinks: [{ id: 's1', platform: 'whatsapp', url: 'https://wa.me/2250104000000', displayOrder: 1 }],
-      privacy: { hideAddress: false }
-    },
-    styling: {
-      fgColor: '#0f172a',
-      bgColor: '#ffffff',
-      transparentBg: false,
-      moduleStyle: 'rounded',
-      eyeStyle: 'rounded',
-      errorCorrectionLevel: 'H',
-      margin: 3,
-      size: 320,
-      cardBackgroundTheme: 'matte_dark',
-      logoUrl: AGB_ENGINEERING_LOGO
-    }
-  }
-] : [];
+export const INITIAL_CLIENTS: ClientProfile[] = [];
+export const INITIAL_QR_ITEMS: QRCodeItem[] = [];
 
 export function getStoredQRCodes(): QRCodeItem[] {
   try {
@@ -216,36 +158,16 @@ export function getStoredQRCodes(): QRCodeItem[] {
     let items: QRCodeItem[] = data ? JSON.parse(data) : [];
     if (!Array.isArray(items)) items = [];
 
-    let changed = false;
-    if (import.meta.env.DEV && items.length === 0) {
-      INITIAL_QR_ITEMS.forEach(initItem => {
-        if (!items.find(i => i && i.id === initItem.id) && !deletedIds.includes(initItem.id)) {
-          items.push(initItem);
-          changed = true;
-        }
-      });
-    }
-
     const uniqueMap = new Map<string, QRCodeItem>();
     items.forEach(item => {
-      if (!item) return;
+      if (!item || (item.id && deletedIds.includes(item.id))) return;
       const idKey = (item.publicId || item.id).trim().toUpperCase();
       if (!uniqueMap.has(idKey)) uniqueMap.set(idKey, item);
     });
 
-    const deduplicated = Array.from(new Set(uniqueMap.values()));
-    if (deduplicated.length !== items.length) {
-      items = deduplicated;
-      changed = true;
-    }
-
-    if (changed || !data) {
-      saveQRCodes(items);
-    }
-
-    return items;
+    return Array.from(new Set(uniqueMap.values()));
   } catch {
-    return import.meta.env.DEV ? INITIAL_QR_ITEMS : [];
+    return [];
   }
 }
 
@@ -264,48 +186,6 @@ export function getQRCodeByPublicId(publicId: string): QRCodeItem | undefined {
     (q && q.publicId && q.publicId.toLowerCase() === cleanId) ||
     (q && q.id && q.id.toLowerCase() === cleanId)
   );
-}
-
-export function decodeCardPayload(payload: string): QRCodeItem | null {
-  if (!payload || typeof payload !== 'string') return null;
-  try {
-    let cleanStr = payload.trim();
-    if (cleanStr.includes('%')) {
-      try { cleanStr = decodeURIComponent(cleanStr); } catch {}
-    }
-    cleanStr = cleanStr.replace(/-/g, '+').replace(/_/g, '/');
-    const mod = cleanStr.length % 4;
-    if (mod === 2) cleanStr += '==';
-    else if (mod === 3) cleanStr += '=';
-
-    let rawStr = atob(cleanStr);
-    let jsonStr = rawStr;
-    try { jsonStr = decodeURIComponent(escape(rawStr)); } catch {}
-
-    const compact = JSON.parse(jsonStr);
-    if (!compact) return null;
-
-    return {
-      id: compact.id || `qr_${(compact.pid || Date.now()).toString().toLowerCase()}`,
-      publicId: compact.pid || compact.publicId || 'PUBLIC_CARD',
-      title: compact.tt || compact.title || 'Fiche Visite',
-      type: compact.tp || compact.type || 'BUSINESS_CARD',
-      mode: 'dynamic',
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      scanCount: 0,
-      content: compact.c || compact.content || {},
-      styling: compact.st || compact.styling || {}
-    };
-  } catch (e) {
-    console.warn('Failed to decode card payload:', e);
-    return null;
-  }
-}
-
-export async function syncOfficialDataToCloud(): Promise<void> {
-  await syncAllToCloud();
 }
 
 export function buildPublicCardPayload(card: QRCodeItem): any {
@@ -637,42 +517,23 @@ export async function syncCardsWithServer(): Promise<QRCodeItem[]> {
 
 export function getStoredClients(): ClientProfile[] {
   try {
-    const data = localStorage.getItem(getClientsStorageKey());
+    const key = getClientsStorageKey();
+    const data = localStorage.getItem(key);
     const deletedData = localStorage.getItem(DELETED_CLIENTS_KEY);
     const deletedIds: string[] = deletedData ? JSON.parse(deletedData) : [];
 
     let clients: ClientProfile[] = data ? JSON.parse(data) : [];
     if (!Array.isArray(clients)) clients = [];
 
-    let changed = false;
-    if (import.meta.env.DEV && clients.length === 0) {
-      INITIAL_CLIENTS.forEach(initClient => {
-        if (!clients.find(c => c && c.id === initClient.id) && !deletedIds.includes(initClient.id)) {
-          clients.push(initClient);
-          changed = true;
-        }
-      });
-    }
-
     const uniqueMap = new Map<string, ClientProfile>();
     clients.forEach(c => {
-      if (!c) return;
+      if (!c || (c.id && deletedIds.includes(c.id))) return;
       if (!uniqueMap.has(c.id)) uniqueMap.set(c.id, c);
     });
 
-    const deduplicated = Array.from(new Set(uniqueMap.values()));
-    if (deduplicated.length !== clients.length) {
-      clients = deduplicated;
-      changed = true;
-    }
-
-    if (changed || !data) {
-      saveClients(clients);
-    }
-
-    return clients;
+    return Array.from(new Set(uniqueMap.values()));
   } catch {
-    return import.meta.env.DEV ? INITIAL_CLIENTS : [];
+    return [];
   }
 }
 
@@ -896,6 +757,48 @@ export async function syncAllToCloud(): Promise<{ cards: number, clients: number
   }
 
   return { cards: cardsSynced, clients: clientsSynced };
+}
+
+export function decodeCardPayload(payload: string): QRCodeItem | null {
+  if (!payload || typeof payload !== 'string') return null;
+  try {
+    let cleanStr = payload.trim();
+    if (cleanStr.includes('%')) {
+      try { cleanStr = decodeURIComponent(cleanStr); } catch {}
+    }
+    cleanStr = cleanStr.replace(/-/g, '+').replace(/_/g, '/');
+    const mod = cleanStr.length % 4;
+    if (mod === 2) cleanStr += '==';
+    else if (mod === 3) cleanStr += '=';
+
+    let rawStr = atob(cleanStr);
+    let jsonStr = rawStr;
+    try { jsonStr = decodeURIComponent(escape(rawStr)); } catch {}
+
+    const compact = JSON.parse(jsonStr);
+    if (!compact) return null;
+
+    return {
+      id: compact.id || `qr_${(compact.pid || Date.now()).toString().toLowerCase()}`,
+      publicId: compact.pid || compact.publicId || 'PUBLIC_CARD',
+      title: compact.tt || compact.title || 'Fiche Visite',
+      type: compact.tp || compact.type || 'BUSINESS_CARD',
+      mode: 'dynamic',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      scanCount: 0,
+      content: compact.c || compact.content || {},
+      styling: compact.st || compact.styling || {}
+    };
+  } catch (e) {
+    console.warn('Failed to decode card payload:', e);
+    return null;
+  }
+}
+
+export async function syncOfficialDataToCloud(): Promise<void> {
+  await syncAllToCloud();
 }
 
 export function exportFullDatabaseJSON(): string {
